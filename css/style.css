@@ -218,6 +218,34 @@ select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); o
 .role-seventh { --c: var(--seventh); }
 .role-ext { --c: var(--ext); }
 .role-scale { --c: var(--scale); }
+.role-sel { --c: #57534e; }
+
+/* ---------- Rozpoznawanie akordu ---------- */
+.btn.small { font-size: 13px; padding: 5px 11px; }
+.recognize {
+  margin-top: 14px; padding: 14px; border-radius: 12px;
+  background: var(--surface-2); border: 1px dashed var(--accent);
+}
+.recognize[hidden] { display: none; }
+.recognize .hint { margin: 0; }
+.rec-notes { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.rec-notes .lbl { font-size: 13px; color: var(--muted); }
+.rec-notes .btn:first-of-type { margin-left: auto; }
+.rec-ivs { margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 13.5px; }
+.rec-none { margin: 12px 0 0; color: var(--no); font-size: 14px; }
+.rec-cands { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-top: 12px; }
+.rec-card {
+  font: inherit; color: var(--text); text-align: left; cursor: pointer;
+  display: grid; gap: 2px; padding: 12px; border-radius: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+}
+.rec-card:hover { border-color: var(--accent); }
+.rec-card.best { border-color: var(--accent); background: var(--accent-soft); }
+.rec-card .rec-tag { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; }
+.rec-card .sym { font-size: 24px; font-weight: 700; }
+.rec-card .qual { font-size: 13px; }
+.rec-card .inv { font-size: 12.5px; color: var(--muted); }
+.rec-card .go { font-size: 12.5px; color: var(--accent); margin-top: 4px; }
 
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--muted); }
 .legend span { display: inline-flex; align-items: center; gap: 5px; }

@@ -280,6 +280,45 @@
     });
   }
 
+  /* ---------- Rozpoznawanie akordu ---------- */
+
+  /**
+   * Na podstawie listy wysokości MIDI zwraca możliwe nazwy akordu, od najbardziej
+   * prawdopodobnej. kind: 'exact' (dokładnie te dźwięki), 'no5' (bez kwinty),
+   * 'slash' (akord + obcy dźwięk w basie, np. C/D).
+   */
+  function recognize(midis) {
+    const sorted = [...new Set(midis)].sort((a, b) => a - b);
+    const pcs = new Set(sorted.map((m) => mod(m, 12)));
+    if (pcs.size < 2) return [];
+    const bassPc = mod(sorted[0], 12);
+    const eq = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
+    const rest = new Set([...pcs].filter((p) => p !== bassPc));
+    const out = [];
+
+    CHORD_TYPES.forEach((t, ti) => {
+      for (let r = 0; r < 12; r++) {
+        const at = (ivs) => new Set(ivs.map((i) => mod(r + i.semi, 12)));
+        const full = at(t.intervals);
+        let kind = null;
+        if (pcs.has(r) && eq(full, pcs)) kind = 'exact';
+        else if (pcs.has(r) && t.intervals.length >= 4 && t.intervals.some((i) => i.sym === '5') &&
+          eq(at(t.intervals.filter((i) => i.sym !== '5')), pcs)) kind = 'no5';
+        else if (rest.size >= 3 && !full.has(bassPc) && rest.has(r) && eq(full, rest)) kind = 'slash';
+        if (!kind) continue;
+
+        const bySemi = [...t.intervals].sort((a, b) => a.semi - b.semi);
+        const bassIdx = bySemi.findIndex((i) => mod(r + i.semi, 12) === bassPc);
+        const score = { exact: 0, no5: 2, slash: 3 }[kind] +
+          (kind !== 'slash' && bassPc !== r ? 1 : 0) +
+          (t.group === 'ext' ? 0.3 : 0) + ti * 0.01;
+        const bassDeg = bassIdx >= 0 ? bySemi[bassIdx].deg : null;
+        out.push({ rootPc: r, type: t, kind, bassPc, bassIdx, bassDeg, score });
+      }
+    });
+    return out.sort((a, b) => a.score - b.score);
+  }
+
   /* ---------- Gitara: wyszukiwanie chwytów ---------- */
 
   const TUNINGS = [
@@ -367,6 +406,6 @@
     parseInterval, describeInterval, intervalBetween, transpose,
     scaleById, buildScale, chordTypeById, buildChord, chordSymbol,
     identifyType, diatonicChords, fittingChords, inversion,
-    tuningById, findVoicings, roleOf,
+    tuningById, findVoicings, roleOf, recognize,
   };
 })(window);

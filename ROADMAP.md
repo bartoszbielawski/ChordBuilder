@@ -4,6 +4,9 @@ Wersja 1.0 (gotowa): skale i tryby, akordy diatoniczne, konstruktor akordów
 z przewrotami, nazwy interwałów i półtony, pianino, gryf gitary z wyszukiwaniem
 chwytów, dźwięk, notacja A B C / A H C, stan w URL.
 
+Wersja 1.1 (gotowa): nazwy wszystkich klawiszy i pozycji na gryfie,
+rozpoznawanie akordu wklikanego na pianinie lub gryfie (punkt 2.1).
+
 Poniżej propozycje rozszerzeń, pogrupowane w etapy od najbardziej przydatnych
 i najtańszych w realizacji.
 
@@ -11,7 +14,7 @@ i najtańszych w realizacji.
 
 | # | Funkcja | Opis | Nakład |
 |---|---|---|---|
-| 2.1 | **Rozpoznawanie akordu** | Klikasz klawisze lub progi → strona mówi, jaki to akord (z przewrotem, np. „C/E”). Odwrotność obecnego widoku. | M |
+| 2.1 | ~~**Rozpoznawanie akordu**~~ ✓ | Klikasz klawisze lub progi → strona mówi, jaki to akord (z przewrotem, np. „C/E”). Odwrotność obecnego widoku. | M |
 | 2.2 | **Funkcje harmoniczne** | Przy akordach diatonicznych: T, S, D, Tp, Sp, Dp…, oraz kolorowanie wg funkcji. | S |
 | 2.3 | **Koło kwintowe** | Interaktywne koło: wybór toniki, pokazanie tonacji pokrewnych, liczby znaków przykluczowych i akordów diatonicznych. | M |
 | 2.4 | **Progresje akordów** | Gotowe schematy (I–V–vi–IV, ii–V–I, 12-taktowy blues, kadencja andaluzyjska) w wybranej tonacji, z odtwarzaniem i chwytami. Własna progresja z klocków. | M |
@@ -54,7 +57,7 @@ i najtańszych w realizacji.
 ## Proponowana kolejność
 
 1. **2.2 Funkcje harmoniczne** + **2.6 Porównanie trybów** — szybkie, duża wartość dydaktyczna.
-2. **2.1 Rozpoznawanie akordu** — najczęściej potrzebna funkcja „odwrotna”.
+2. ~~**2.1 Rozpoznawanie akordu**~~ — zrobione w wersji 1.1.
 3. **2.4 Progresje** + **2.3 Koło kwintowe** — spinają skale i akordy w całość.
 4. **5.5 Testy** — zanim logika teorii zacznie się rozrastać.
 5. **3.1 / 3.2 CAGED i pozycje skal** — dla gitarzystów.

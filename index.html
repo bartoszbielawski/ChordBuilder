@@ -110,10 +110,12 @@
         </div>
       </div>
       <div class="controls tight below-head">
+        <button type="button" class="btn ghost" id="input-piano">✎ Wklikaj akord</button>
         <label class="check"><input type="checkbox" id="piano-names"> nazwy wszystkich klawiszy</label>
       </div>
       <div id="piano" class="instrument"></div>
-      <p class="hint">Akord w wybranym przewrocie, od C3. Kliknij klawisz, aby go usłyszeć; najedź na klawisz, aby zobaczyć dźwięk z oktawą.</p>
+      <div id="recognize-piano" class="recognize" aria-live="polite" hidden></div>
+      <p class="hint" id="piano-hint">Akord w wybranym przewrocie, od C3. Kliknij klawisz, aby go usłyszeć; najedź na klawisz, aby zobaczyć dźwięk z oktawą.</p>
     </section>
 
     <section class="card" id="guitar-section">
@@ -126,10 +128,16 @@
           <label class="check"><input type="checkbox" id="fb-names"> nazwy wszystkich dźwięków</label>
         </div>
       </div>
+      <div class="controls tight below-head">
+        <button type="button" class="btn ghost" id="input-guitar">✎ Wklikaj akord</button>
+      </div>
       <div class="scroll-x"><div id="fretboard" class="instrument"></div></div>
-      <h3>Chwyty <small id="voicing-count"></small></h3>
-      <p class="hint">Automatycznie znalezione chwyty (rozpiętość do 4 progów, maks. 4 palce, barré liczone jako jeden). Bas zgodny z wybranym przewrotem. Kliknij chwyt, aby go pokazać na gryfie i usłyszeć.</p>
-      <div id="voicings" class="voicings"></div>
+      <div id="recognize-guitar" class="recognize" aria-live="polite" hidden></div>
+      <div id="voicings-wrap">
+        <h3>Chwyty <small id="voicing-count"></small></h3>
+        <p class="hint">Automatycznie znalezione chwyty (rozpiętość do 4 progów, maks. 4 palce, barré liczone jako jeden). Bas zgodny z wybranym przewrotem. Kliknij chwyt, aby go pokazać na gryfie i usłyszeć.</p>
+        <div id="voicings" class="voicings"></div>
+      </div>
     </section>
   </main>
 

@@ -19,6 +19,9 @@
     pianoNames: true, fbNames: true,
   };
 
+  // Tryb „wklikaj akord”: dźwięki wybrane na pianinie albo na gryfie.
+  const input = { on: false, source: 'piano', piano: new Set(), guitar: [-1, -1, -1, -1, -1, -1] };
+
   /* ---------- Trwałość: preferencje + URL ---------- */
 
   const PREF_KEYS = ['notation', 'labels', 'tuning', 'showAll', 'showScale', 'pianoNames', 'fbNames'];
@@ -62,13 +65,18 @@
    * Nazwa dowolnej klasy wysokości w kontekście: najpierw pisownia z akordu,
    * potem ze skali, a dla pozostałych — krzyżyki lub bemole zależnie od tonacji.
    */
-  function pcNamer(chord, sc) {
+  function noteFor(sc, chord) {
     const map = new Map();
     for (const n of sc.notes) map.set(n.note.pc, n.note);
-    for (const n of chord.notes) map.set(n.note.pc, n.note);
-    const flats = sc.notes.some((n) => n.note.acc < 0) || (sc.notes.every((n) => n.note.acc === 0) && chord.root.acc < 0);
+    if (chord) for (const n of chord.notes) map.set(n.note.pc, n.note);
+    const flats = sc.notes.some((n) => n.note.acc < 0) ||
+      (chord && sc.notes.every((n) => n.note.acc === 0) && chord.root.acc < 0);
     const keys = flats ? FLAT_KEYS : SHARP_KEYS;
-    return (pc) => nn(map.get(pc) || T.parseNote(keys[pc]));
+    return (pc) => map.get(pc) || T.parseNote(keys[pc]);
+  }
+  function pcNamer(chord, sc) {
+    const nf = noteFor(sc, chord);
+    return (pc) => nn(nf(pc));
   }
 
   function midiTitle(name, midi, chord, sc) {
@@ -160,8 +168,10 @@
     renderDiatonic(sc, chord);
     renderFitting(sc, chord);
     const voiced = renderChord(sc, chord);
-    renderPiano(sc, voiced);
-    renderGuitar(sc, chord, voiced);
+    const rec = recognition(sc);
+    renderPiano(sc, voiced, rec);
+    renderGuitar(sc, chord, voiced, rec);
+    renderRecognize(sc, rec);
     saveHash();
   }
 
@@ -312,23 +322,167 @@
     return voiced.map((n) => PIANO_START + chord.root.pc + n.semiAbs);
   }
 
-  function renderPiano(sc, voiced) {
+  /* ---------- Rozpoznawanie akordu (tryb „wklikaj”) ---------- */
+
+  function inputMidis() {
+    if (input.source === 'piano') return [...input.piano];
+    const t = T.tuningById(state.tuning);
+    return input.guitar.map((f, s) => (f >= 0 ? t.midi[s] + f : null)).filter((m) => m != null);
+  }
+
+  function recognition(sc) {
+    const midis = input.on ? inputMidis().sort((a, b) => a - b) : [];
+    const nf = noteFor(sc);
+    const cands = T.recognize(midis).slice(0, 8).map((c) => {
+      const chord = T.buildChord(nf(c.rootPc), c.type.id);
+      const be = chord.notes.find((n) => n.note.pc === c.bassPc);
+      return { ...c, chord, bassNote: be ? be.note : nf(c.bassPc) };
+    });
+    const best = cands[0] || null;
+    const entryOf = (pc) => (best ? best.chord.notes.find((n) => n.note.pc === pc) : null);
+    const noteOf = (pc) => { const e = entryOf(pc); return e ? e.note : nf(pc); };
+    return { midis, pcs: new Set(midis.map((m) => T.mod(m, 12))), cands, best, entryOf, noteOf };
+  }
+
+  /** Etykieta i rola wybranego dźwięku w trybie wklikiwania. */
+  function inputMark(rec, midi) {
+    const pc = T.mod(midi, 12);
+    const e = rec.entryOf(pc);
+    if (e) return { label: labelFor(e), role: e.role };
+    const label = state.labels === 'semi' ? String(midi - rec.midis[0]) : nn(rec.noteOf(pc));
+    return { label, role: 'sel' };
+  }
+
+  function toggleInput(source) {
+    if (input.on && input.source === source) input.on = false;
+    else { input.on = true; input.source = source; }
+    render();
+  }
+
+  function clearInput() {
+    input.piano.clear();
+    input.guitar = [-1, -1, -1, -1, -1, -1];
+  }
+
+  function renderRecognize(sc, rec) {
+    for (const src of ['piano', 'guitar']) {
+      const btn = $('input-' + src);
+      const on = input.on && input.source === src;
+      btn.textContent = on ? '✓ Zakończ wklikiwanie' : '✎ Wklikaj akord';
+      btn.classList.toggle('ghost', !on);
+      $('recognize-' + src).replaceChildren();
+      $('recognize-' + src).hidden = true;
+    }
+    $('voicings-wrap').hidden = input.on;
+    $('piano-hint').hidden = input.on;
+    if (!input.on) return;
+
+    const box = $('recognize-' + input.source);
+    box.hidden = false;
+    const how = input.source === 'piano'
+      ? 'Klikaj klawisze, aby dodać lub usunąć dźwięk.'
+      : 'Klikaj progi — na każdej strunie jeden dźwięk (pusta struna: kliknij przy nazwie struny). Ponowne kliknięcie usuwa dźwięk.';
+    if (!rec.midis.length) {
+      box.append(h('p', { class: 'hint' }, how + ' Rozpoznam akord, gdy wybierzesz co najmniej dwa różne dźwięki.'));
+      return;
+    }
+
+    const octName = (m) => nn(rec.noteOf(T.mod(m, 12))) + (Math.floor(m / 12) - 1);
+    const timbre = input.source === 'piano' ? 'piano' : 'guitar';
+    box.append(h('div', { class: 'rec-notes' },
+      h('span', { class: 'lbl' }, 'Wybrane dźwięki (od basu):'),
+      rec.midis.map((m) => { const k = inputMark(rec, m); return h('span', { class: 'pill role-' + k.role }, octName(m)); }),
+      h('button', { type: 'button', class: 'btn small', onclick: () => Sound.play(rec.midis, timbre === 'guitar' ? 'strum' : 'chord', timbre) }, '▶ Zagraj'),
+      h('button', { type: 'button', class: 'btn small ghost', onclick: () => { clearInput(); render(); } }, 'Wyczyść')));
+
+    // Interwały od basu.
+    const bass = rec.midis[0];
+    const bassNote = rec.noteOf(T.mod(bass, 12));
+    const ivs = rec.midis.slice(1).map((m) => {
+      const n = rec.noteOf(T.mod(m, 12));
+      const semis = m - bass;
+      const oct = Math.floor(semis / 12);
+      const simpleDeg = T.mod(n.letter - bassNote.letter, 7) + 1;
+      let name;
+      if (simpleDeg === 1 && T.mod(semis, 12) === 0) name = oct === 1 ? 'oktawa czysta' : `${oct} oktawy`;
+      else {
+        const deg = oct === 1 && simpleDeg <= 6 ? simpleDeg + 7 : simpleDeg;
+        const d = T.describeInterval(deg, deg > 7 ? T.mod(semis, 12) + 12 : T.mod(semis, 12));
+        name = d.name + (oct >= 2 || (oct === 1 && deg <= 7) ? ' + oktawa' : '');
+      }
+      return h('li', {}, h('b', {}, `${nn(bassNote)} → ${nn(n)}`), ` ${name} `, h('span', { class: 'muted' }, `(${semis} pt)`));
+    });
+    if (ivs.length) box.append(h('ul', { class: 'rec-ivs' }, ivs));
+
+    if (!rec.cands.length) {
+      box.append(h('p', { class: 'rec-none' }, rec.pcs.size < 2
+        ? 'To jeden dźwięk (ew. w kilku oktawach) — dodaj kolejne.'
+        : 'Nie rozpoznaję tego zestawu jako znanego akordu. Spróbuj dodać lub usunąć dźwięk.'));
+      return;
+    }
+
+    const invText = (c) => {
+      const sym = T.chordSymbol(c.chord, state.notation);
+      if (c.kind === 'slash') return `akord ${sym} z obcym dźwiękiem ${nn(c.bassNote)} w basie`;
+      const invByDeg = { 3: 'I', 5: 'II', 7: 'III' }[c.bassDeg];
+      const bassIv = c.chord.notes.find((n) => n.note.pc === c.bassPc);
+      const base = c.bassIdx === 0 ? 'postać zasadnicza'
+        : invByDeg ? `${invByDeg} przewrót (bas: ${nn(c.bassNote)})`
+        : `w basie ${bassIv ? bassIv.info.name : ''} (${nn(c.bassNote)})`;
+      return base + (c.kind === 'no5' ? ' · bez kwinty' : '');
+    };
+
+    box.append(h('div', { class: 'rec-cands' }, rec.cands.map((c, i) => h('button', {
+      type: 'button', class: 'rec-card' + (i === 0 ? ' best' : ''),
+      title: 'Pokaż budowę tego akordu',
+      onclick: () => {
+        state.root = T.noteKey(c.chord.root);
+        state.type = c.type.id;
+        state.inv = c.kind !== 'slash' && c.bassIdx > 0 && c.bassIdx <= 3 ? c.bassIdx : 0;
+        state.voicing = 0;
+        input.on = false;
+        render();
+        $('chord-section').scrollIntoView({ behavior: 'smooth' });
+      },
+    },
+    i === 0 ? h('span', { class: 'rec-tag' }, 'najbardziej prawdopodobny') : null,
+    h('span', { class: 'sym' }, T.chordSymbol(c.chord, state.notation) + (c.bassPc !== c.rootPc ? '/' + nn(c.bassNote) : '')),
+    h('span', { class: 'qual' }, 'akord ' + c.type.name),
+    h('span', { class: 'inv' }, invText(c)),
+    h('span', { class: 'go' }, 'Pokaż budowę →')))));
+  }
+
+  function renderPiano(sc, voiced, rec) {
     const chord = currentChord();
-    const midis = pianoMidis(chord, voiced);
     const highlights = new Map();
-    midis.forEach((m, i) => highlights.set(m, { label: labelFor(voiced[i]), role: voiced[i].role }));
-    const octaves = Math.max(3, Math.ceil((Math.max(...midis) - PIANO_START + 1) / 12));
-    const name = pcNamer(chord, sc);
+    let startMidi = PIANO_START, octaves;
+    let name = pcNamer(chord, sc);
+    if (input.on) {
+      // Szerszy zakres (C2–C6), żeby zmieściły się też dźwięki z gryfu.
+      startMidi = 36; octaves = 4;
+      for (const m of rec.midis) highlights.set(m, inputMark(rec, m));
+      name = (pc) => nn(rec.noteOf(pc));
+    } else {
+      const midis = pianoMidis(chord, voiced);
+      midis.forEach((m, i) => highlights.set(m, { label: labelFor(voiced[i]), role: voiced[i].role }));
+      octaves = Math.max(3, Math.ceil((Math.max(...midis) - PIANO_START + 1) / 12));
+    }
     I.renderPiano($('piano'), {
-      startMidi: PIANO_START, octaves, highlights, scalePcs: sc.pcs,
+      startMidi, octaves, highlights, scalePcs: input.on ? new Set() : sc.pcs,
       keyName: state.pianoNames ? (m) => name(T.mod(m, 12)) : null,
-      keyTitle: (m) => midiTitle(name(T.mod(m, 12)), m, chord, sc),
-      onKey: (m) => Sound.play([m]),
+      keyTitle: (m) => input.on ? nn(rec.noteOf(T.mod(m, 12))) + (Math.floor(m / 12) - 1) : midiTitle(name(T.mod(m, 12)), m, chord, sc),
+      onKey: (m) => {
+        Sound.play([m]);
+        if (!input.on) return;
+        if (input.source !== 'piano') { clearInput(); input.source = 'piano'; }
+        if (input.piano.has(m)) input.piano.delete(m); else input.piano.add(m);
+        render();
+      },
     });
   }
 
   let lastVoicings = [];
-  function renderGuitar(sc, chord, voiced) {
+  function renderGuitar(sc, chord, voiced, rec) {
     const tuning = T.tuningById(state.tuning);
     const bassPc = voiced[0].note.pc;
     const voicings = T.findVoicings(chord, bassPc, tuning).slice(0, 12);
@@ -338,17 +492,24 @@
     const byPc = new Map(chord.notes.map((n) => [n.note.pc, n]));
     const stringNames = tuning.midi.map((m) => nameForKey(PC_KEYS[T.mod(m, 12)]));
     const scaleByPc = new Map(sc.notes.map((n) => [n.note.pc, n]));
-    const name = pcNamer(chord, sc);
+    const name = input.on ? (pc) => nn(rec.noteOf(pc)) : pcNamer(chord, sc);
 
     I.renderFretboard($('fretboard'), {
       tuning: tuning.midi, frets: 15, stringNames,
       cellName: state.fbNames ? (s, f) => name(T.mod(tuning.midi[s] + f, 12)) : null,
       cellTitle: (s, f) => {
         const m = tuning.midi[s] + f;
-        return `Struna ${6 - s} (${stringNames[s]}), ${f === 0 ? 'pusta' : 'próg ' + f}: ` + midiTitle(name(T.mod(m, 12)), m, chord, sc);
+        const pos = `Struna ${6 - s} (${stringNames[s]}), ${f === 0 ? 'pusta' : 'próg ' + f}: `;
+        return pos + (input.on ? name(T.mod(m, 12)) + (Math.floor(m / 12) - 1) : midiTitle(name(T.mod(m, 12)), m, chord, sc));
       },
       cell: (s, f) => {
         const pc = T.mod(tuning.midi[s] + f, 12);
+        if (input.on) {
+          const m = tuning.midi[s] + f;
+          if (input.source === 'guitar' && input.guitar[s] === f) return { ...inputMark(rec, m), strong: true };
+          if (state.showAll && rec.pcs.has(pc)) return { ...inputMark(rec, m), strong: false };
+          return null;
+        }
         const n = byPc.get(pc);
         if (n && sel && sel.frets[s] === f) return { label: labelFor(n), role: n.role, strong: true };
         if (n && state.showAll) return { label: labelFor(n), role: n.role, strong: false };
@@ -361,7 +522,13 @@
         }
         return null;
       },
-      onCell: (s, f) => Sound.play([tuning.midi[s] + f], 'chord', 'guitar'),
+      onCell: (s, f) => {
+        Sound.play([tuning.midi[s] + f], 'chord', 'guitar');
+        if (!input.on) return;
+        if (input.source !== 'guitar') { clearInput(); input.source = 'guitar'; }
+        input.guitar[s] = input.guitar[s] === f ? -1 : f;
+        render();
+      },
     });
 
     $('voicing-count').textContent = voicings.length ? `(${voicings.length})` : '';
@@ -414,6 +581,8 @@
     $('show-scale').addEventListener('change', (e) => { state.showScale = e.target.checked; savePrefs(); render(); });
     $('piano-names').addEventListener('change', (e) => { state.pianoNames = e.target.checked; savePrefs(); render(); });
     $('fb-names').addEventListener('change', (e) => { state.fbNames = e.target.checked; savePrefs(); render(); });
+    $('input-piano').addEventListener('click', () => toggleInput('piano'));
+    $('input-guitar').addEventListener('click', () => toggleInput('guitar'));
     $('play-chord').addEventListener('click', () => {
       const c = currentChord();
       Sound.play(pianoMidis(c, T.inversion(c, state.inv)), 'chord');

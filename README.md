@@ -26,6 +26,11 @@ kroku budowania), więc działa od razu na GitHub Pages.
 - **Pianino:** akord w wybranym przewrocie, dźwięki skali zaznaczone kropkami.
 - **Gitara:** gryf do 15. progu, kilka strojów, automatycznie wyszukiwane
   grywalne chwyty z diagramami (bas zgodny z przewrotem).
+- **Rozpoznawanie akordu („✎ Wklikaj akord”):** wybierz dźwięki na pianinie
+  albo na gryfie, a strona poda nazwę akordu (z przewrotem, np. C/E, wariantem
+  bez kwinty lub akordem z obcym basem), interwały od basu i pozwoli przejść
+  do pełnej budowy akordu.
+- **Nazwy wszystkich klawiszy i pozycji na gryfie** (można wyłączyć).
 - **Dźwięk:** odtwarzanie akordu, arpeggia, pojedynczych klawiszy i strun
   (Web Audio, bez plików z próbkami).
 - **Etykiety** na instrumentach: nazwy dźwięków / interwały / półtony.
