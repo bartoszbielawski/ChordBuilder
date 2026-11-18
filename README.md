@@ -4,8 +4,8 @@ Interaktywna strona pokazująca, **jak zbudowane są akordy** w różnych skalac
 które dźwięki wchodzą do akordu, jakie są między nimi interwały (nazwy i liczba
 półtonów) oraz jak akord wygląda na **pianinie** i **gitarze**.
 
-Oprócz strony głównej są trzy działy do nauki teorii: **Interwały**,
-**Modusy** i **Ćwiczenia** (kształcenie słuchu i quizy).
+Oprócz strony głównej są działy do nauki teorii: **Interwały**,
+**Modusy**, **Ćwiczenia** (kształcenie słuchu i quizy) oraz **Słowniczek**.
 
 Strona jest w pełni statyczna (HTML + CSS + JavaScript, bez frameworków i bez
 kroku budowania), więc działa od razu na GitHub Pages.
@@ -32,6 +32,9 @@ kroku budowania), więc działa od razu na GitHub Pages.
   zaznaczanie akordu i skali na klawiaturze oraz szukanie dźwięków na gryfie. Każda odpowiedź ma
   wyjaśnienie z zapisem nutowym; elementy, w których się mylisz, wracają częściej;
   statystyki zapisują się w przeglądarce; obsługa klawiaturą (1–9, spacja, Enter).
+- **Słowniczek** (`glossary.html`): ponad 50 pojęć (akord, tryton, tonacja
+  równoległa, kadencja, przewrót…) z krótkimi definicjami, wyszukiwarką
+  i odnośnikami do miejsc na stronie, gdzie można je zobaczyć i usłyszeć.
 - **Karta ćwiczeń do druku** (`worksheet.html`) dla nauczycieli: wybierasz rodzaje
   zadań (czytanie nut, znaki przykluczowe, interwały i akordy z nut, budowa akordów,
   akordy w tonacji), poziom i liczbę — strona losuje zestaw z miejscem na odpowiedź
@@ -154,6 +157,7 @@ go w narzędziach deweloperskich (Application → Service Workers).
 | `modes.html`, `js/modes.js` | dział „Modusy” |
 | `quiz.html`, `js/quiz.js` | dział „Ćwiczenia” (generatory pytań, statystyki) |
 | `worksheet.html`, `js/worksheet.js` | karta ćwiczeń do druku z kluczem odpowiedzi |
+| `glossary.html`, `js/glossary.js` | słowniczek pojęć |
 | `js/common.js` | wspólne pomocnicze funkcje podstron |
 | `sheet.html`, `js/sheet.js`, `css/sheet.css` | ściąga do druku |
 | `css/style.css` | wygląd (tokeny kolorów, tryb ciemny, wersja mobilna) |

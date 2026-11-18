@@ -519,3 +519,13 @@ kbd {
 .quiz-piano { width: 100%; max-width: 640px; }
 .quiz-feedback .quiz-piano { margin-top: 6px; }
 .btn:disabled { opacity: .45; cursor: default; }
+
+/* ---------- Słowniczek ---------- */
+.text-input { font: inherit; font-size: 15px; color: var(--text); background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 7px 10px; width: 100%; }
+.gl-search { max-width: 420px; }
+.glossary { margin-top: 10px; }
+.gl-letter h2 { font-size: 22px; color: var(--accent); margin: 18px 0 6px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+.gl-letter dl { margin: 0; }
+.gl-letter dt { font-weight: 700; margin-top: 10px; scroll-margin-top: 16px; }
+.gl-letter dd { margin: 2px 0 0; line-height: 1.55; }
+.gl-links { display: inline-flex; flex-wrap: wrap; gap: 4px 12px; margin-left: 8px; font-size: 13.5px; }

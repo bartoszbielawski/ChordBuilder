@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Słowniczek — ChordBuilder</title>
+  <meta name="description" content="Słowniczek teorii muzyki: akord, interwał, tonacja, modus, kadencja, przewrót, enharmonia i inne pojęcia — z przykładami na stronie.">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#c2410c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Music&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div>
+        <h1>ChordBuilder</h1>
+        <p class="tagline">Słowniczek — pojęcia teorii muzyki w pigułce.</p>
+        <nav class="site-nav" aria-label="Działy">
+          <a href="./">Akordy i skale</a>
+          <a href="intervals.html">Interwały</a>
+          <a href="modes.html">Modusy</a>
+          <a href="quiz.html">Ćwiczenia</a>
+          <a href="glossary.html" aria-current="page">Słowniczek</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="card-head">
+        <h2>Słowniczek pojęć</h2>
+        <label class="field grow gl-search"><span>Szukaj (<span id="count"></span>)</span><input type="search" id="search" class="text-input" placeholder="np. tryton, dominanta, przewrót…" autocomplete="off"></label>
+      </div>
+      <p class="hint">Krótkie definicje najważniejszych pojęć z harmonii i teorii muzyki. Strzałki prowadzą do miejsc na stronie, gdzie można dane zjawisko zobaczyć i usłyszeć.</p>
+      <div id="terms" class="glossary"></div>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>ChordBuilder · <a href="./">strona główna</a> · <a href="https://github.com/bartoszbielawski/ChordBuilder">kod na GitHubie</a></p>
+  </footer>
+
+  <script src="js/theory.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/glossary.js"></script>
+</body>
+</html>
