@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChordBuilder — budowa akordów</title>
+  <meta name="description" content="Interaktywna strona pokazująca, jak budowane są akordy w różnych skalach: dźwięki, interwały, półtony, wizualizacja na pianinie i gitarze.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c2410c'/%3E%3Ccircle cx='11' cy='22' r='4' fill='white'/%3E%3Ccircle cx='21' cy='18' r='4' fill='white'/%3E%3Cpath d='M15 22V6h10v12' stroke='white' stroke-width='2.4' fill='none'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div>
+        <h1>ChordBuilder</h1>
+        <p class="tagline">Jak zbudowane są akordy — dźwięki, interwały i półtony, na pianinie i gitarze.</p>
+      </div>
+      <div class="settings">
+        <label class="field">
+          <span>Notacja</span>
+          <div class="seg" id="notation" role="radiogroup" aria-label="Notacja nazw dźwięków">
+            <button type="button" data-value="intl" title="Międzynarodowa: … A B C">A B C</button>
+            <button type="button" data-value="H" title="Polska/niemiecka: … A H C, B = B♭">A H C</button>
+          </div>
+        </label>
+        <label class="field">
+          <span>Etykiety na instrumentach</span>
+          <div class="seg" id="labels" role="radiogroup" aria-label="Etykiety">
+            <button type="button" data-value="note">dźwięki</button>
+            <button type="button" data-value="interval">interwały</button>
+            <button type="button" data-value="semi">półtony</button>
+          </div>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" id="scale-section">
+      <h2><span class="step">1</span> Skala</h2>
+      <div class="controls">
+        <label class="field"><span>Tonika</span><select id="tonic"></select></label>
+        <label class="field grow"><span>Skala / tryb</span><select id="scale"></select></label>
+      </div>
+      <div id="scale-notes" class="scale-notes" aria-live="polite"></div>
+      <p class="hint">Liczby między dźwiękami to odległości w półtonach (2 = cały ton, 1 = półton). Kliknij dźwięk skali, aby zbudować na nim akord.</p>
+    </section>
+
+    <section class="card" id="chords-section">
+      <div class="card-head">
+        <h2><span class="step">2</span> Akordy w skali</h2>
+        <div class="seg" id="chord-size" role="radiogroup" aria-label="Rodzaj akordów diatonicznych">
+          <button type="button" data-value="3">trójdźwięki</button>
+          <button type="button" data-value="4">septymowe</button>
+        </div>
+      </div>
+      <p class="hint" id="diatonic-hint"></p>
+      <div id="diatonic" class="diatonic"></div>
+      <details class="fitting">
+        <summary>Wszystkie akordy zbudowane wyłącznie z dźwięków tej skali</summary>
+        <div id="fitting"></div>
+      </details>
+    </section>
+
+    <section class="card" id="chord-section">
+      <h2><span class="step">3</span> Budowa akordu</h2>
+      <div class="controls">
+        <label class="field"><span>Pryma (dźwięk podstawowy)</span><select id="chord-root"></select></label>
+        <label class="field grow"><span>Rodzaj akordu</span><select id="chord-type"></select></label>
+        <div class="field">
+          <span>Przewrót</span>
+          <div class="seg" id="inversion" role="radiogroup" aria-label="Przewrót akordu"></div>
+        </div>
+      </div>
+
+      <div class="chord-head">
+        <div class="chord-symbol" id="chord-symbol"></div>
+        <div>
+          <div class="chord-name" id="chord-name"></div>
+          <div class="fit" id="chord-fit"></div>
+        </div>
+        <div class="play-group">
+          <button type="button" class="btn" id="play-chord" title="Zagraj akord">▶ Akord</button>
+          <button type="button" class="btn ghost" id="play-arp" title="Zagraj arpeggio">▶ Arpeggio</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="chord-table">
+          <thead>
+            <tr><th>Dźwięk</th><th>Stopień</th><th>Interwał od prymy</th><th>Skrót</th><th>Półtony od prymy</th><th>W skali</th></tr>
+          </thead>
+          <tbody id="chord-tbody"></tbody>
+        </table>
+      </div>
+
+      <h3>Jak to jest zbudowane</h3>
+      <div id="chord-stack" class="stack"></div>
+      <div id="chord-formula" class="formula"></div>
+    </section>
+
+    <section class="card" id="piano-section">
+      <div class="card-head">
+        <h2>Pianino</h2>
+        <div class="legend" aria-hidden="true">
+          <span><i class="role-root"></i>pryma</span><span><i class="role-third"></i>tercja</span><span><i class="role-fifth"></i>kwinta</span><span><i class="role-seventh"></i>septyma</span><span><i class="role-ext"></i>inne (2/4/6/9/11/13)</span><span><i class="scale-swatch"></i>dźwięk skali</span>
+        </div>
+      </div>
+      <div id="piano" class="instrument"></div>
+      <p class="hint">Akord w wybranym przewrocie, od C3. Kliknij klawisz, aby go usłyszeć.</p>
+    </section>
+
+    <section class="card" id="guitar-section">
+      <div class="card-head">
+        <h2>Gitara</h2>
+        <div class="controls tight">
+          <label class="field"><span>Strój</span><select id="tuning"></select></label>
+          <label class="check"><input type="checkbox" id="show-all"> wszystkie dźwięki akordu</label>
+          <label class="check"><input type="checkbox" id="show-scale"> dźwięki skali</label>
+        </div>
+      </div>
+      <div class="scroll-x"><div id="fretboard" class="instrument"></div></div>
+      <h3>Chwyty <small id="voicing-count"></small></h3>
+      <p class="hint">Automatycznie znalezione chwyty (rozpiętość do 4 progów, maks. 4 palce, barré liczone jako jeden). Bas zgodny z wybranym przewrotem. Kliknij chwyt, aby go pokazać na gryfie i usłyszeć.</p>
+      <div id="voicings" class="voicings"></div>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>ChordBuilder · statyczna strona bez zależności, gotowa na GitHub Pages · <a href="ROADMAP.md">Plan rozwoju</a></p>
+  </footer>
+
+  <script src="js/theory.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
