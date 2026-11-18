@@ -61,7 +61,7 @@
       if (keyTitle) el('title', {}, g).textContent = keyTitle(midi);
       if (!h && keyName) {
         const nm = keyName(midi);
-        text(g, cx, k.black ? BH - 30 : H - 36, nm, 'key-name ' + (k.black ? 'on-black' : 'on-white') + (nm.length > 1 ? ' small' : ''));
+        if (nm) text(g, cx, k.black ? BH - 30 : H - 36, nm, 'key-name ' + (k.black ? 'on-black' : 'on-white') + (nm.length > 1 ? ' small' : ''));
       }
       if (h) {
         const cy = k.black ? BH - 16 : H - 20;
@@ -268,6 +268,90 @@
     container.replaceChildren(svg);
   }
 
+  /* ---------- Pięciolinia: jeden system, nuty w rzędzie ---------- */
+
+  // Pozycje znaków przykluczowych w kluczu wiolinowym (kolejność F C G D A E B / B E A D G C F).
+  const SIG_STEPS = { sharp: [38, 35, 39, 36, 33, 37, 34], flat: [34, 37, 33, 36, 32, 35, 31] };
+
+  /**
+   * columns: [[{ midi, note, role?, label? }], …] — każda kolumna to nuta lub współbrzmienie.
+   * opts: { clef: 'treble' | 'bass' | 'auto', keySig (Theory.keySignature), gap, activeCol,
+   *         onColumn(i), labels: [tekst pod kolumną], ariaLabel, minWidth }
+   * Znaki chromatyczne stawiane tylko tam, gdzie dźwięk różni się od obowiązującego
+   * (znaki przykluczowe + wcześniejsze znaki w takcie).
+   */
+  function renderMelody(container, columns, opts = {}) {
+    const all = columns.flat();
+    const clef = opts.clef && opts.clef !== 'auto' ? opts.clef
+      : (all.length && all.reduce((s, n) => s + n.midi, 0) / all.length < 57 ? 'bass' : 'treble');
+    // Linie basowe: G2–A3 (12 stopni niżej niż E4–F5); znaki przykluczowe: o 2 oktawy (14) niżej.
+    const lines = clef === 'bass' ? [18, 20, 22, 24, 26] : [30, 32, 34, 36, 38];
+    const sigShift = clef === 'bass' ? -14 : 0;
+    const steps = all.map((n) => global.Theory.staffStep(n.note, n.midi));
+    const sp = 5;
+    const top = Math.max(lines[4] + 4, ...steps.map((s) => s + 3));
+    const bottom = Math.min(lines[0] - 4, ...steps.map((s) => s - 3));
+    const pad = 4;
+    const y = (s) => pad + (top - s) * sp;
+    const hasLabels = opts.labels && opts.labels.some(Boolean);
+    const H = y(bottom) + (hasLabels ? 22 : 6);
+    const sig = opts.keySig;
+    const sigNotes = sig && sig.count <= 7 ? sig.notes : [];
+    const gap = opts.gap || 38;
+    const left = 6, clefW = 34, sigW = sigNotes.length * 9;
+    const x0 = left + clefW + sigW + 22;
+    const W = Math.max(opts.minWidth || 0, x0 + columns.length * gap);
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W * (opts.scale || 1.15), class: 'staff melody', role: 'img', 'aria-label': opts.ariaLabel || 'Zapis nutowy' });
+
+    for (const s of lines) el('line', { x1: left, x2: W - 2, y1: y(s), y2: y(s), class: 'st-line' }, svg);
+    el('line', { x1: left, x2: left, y1: y(lines[4]), y2: y(lines[0]), class: 'st-line' }, svg);
+    if (clef === 'treble') {
+      const c = el('text', { x: left + 4, y: y(32) + 9, class: 'st-clef g' }, svg); c.textContent = '𝄞';
+    } else {
+      const c = el('text', { x: left + 4, y: y(24) + 8, class: 'st-clef f' }, svg); c.textContent = '𝄢';
+    }
+    sigNotes.forEach((n, i) => {
+      const s = SIG_STEPS[n.acc > 0 ? 'sharp' : 'flat'][i] + sigShift;
+      text(svg, left + clefW + 4 + i * 9, y(s) + (n.acc < 0 ? -2 : 0), ACC_GLYPH[n.acc], 'st-acc sig');
+    });
+
+    const current = new Map(); // stopień pięciolinii → obowiązujący znak
+    const accAt = (step, letter) => (current.has(step) ? current.get(step) : sig ? sig.accOf(letter) : 0);
+    columns.forEach((col, ci) => {
+      const cx = x0 + ci * gap;
+      const g = el('g', { class: 'st-col' + (opts.activeCol === ci ? ' active' : '') + (opts.onColumn ? ' clickable' : '') }, svg);
+      if (opts.onColumn) {
+        el('rect', { x: cx - gap / 2, y: 0, width: gap, height: H, class: 'st-hit' }, g);
+        g.addEventListener('click', () => opts.onColumn(ci));
+      }
+      const pos = col.map((n) => ({ ...n, step: global.Theory.staffStep(n.note, n.midi) })).sort((a, b) => a.step - b.step);
+      let prev = null;
+      for (const p of pos) {
+        p.dx = prev && p.step - prev.step === 1 && !prev.dx ? 11 : 0;
+        prev = p;
+        for (let l = lines[4] + 2; l <= p.step; l += 2) el('line', { x1: cx - 10 + p.dx, x2: cx + 10 + p.dx, y1: y(l), y2: y(l), class: 'st-line ledger' }, g);
+        for (let l = lines[0] - 2; l >= p.step; l -= 2) el('line', { x1: cx - 10 + p.dx, x2: cx + 10 + p.dx, y1: y(l), y2: y(l), class: 'st-line ledger' }, g);
+      }
+      let accCol = 0;
+      for (const p of [...pos].reverse()) {
+        const want = p.note.acc;
+        if (accAt(p.step, p.note.letter) !== want) {
+          const glyph = want === 0 ? '♮' : ACC_GLYPH[want];
+          text(g, cx - 15 - accCol * 11, y(p.step), glyph, 'st-acc role-' + (p.role || 'none'));
+          accCol = accCol ? 0 : 1;
+        }
+        current.set(p.step, want);
+      }
+      for (const p of pos) {
+        const hx = cx + p.dx, hy = y(p.step);
+        el('ellipse', { cx: hx, cy: hy, rx: 6.4, ry: 4.4, transform: `rotate(-22 ${hx} ${hy})`, class: 'st-head role-' + (p.role || 'none') }, g);
+      }
+      if (hasLabels && opts.labels[ci]) text(g, cx, H - 9, opts.labels[ci], 'st-label');
+    });
+    container.replaceChildren(svg);
+    return svg;
+  }
+
   /* ---------- Koło kwintowe ---------- */
 
   function arcPath(cx, cy, r1, r2, a0, a1) {
@@ -320,5 +404,5 @@
     container.replaceChildren(svg);
   }
 
-  global.Instruments = { renderPiano, renderFretboard, renderChordDiagram, renderCircle, renderStaff };
+  global.Instruments = { renderPiano, renderFretboard, renderChordDiagram, renderCircle, renderStaff, renderMelody };
 })(window);

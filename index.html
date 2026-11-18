@@ -22,6 +22,12 @@
       <div>
         <h1>ChordBuilder</h1>
         <p class="tagline">Jak zbudowane są akordy — dźwięki, interwały i półtony, na pianinie i gitarze.</p>
+        <nav class="site-nav" aria-label="Działy">
+          <a href="./" aria-current="page">Akordy i skale</a>
+          <a href="intervals.html">Interwały</a>
+          <a href="modes.html">Modusy</a>
+          <a href="quiz.html">Ćwiczenia</a>
+        </nav>
       </div>
       <div class="settings">
         <label class="field">
@@ -53,6 +59,16 @@
       </div>
       <div id="scale-notes" class="scale-notes" aria-live="polite"></div>
       <p class="hint">Liczby między dźwiękami to odległości w półtonach (2 = cały ton, 1 = półton). Kliknij dźwięk skali, aby zbudować na nim akord.</p>
+      <div class="scale-extra">
+        <div>
+          <div id="scale-staff" class="melody-wrap"></div>
+          <div class="controls tight">
+            <button type="button" class="btn small" id="play-scale">▶ Zagraj skalę</button>
+            <span class="hint" style="margin:0">Kliknij nutę, aby ją usłyszeć.</span>
+          </div>
+        </div>
+        <dl id="scale-info" class="info-dl"></dl>
+      </div>
     </section>
 
     <section class="card" id="circle-section">

@@ -100,7 +100,9 @@
     const symbol = (deg === 1 ? '1' : accSym + deg);
     let name = (DEGREE_NAMES[deg - 1] || deg + '.') + ' ' + quality;
     if (mod(semi, 12) === 6 && deg <= 7) name += ' (tryton)';
-    return { deg, semi, diff, quality, abbr: abbr + deg, symbol, name };
+    const plQ = { czysta: 'cz', 'mała': 'm', wielka: 'w', 'zwiększona': 'zw', zmniejszona: 'zmn',
+      'podwójnie zwiększona': '2zw', 'podwójnie zmniejszona': '2zmn' }[quality] || '?';
+    return { deg, semi, diff, quality, abbr: abbr + deg, pl: deg + plQ, symbol, name };
   }
 
   /** Interwał (prosty, w górę) między dwoma dźwiękami literowymi. */
@@ -119,21 +121,36 @@
 
   /* ---------- Skale ---------- */
 
+  // char — dźwięk charakterystyczny (odróżniający od najbliższej skali dur/moll), mood — opis brzmienia.
   const SCALES = [
-    { id: 'major', name: 'Durowa (jońska)', ints: '1 2 3 4 5 6 7' },
-    { id: 'minor', name: 'Molowa naturalna (eolska)', ints: '1 2 b3 4 5 b6 b7' },
-    { id: 'harmonicMinor', name: 'Molowa harmoniczna', ints: '1 2 b3 4 5 b6 7' },
-    { id: 'melodicMinor', name: 'Molowa melodyczna (jazzowa)', ints: '1 2 b3 4 5 6 7' },
-    { id: 'dorian', name: 'Dorycka', ints: '1 2 b3 4 5 6 b7' },
-    { id: 'phrygian', name: 'Frygijska', ints: '1 b2 b3 4 5 b6 b7' },
-    { id: 'lydian', name: 'Lidyjska', ints: '1 2 3 #4 5 6 7' },
-    { id: 'mixolydian', name: 'Miksolidyjska', ints: '1 2 3 4 5 6 b7' },
-    { id: 'locrian', name: 'Lokrycka', ints: '1 b2 b3 4 b5 b6 b7' },
-    { id: 'phrygianDominant', name: 'Frygijska dominantowa', ints: '1 b2 3 4 5 b6 b7' },
-    { id: 'majorPentatonic', name: 'Pentatonika durowa', ints: '1 2 3 5 6' },
-    { id: 'minorPentatonic', name: 'Pentatonika molowa', ints: '1 b3 4 5 b7' },
-    { id: 'blues', name: 'Bluesowa', ints: '1 b3 4 b5 5 b7' },
-    { id: 'wholeTone', name: 'Całotonowa', ints: '1 2 3 #4 #5 b7' },
+    { id: 'major', name: 'Durowa (jońska)', ints: '1 2 3 4 5 6 7', char: '7',
+      mood: 'Jasna, stabilna. Septyma wielka (dźwięk prowadzący) ciągnie do toniki.' },
+    { id: 'minor', name: 'Molowa naturalna (eolska)', ints: '1 2 b3 4 5 b6 b7', char: 'b6',
+      mood: 'Smutna, poważna. Mała seksta odróżnia ją od doryckiej.' },
+    { id: 'harmonicMinor', name: 'Molowa harmoniczna', ints: '1 2 b3 4 5 b6 7', char: '7',
+      mood: 'Moll z podwyższoną septymą — daje durową dominantę (V) i „orientalną” sekundę zwiększoną ♭6–7.' },
+    { id: 'melodicMinor', name: 'Molowa melodyczna (jazzowa)', ints: '1 2 b3 4 5 6 7', char: '6',
+      mood: 'Moll z wielką sekstą i septymą — gładka melodycznie; w klasyce tylko w górę, w jazzie w obie strony.' },
+    { id: 'dorian', name: 'Dorycka', ints: '1 2 b3 4 5 6 b7', char: '6',
+      mood: 'Moll z jaśniejszą, wielką sekstą — brzmi mniej smutno; częsta w funku, jazzie i folku.' },
+    { id: 'phrygian', name: 'Frygijska', ints: '1 b2 b3 4 5 b6 b7', char: 'b2',
+      mood: 'Ciemny moll z małą sekundą — brzmienie hiszpańskie, metalowe.' },
+    { id: 'lydian', name: 'Lidyjska', ints: '1 2 3 #4 5 6 7', char: '#4',
+      mood: 'Najjaśniejsza: dur z kwartą zwiększoną — „marzycielska”, filmowa.' },
+    { id: 'mixolydian', name: 'Miksolidyjska', ints: '1 2 3 4 5 6 b7', char: 'b7',
+      mood: 'Dur z małą septymą — rockowa, bluesowa, bez silnego dźwięku prowadzącego.' },
+    { id: 'locrian', name: 'Lokrycka', ints: '1 b2 b3 4 b5 b6 b7', char: 'b5',
+      mood: 'Najciemniejsza: zmniejszona kwinta sprawia, że tonika jest niestabilna; rzadko używana.' },
+    { id: 'phrygianDominant', name: 'Frygijska dominantowa', ints: '1 b2 3 4 5 b6 b7', char: '3',
+      mood: 'V stopień molowej harmonicznej: frygijska z wielką tercją — flamenco, muzyka bliskowschodnia.' },
+    { id: 'majorPentatonic', name: 'Pentatonika durowa', ints: '1 2 3 5 6',
+      mood: 'Durowa bez półtonów (bez 4 i 7) — nie da się w niej zagrać „źle”; folk, country, pop.' },
+    { id: 'minorPentatonic', name: 'Pentatonika molowa', ints: '1 b3 4 5 b7',
+      mood: 'Molowa bez półtonów (bez 2 i ♭6) — podstawa solówek rockowych i bluesowych.' },
+    { id: 'blues', name: 'Bluesowa', ints: '1 b3 4 b5 5 b7',
+      mood: 'Pentatonika molowa z dodaną „blue note” ♭5.' },
+    { id: 'wholeTone', name: 'Całotonowa', ints: '1 2 3 #4 #5 b7',
+      mood: 'Same całe tony — brak centrum tonalnego, brzmienie „senne” (Debussy).' },
   ].map((s) => ({ ...s, intervals: s.ints.split(' ').map(parseInterval) }));
 
   const scaleById = (id) => SCALES.find((s) => s.id === id) || SCALES[0];
@@ -448,7 +465,158 @@
     return pruned.sort((a, b) => a.score - b.score);
   }
 
+  /* ---------- Interwały: analiza dwóch dźwięków ---------- */
+
+  /** Numer pozycji na pięciolinii (C4 = 28): oktawa · 7 + litera. */
+  function staffStep(note, midi) {
+    return (Math.floor((midi - note.acc) / 12) - 1) * 7 + note.letter;
+  }
+
+  /** Interwał między dwoma dźwiękami o konkretnej wysokości (także złożony). */
+  function intervalOf(lowNote, lowMidi, highNote, highMidi) {
+    const deg = staffStep(highNote, highMidi) - staffStep(lowNote, lowMidi) + 1;
+    const semi = highMidi - lowMidi;
+    if (deg < 1) return null;
+    return describeInterval(deg, semi);
+  }
+
+  /** Przewrót interwału prostego: stopień 9 − n, półtony 12 − n (m↔M, A↔d, P↔P). */
+  function invertInterval(deg, semi) {
+    const oct = Math.floor((deg - 1) / 7);
+    const isOctave = deg > 1 && mod(deg - 1, 7) === 0;
+    // Sprowadź do interwału prostego (oktawę zostaw jako oktawę).
+    const simpleDeg = isOctave ? 8 : deg - 7 * oct;
+    const simpleSemi = isOctave ? semi - 12 * (oct - 1) : semi - 12 * oct;
+    return describeInterval(9 - simpleDeg, 12 - simpleSemi);
+  }
+
+  /** Klasyfikacja brzmieniowa (harmonia klasyczna). */
+  function consonance(info) {
+    const sd = mod(info.deg - 1, 7) + 1;
+    if (!['P', 'M', 'm'].includes(info.abbr.replace(/\d+$/, ''))) {
+      return { id: 'dis', name: 'dysonans', why: 'Interwały zwiększone i zmniejszone traktuje się jako dysonanse — nawet gdy brzmią jak konsonans (np. sekunda zwiększona = 3 półtony).' };
+    }
+    if (sd === 1 || sd === 5) return { id: 'perfect', name: 'konsonans doskonały', why: 'Pryma, oktawa i kwinta czysta — brzmią „pusto” i stabilnie; dźwięki niemal się zlewają.' };
+    if (sd === 4) return { id: 'fourth', name: 'konsonans doskonały*', why: 'Kwarta czysta: sama brzmi zgodnie, ale w harmonii klasycznej nad basem traktuje się ją jak dysonans, który wymaga rozwiązania (np. w akordzie sus4).' };
+    if (sd === 3 || sd === 6) return { id: 'imperfect', name: 'konsonans niedoskonały', why: 'Tercje i seksty — brzmią ciepło i zgodnie; to z nich budujemy akordy.' };
+    return { id: 'dis', name: 'dysonans', why: 'Sekundy i septymy brzmią napięciowo i „chcą” się rozwiązać do konsonansu.' };
+  }
+
+  /** Enharmoniczne odpowiedniki: te same półtony, inny stopień (np. 6 pt = A4 lub d5). */
+  function enharmonicIntervals(semi) {
+    const s = mod(semi, 12) === 0 && semi > 0 ? 12 : mod(semi, 12);
+    const out = [];
+    for (let deg = 1; deg <= 8; deg++) {
+      const d = describeInterval(deg, s);
+      if (d.quality !== '?' && !d.quality.startsWith('podwójnie')) {
+        const base = MAJOR_SEMI[mod(deg - 1, 7)] + (deg === 8 ? 12 : 0);
+        if (Math.abs(s - base) <= 2) out.push(d);
+      }
+    }
+    return out;
+  }
+
+  // Interwały do tabel i ćwiczeń (proste + najczęstsze złożone).
+  const INTERVALS = '1 b2 2 b3 3 4 #4 b5 5 #5 b6 6 b7 7 8 b9 9 #9 b10 10 11 #11 12 b13 13'.split(' ').map((sym) => {
+    const iv = parseInterval(sym);
+    return { ...iv, info: describeInterval(iv.deg, iv.semi) };
+  });
+
+  /* ---------- Znaki przykluczowe ---------- */
+
+  // Stopień tonacji durowej (macierzystej), na którym zaczyna się skala.
+  const PARENT_DEGREE = {
+    major: '1', dorian: '2', phrygian: '3', lydian: '4', mixolydian: '5', minor: '6', locrian: '7',
+    harmonicMinor: '6', melodicMinor: '6', phrygianDominant: '3',
+    majorPentatonic: '1', minorPentatonic: '6', blues: '6',
+  };
+  const SHARP_ORDER = [3, 0, 4, 1, 5, 2, 6]; // F C G D A E B
+  const FLAT_ORDER = [6, 2, 5, 1, 4, 0, 3];  // B E A D G C F
+
+  /**
+   * Znaki przykluczowe dla skali: { parent (tonika durowa), type: 'sharp'|'flat'|null,
+   * notes[] w kolejności zapisu, accOf(letter), theoretical }. null — skala spoza dur–moll.
+   */
+  function keySignature(tonic, scaleId) {
+    const d = PARENT_DEGREE[scaleId];
+    if (!d) return null;
+    const iv = parseInterval(d);
+    const letter = mod(tonic.letter - (iv.deg - 1), 7);
+    const pc = mod(tonic.pc - iv.semi, 12);
+    const parent = makeNote(letter, mod(pc - LETTER_PC[letter] + 6, 12) - 6);
+    const notes = buildScale(parent, 'major').notes.map((n) => n.note).filter((n) => n.acc !== 0);
+    const type = !notes.length ? null : notes[0].acc > 0 ? 'sharp' : 'flat';
+    const order = type === 'flat' ? FLAT_ORDER : SHARP_ORDER;
+    notes.sort((a, b) => order.indexOf(a.letter) - order.indexOf(b.letter));
+    const accByLetter = new Map(notes.map((n) => [n.letter, n.acc]));
+    return {
+      parent, type, notes,
+      count: notes.length,
+      theoretical: notes.some((n) => Math.abs(n.acc) > 1) || (notes.length === 7 && notes.some((n) => n.acc !== notes[0].acc)),
+      accOf: (l) => accByLetter.get(l) || 0,
+    };
+  }
+
+  /** Stopnie skali różniące się od durowej (np. dorycka: ♭3, ♭7). */
+  function alterationsVsMajor(scale) {
+    return scale.intervals
+      .filter((iv) => iv.semi !== MAJOR_SEMI[mod(iv.deg - 1, 7)])
+      .map((iv) => describeInterval(iv.deg, iv.semi));
+  }
+
+  /* ---------- Prowadzenie głosów ---------- */
+
+  /**
+   * Układ akordu (w zwartej pozycji) najbliższy poprzedniemu: minimalizuje sumę
+   * ruchów głosów. prev — wysokości MIDI poprzedniego akordu (lub null).
+   * Zwraca { midis[], notes[] (pozycje akordu w tej samej kolejności), inv }.
+   */
+  function smoothVoicing(chord, prev, center = 62) {
+    let best = null;
+    for (let inv = 0; inv < chord.notes.length; inv++) {
+      const voiced = inversion(chord, inv);
+      for (let base = 48; base <= 72; base++) {
+        if (mod(base, 12) !== voiced[0].note.pc) continue;
+        const midis = voiced.map((v) => base + v.semiAbs - voiced[0].semiAbs);
+        if (midis[midis.length - 1] > 79 || midis[0] < 52) continue;
+        const avg = midis.reduce((a, b) => a + b, 0) / midis.length;
+        let cost;
+        if (prev && prev.length) {
+          const near = (m, list) => Math.min(...list.map((p) => Math.abs(p - m)));
+          cost = midis.reduce((s, m) => s + near(m, prev), 0) + prev.reduce((s, p) => s + near(p, midis), 0) +
+            Math.abs(avg - center) * 0.15;
+        } else {
+          cost = Math.abs(avg - center) + inv * 0.5;
+        }
+        if (!best || cost < best.cost) best = { cost, midis, notes: voiced, inv };
+      }
+    }
+    return best;
+  }
+
+  /**
+   * Opis przejścia między akordami: dźwięki wspólne i ruchy pozostałych głosów.
+   * Zwraca [{ from, to, semis }] — każdy dźwięk nowego akordu z najbliższym poprzednim.
+   */
+  function voiceMoves(prev, next) {
+    return next.map((m) => {
+      let from = prev[0];
+      for (const p of prev) if (Math.abs(p - m) < Math.abs(from - m)) from = p;
+      return { from, to: m, semis: m - from };
+    });
+  }
+
+  /* ---------- Dominanty wtrącone ---------- */
+
+  /** V7 (dominanta septymowa) dla akordu na danym dźwięku: kwinta wyżej. */
+  function secondaryDominant(target) {
+    return buildChord(transpose(target, parseInterval('5')), '7');
+  }
+
   global.Theory = {
+    staffStep, intervalOf, invertInterval, consonance, enharmonicIntervals,
+    keySignature, alterationsVsMajor, smoothVoicing, voiceMoves, secondaryDominant,
+    MAJOR_SEMI, INTERVALS,
     LETTERS, SCALES, CHORD_TYPES, CHORD_GROUPS, TUNINGS,
     mod, makeNote, parseNote, noteKey, noteName,
     parseInterval, describeInterval, intervalBetween, transpose,

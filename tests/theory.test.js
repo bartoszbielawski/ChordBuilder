@@ -179,6 +179,95 @@
       const syms = p.steps.map((s) => T.chordSymbol(T.buildChord(T.transpose(T.parseNote('E'), s.iv), s.type)));
       eq([...new Set(syms)].join(' '), 'E7 A7 B7');
     }],
+
+    /* ---------- Interwały ---------- */
+    ['Interwały między dźwiękami (także złożone)', (T, eq) => {
+      const iv = (a, am, b, bm) => T.intervalOf(T.parseNote(a), am, T.parseNote(b), bm).abbr;
+      eq(iv('C', 60, 'E', 64), 'M3');
+      eq(iv('C', 60, 'Eb', 63), 'm3');
+      eq(iv('C', 60, 'D#', 63), 'A2');
+      eq(iv('F', 65, 'B', 71), 'A4');
+      eq(iv('B', 59, 'F', 65), 'd5');
+      eq(iv('C', 60, 'C', 72), 'P8');
+      eq(iv('C', 60, 'D', 74), 'M9');
+      eq(iv('E', 64, 'C', 72), 'm6');
+      eq(iv('B', 71, 'C', 72), 'm2');
+      eq(iv('Cb', 59, 'B#', 72), 'AA7');
+    }],
+    ['Przewroty interwałów', (T, eq) => {
+      const inv = (d, s) => T.invertInterval(d, s).abbr;
+      eq(inv(3, 4), 'm6');
+      eq(inv(3, 3), 'M6');
+      eq(inv(4, 6), 'd5');
+      eq(inv(5, 7), 'P4');
+      eq(inv(2, 1), 'M7');
+      eq(inv(1, 0), 'P8');
+      eq(inv(8, 12), 'P1');
+      eq(inv(10, 16), 'm6');
+    }],
+    ['Konsonanse i dysonanse', (T, eq) => {
+      const c = (d, s) => T.consonance(T.describeInterval(d, s)).id;
+      eq(c(5, 7), 'perfect');
+      eq(c(8, 12), 'perfect');
+      eq(c(3, 3), 'imperfect');
+      eq(c(6, 9), 'imperfect');
+      eq(c(4, 5), 'fourth');
+      eq(c(2, 2), 'dis');
+      eq(c(4, 6), 'dis');
+      eq(c(2, 3), 'dis');
+    }],
+    ['Enharmonia interwałów', (T, eq) => {
+      const e = (s) => T.enharmonicIntervals(s).map((d) => d.abbr).join(' ');
+      eq(e(6), 'A4 d5');
+      eq(e(3), 'A2 m3');
+      eq(e(0), 'P1 d2');
+      eq(e(12), 'A7 P8');
+    }],
+
+    /* ---------- Znaki przykluczowe ---------- */
+    ['Znaki przykluczowe', (T, eq) => {
+      const ks = (t, s) => {
+        const k = T.keySignature(T.parseNote(t), s);
+        return k.notes.map((n) => T.noteName(n)).join(' ');
+      };
+      eq(ks('C', 'major'), '');
+      eq(ks('D', 'major'), 'F♯ C♯');
+      eq(ks('F', 'major'), 'B♭');
+      eq(ks('Eb', 'major'), 'B♭ E♭ A♭');
+      eq(ks('C#', 'major'), 'F♯ C♯ G♯ D♯ A♯ E♯ B♯');
+      eq(ks('A', 'minor'), '');
+      eq(ks('G', 'minor'), 'B♭ E♭');
+      eq(ks('A', 'harmonicMinor'), '');
+      eq(ks('D', 'dorian'), '');
+      eq(ks('E', 'phrygian'), '');
+      eq(ks('G', 'mixolydian'), '');
+      eq(ks('F#', 'minor'), 'F♯ C♯ G♯');
+      eq(T.keySignature(T.parseNote('C'), 'wholeTone'), null);
+    }],
+    ['Skale vs durowa', (T, eq) => {
+      const alt = (id) => T.alterationsVsMajor(T.scaleById(id)).map((d) => d.symbol).join(' ');
+      eq(alt('dorian'), '♭3 ♭7');
+      eq(alt('lydian'), '♯4');
+      eq(alt('locrian'), '♭2 ♭3 ♭5 ♭6 ♭7');
+      eq(alt('major'), '');
+    }],
+
+    /* ---------- Prowadzenie głosów ---------- */
+    ['Płynne prowadzenie głosów C → F → G', (T, eq, ok) => {
+      const c = (r, t) => T.buildChord(T.parseNote(r), t);
+      const a = T.smoothVoicing(c('C', 'maj'), null);
+      ok(a.midis.every((m) => m >= 52 && m <= 79), 'zakres');
+      const b = T.smoothVoicing(c('F', 'maj'), a.midis);
+      const moves = T.voiceMoves(a.midis, b.midis);
+      ok(moves.some((m) => m.semis === 0), 'C→F: dźwięk wspólny');
+      ok(moves.every((m) => Math.abs(m.semis) <= 2), 'C→F: ruchy o max sekundę');
+      eq(c('C', 'maj').pcs.size, 3);
+    }],
+    ['Dominanty wtrącone', (T, eq) => {
+      eq(T.chordSymbol(T.secondaryDominant(T.parseNote('D'))), 'A7');
+      eq(T.chordSymbol(T.secondaryDominant(T.parseNote('Bb'))), 'F7');
+      eq(T.chordSymbol(T.secondaryDominant(T.parseNote('E'))), 'B7');
+    }],
   ];
 
   /** Uruchamia testy; zwraca listę wyników { name, ok, errors[] }. */

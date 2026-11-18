@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modusy — ChordBuilder</title>
+  <meta name="description" content="Skale modalne (kościelne): od najjaśniejszej lidyjskiej do najciemniejszej lokryckiej, dźwięki charakterystyczne, modusy równoległe i względne, z dźwiękiem.">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#c2410c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Music&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div>
+        <h1>ChordBuilder</h1>
+        <p class="tagline">Modusy — siedem skal z tych samych dźwięków, każda o innym charakterze.</p>
+        <nav class="site-nav" aria-label="Działy">
+          <a href="./">Akordy i skale</a>
+          <a href="intervals.html">Interwały</a>
+          <a href="modes.html" aria-current="page">Modusy</a>
+          <a href="quiz.html">Ćwiczenia</a>
+        </nav>
+      </div>
+      <div class="settings">
+        <label class="field">
+          <span>Notacja</span>
+          <div class="seg" id="notation" role="radiogroup" aria-label="Notacja nazw dźwięków">
+            <button type="button" data-value="intl" title="Międzynarodowa: … A B C">A B C</button>
+            <button type="button" data-value="H" title="Polska/niemiecka: … A H C, B = B♭">A H C</button>
+          </div>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" id="parallel-section">
+      <div class="card-head">
+        <h2><span class="step">1</span> Od najjaśniejszego do najciemniejszego</h2>
+        <label class="field"><span>Wspólna tonika</span><select id="tonic"></select></label>
+      </div>
+      <p class="hint">Wszystkie modusy od tej samej toniki (modusy <b>równoległe</b>). Każdy kolejny wiersz obniża dokładnie <b>jeden</b> dźwięk o półton — w kolejności koła kwintowego: 4, 7, 3, 6, 2, 5. Fioletem zaznaczono dźwięk charakterystyczny modusu.</p>
+      <div class="table-wrap">
+        <table class="chord-table modes-table">
+          <thead><tr><th>Modus</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>Zmiana</th><th>Akord toniczny</th><th></th></tr></thead>
+          <tbody id="parallel"></tbody>
+        </table>
+      </div>
+      <div class="controls tight below-head">
+        <label class="check"><input type="checkbox" id="drone" checked> grając skalę, trzymaj tonikę w basie (burdon) — wtedy najlepiej słychać charakter modusu</label>
+      </div>
+    </section>
+
+    <section class="card" id="relative-section">
+      <div class="card-head">
+        <h2><span class="step">2</span> Te same dźwięki, inny początek</h2>
+        <label class="field"><span>Tonacja durowa</span><select id="parent"></select></label>
+      </div>
+      <p class="hint">Modusy <b>względne</b>: siedem skal z dźwięków jednej tonacji durowej — każda zaczyna się od innego stopnia, więc półtony (1) wypadają w innych miejscach.</p>
+      <div id="relative" class="relative-list"></div>
+    </section>
+
+    <section class="card prose" id="howto-section">
+      <h2><span class="step">3</span> Jak rozpoznać i zapamiętać modusy</h2>
+      <ol class="rules">
+        <li><b>Durowe czy molowe?</b> Modusy z tercją wielką (lidyjski, joński, miksolidyjski) brzmią „durowo”, z tercją małą (dorycki, eolski, frygijski, lokrycki) — „molowo”.</li>
+        <li><b>Porównuj z dur lub moll.</b> Lidyjski = dur z ♯4. Miksolidyjski = dur z ♭7. Dorycki = moll z wielką sekstą (6). Frygijski = moll z ♭2. Lokrycki = moll z ♭2 i ♭5.</li>
+        <li><b>Szybkie wyznaczanie znaków:</b> znajdź tonację durową, w której dany dźwięk jest odpowiednim stopniem. D dorycki → D to II stopień C-dur → brak znaków. E frygijski → III stopień C-dur. F♯ dorycki → II stopień E-dur → 4♯.</li>
+        <li><b>Słuchaj na tle toniki.</b> Ten sam zestaw dźwięków (np. białe klawisze) zmienia charakter dopiero wtedy, gdy bas trzyma inną tonikę. Włącz burdon w tabeli powyżej i porównaj kolejne wiersze.</li>
+        <li><b>Gdzie je usłyszysz:</b> dorycki — funk, jazz modalny, muzyka celtycka; miksolidyjski — rock, blues; frygijski — flamenco, metal; lidyjski — muzyka filmowa; eolski — większość „molowych” piosenek pop.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>ChordBuilder · <a href="./">strona główna</a> · <a href="https://github.com/bartoszbielawski/ChordBuilder">kod na GitHubie</a></p>
+  </footer>
+
+  <script src="js/theory.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/modes.js"></script>
+</body>
+</html>

@@ -260,6 +260,51 @@
     items.push(h('span', { class: 'scale-note octave' },
       h('span', { class: 'deg' }, '8'), h('span', { class: 'nm' }, nn(sc.tonic)), h('span', { class: 'sm' }, '12 pt')));
     box.replaceChildren(...items);
+    renderScaleStaff(sc);
+  }
+
+  function scaleMidis(sc) {
+    const start = 60 + sc.tonic.pc - (sc.tonic.pc > 7 ? 12 : 0);
+    return [...sc.notes.map((n) => start + n.iv.semi), start + 12];
+  }
+
+  function renderScaleStaff(sc) {
+    const sig = T.keySignature(sc.tonic, sc.scale.id);
+    const midis = scaleMidis(sc);
+    const notes = [...sc.notes.map((n) => n.note), sc.tonic];
+    const labels = [...sc.notes.map((n) => T.describeInterval(n.iv.deg, n.iv.semi).symbol), '8'];
+    const charIdx = sc.scale.char ? sc.notes.findIndex((n) => n.iv.sym === sc.scale.char) : -1;
+    I.renderMelody($('scale-staff'), notes.map((note, i) => [{
+      midi: midis[i], note, role: i === 0 || i === notes.length - 1 ? 'root' : i === charIdx ? 'ext' : null,
+    }]), {
+      keySig: sig, labels, ariaLabel: 'Skala na pięciolinii ze znakami przykluczowymi',
+      onColumn: (i) => Sound.play([midis[i]]),
+    });
+
+    const rows = [];
+    if (sig) {
+      const parentName = nn(sig.parent) + '-dur';
+      rows.push(['Znaki przykluczowe', sig.count
+        ? `${sig.count}${sig.type === 'sharp' ? '♯' : '♭'} — ${sig.notes.map(nn).join(', ')}` + (sig.theoretical ? ' (tonacja teoretyczna — w praktyce zapisuje się ją enharmonicznie)' : '')
+        : 'brak']);
+      if (sc.scale.id !== 'major') rows.push(['Tonacja macierzysta', `te same znaki co ${parentName}` + (['harmonicMinor', 'melodicMinor', 'phrygianDominant', 'blues', 'minorPentatonic', 'majorPentatonic'].includes(sc.scale.id) ? '; pozostałe zmiany jako znaki przygodne przy nutach' : '')]);
+    } else {
+      rows.push(['Znaki przykluczowe', 'skala spoza systemu dur–moll — zapisuje się ją znakami przygodnymi']);
+    }
+    const alts = T.alterationsVsMajor(sc.scale);
+    if (sc.notes.length === 7) {
+      rows.push(['Względem durowej', alts.length ? alts.map((a) => a.symbol).join(', ') : 'to jest skala durowa']);
+    } else {
+      const present = new Set(sc.scale.intervals.map((i) => i.deg));
+      const missing = [1, 2, 3, 4, 5, 6, 7].filter((d) => !present.has(d));
+      rows.push(['Budowa', `${sc.notes.length} dźwięków` + (alts.length ? `; zmienione: ${alts.map((a) => a.symbol).join(', ')}` : '') + (missing.length ? `; brak stopni ${missing.join(', ')}` : '')]);
+    }
+    if (charIdx >= 0) {
+      const cn = sc.notes[charIdx];
+      rows.push(['Dźwięk charakterystyczny', h('span', {}, h('span', { class: 'char-note' }, `${T.describeInterval(cn.iv.deg, cn.iv.semi).symbol} = ${nn(cn.note)}`), ' — zaznaczony na fioletowo')]);
+    }
+    if (sc.scale.mood) rows.push(['Brzmienie', sc.scale.mood]);
+    $('scale-info').replaceChildren(...rows.flatMap(([a, b]) => [h('dt', {}, a), h('dd', {}, b)]));
   }
 
   function isActive(chord) {
@@ -839,6 +884,10 @@
     $('play-chord').addEventListener('click', () => {
       const c = currentChord();
       Sound.play(pianoMidis(c, T.inversion(c, state.inv)), 'chord');
+    });
+    $('play-scale').addEventListener('click', () => {
+      const ms = scaleMidis(currentScale());
+      Sound.play(ms, 'arp', 'piano', 1.0);
     });
     $('play-arp').addEventListener('click', () => {
       const c = currentChord();

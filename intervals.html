@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interwały — ChordBuilder</title>
+  <meta name="description" content="Kalkulator i tabela interwałów: nazwy, półtony, przewroty, konsonanse i dysonanse, enharmonia. Z zapisem nutowym, pianinem i dźwiękiem.">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#c2410c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Music&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div>
+        <h1>ChordBuilder</h1>
+        <p class="tagline">Interwały — odległości między dźwiękami: jak je nazywać, liczyć i słyszeć.</p>
+        <nav class="site-nav" aria-label="Działy">
+          <a href="./">Akordy i skale</a>
+          <a href="intervals.html" aria-current="page">Interwały</a>
+          <a href="modes.html">Modusy</a>
+          <a href="quiz.html">Ćwiczenia</a>
+        </nav>
+      </div>
+      <div class="settings">
+        <label class="field">
+          <span>Notacja</span>
+          <div class="seg" id="notation" role="radiogroup" aria-label="Notacja nazw dźwięków">
+            <button type="button" data-value="intl" title="Międzynarodowa: … A B C">A B C</button>
+            <button type="button" data-value="H" title="Polska/niemiecka: … A H C, B = B♭">A H C</button>
+          </div>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" id="calc-section">
+      <h2><span class="step">1</span> Kalkulator interwałów</h2>
+      <div class="controls">
+        <div class="field"><span>Dźwięk dolny</span>
+          <div class="pair"><select id="low-note" aria-label="Dźwięk dolny"></select><select id="low-oct" aria-label="Oktawa dźwięku dolnego"></select></div>
+        </div>
+        <button type="button" class="btn ghost small" id="swap" title="Zamień dźwięki">⇅ Zamień</button>
+        <div class="field"><span>Dźwięk górny</span>
+          <div class="pair"><select id="high-note" aria-label="Dźwięk górny"></select><select id="high-oct" aria-label="Oktawa dźwięku górnego"></select></div>
+        </div>
+        <label class="field grow"><span>…albo zbuduj interwał od dźwięku dolnego</span><select id="build-iv"></select></label>
+      </div>
+
+      <div class="iv-result" id="iv-result" aria-live="polite"></div>
+
+      <div class="iv-visual">
+        <div id="iv-staff" class="melody-wrap"></div>
+        <div class="play-group">
+          <button type="button" class="btn" id="play-mel">▶ Po kolei</button>
+          <button type="button" class="btn ghost" id="play-harm">▶ Razem</button>
+        </div>
+      </div>
+
+      <div class="controls tight below-head">
+        <div class="field"><span>Kliknięcie klawisza ustawia</span>
+          <div class="seg" id="click-target" role="radiogroup" aria-label="Kliknięcie klawisza ustawia">
+            <button type="button" data-value="low">dźwięk dolny</button>
+            <button type="button" data-value="high">dźwięk górny</button>
+          </div>
+        </div>
+      </div>
+      <div id="iv-piano" class="instrument"></div>
+      <p class="hint">Na klawiaturze widać, ile półtonów (klawiszy, także czarnych) dzieli oba dźwięki. Klawisz zamienia się na dźwięk w domyślnej pisowni — inną (np. A♯ zamiast B♭) wybierzesz z listy.</p>
+    </section>
+
+    <section class="card" id="table-section">
+      <div class="card-head">
+        <h2><span class="step">2</span> Wszystkie interwały od dźwięku</h2>
+        <label class="field"><span>Dźwięk dolny</span><select id="table-root"></select></label>
+      </div>
+      <div class="table-wrap">
+        <table class="chord-table iv-table">
+          <thead>
+            <tr><th>Półtony</th><th>Nazwa</th><th>Skrót</th><th>Przykład</th><th>Brzmienie</th><th>Przewrót</th><th></th></tr>
+          </thead>
+          <tbody id="iv-tbody"></tbody>
+        </table>
+      </div>
+      <p class="hint">Skróty: <b>cz</b> — czysta, <b>m</b> — mała, <b>w</b> — wielka, <b>zw</b> — zwiększona, <b>zmn</b> — zmniejszona; w nawiasie skrót międzynarodowy (P, m, M, A, d). Kliknij wiersz, aby pokazać interwał w kalkulatorze.</p>
+    </section>
+
+    <section class="card prose" id="rules-section">
+      <h2><span class="step">3</span> Jak nazwać interwał — krok po kroku</h2>
+      <ol class="rules">
+        <li><b>Liczba (wielkość)</b> — policz <em>nazwy literowe</em> od dolnego do górnego dźwięku, wliczając oba. C→E: C, D, E = 3 → <b>tercja</b>. Znaki chromatyczne nie zmieniają liczby: C→E♭ i C→E♯ to też tercje.</li>
+        <li><b>Rodzaj (jakość)</b> — policz półtony i porównaj z wzorcem:
+          <div class="table-wrap">
+            <table class="chord-table mini">
+              <thead><tr><th>Interwał</th><th>zmniejszona</th><th>mała</th><th>czysta</th><th>wielka</th><th>zwiększona</th></tr></thead>
+              <tbody>
+                <tr><td>pryma (1)</td><td>—</td><td>—</td><td>0</td><td>—</td><td>1</td></tr>
+                <tr><td>sekunda (2)</td><td>0</td><td>1</td><td>—</td><td>2</td><td>3</td></tr>
+                <tr><td>tercja (3)</td><td>2</td><td>3</td><td>—</td><td>4</td><td>5</td></tr>
+                <tr><td>kwarta (4)</td><td>4</td><td>—</td><td>5</td><td>—</td><td>6</td></tr>
+                <tr><td>kwinta (5)</td><td>6</td><td>—</td><td>7</td><td>—</td><td>8</td></tr>
+                <tr><td>seksta (6)</td><td>7</td><td>8</td><td>—</td><td>9</td><td>10</td></tr>
+                <tr><td>septyma (7)</td><td>9</td><td>10</td><td>—</td><td>11</td><td>12</td></tr>
+                <tr><td>oktawa (8)</td><td>11</td><td>—</td><td>12</td><td>—</td><td>13</td></tr>
+              </tbody>
+            </table>
+          </div>
+          Pryma, kwarta, kwinta i oktawa są <b>czyste</b>; sekundy, tercje, seksty i septymy — <b>małe lub wielkie</b>.
+        </li>
+        <li><b>Skrót myślowy</b>: w skali durowej od dolnego dźwięku wszystkie interwały są wielkie lub czyste. Jeśli górny dźwięk należy do tej skali — gotowe; jeśli jest o półton niżej — mała (lub zmniejszona dla czystych); o półton wyżej — zwiększona.</li>
+        <li><b>Przewrót</b> — przenieś dolny dźwięk o oktawę w górę. Liczby sumują się do 9 (3 ↔ 6, 2 ↔ 7, 4 ↔ 5), półtony do 12, a rodzaj się odwraca: mała ↔ wielka, zwiększona ↔ zmniejszona, czysta zostaje czystą.</li>
+        <li><b>Interwały złożone</b> (większe niż oktawa) to interwał prosty + oktawa: nona = sekunda + oktawa (9 = 2 + 7), decyma = tercja + oktawa, undecyma = kwarta + oktawa, tercdecyma = seksta + oktawa.</li>
+        <li><b>Enharmonia</b> — ta sama liczba półtonów może mieć różne nazwy: 6 półtonów to kwarta zwiększona (C→F♯) albo kwinta zmniejszona (C→G♭). Oba nazywa się <b>trytonem</b> (trzy całe tony).</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>ChordBuilder · <a href="./">strona główna</a> · <a href="https://github.com/bartoszbielawski/ChordBuilder">kod na GitHubie</a></p>
+  </footer>
+
+  <script src="js/theory.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/intervals.js"></script>
+</body>
+</html>
