@@ -135,6 +135,7 @@ select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); o
   border-radius: 9px; padding: 8px 14px; cursor: pointer;
 }
 .btn.ghost { background: transparent; color: var(--accent); }
+a.btn { text-decoration: none; display: inline-block; }
 .btn:active { transform: translateY(1px); }
 
 /* ---------- Scale ---------- */
@@ -219,6 +220,19 @@ select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); o
 .role-ext { --c: var(--ext); }
 .role-scale { --c: var(--scale); }
 .role-sel { --c: #57534e; }
+
+/* ---------- Pięciolinia ---------- */
+.staff-row { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; }
+.staff-row .hint { flex: 1 1 260px; margin: 0; }
+.staff-wrap { flex: 0 1 300px; min-width: 0; }
+.staff-wrap svg { display: block; width: 100%; max-width: 300px; height: auto; }
+.st-line { stroke: var(--text); stroke-width: 1; opacity: .7; }
+.st-clef { font-family: "Noto Music", "Bravura", "Apple Symbols", "Segoe UI Symbol", serif; fill: var(--text); }
+.st-clef.g { font-size: 40px; }
+.st-clef.f { font-size: 30px; }
+.st-head { fill: none; stroke: var(--c, var(--text)); stroke-width: 2.4; }
+.st-acc { font-family: "Noto Music", "Apple Symbols", "Segoe UI Symbol", serif; font-size: 19px; fill: var(--c, var(--text)); }
+.st-name { font: 600 11px Inter, sans-serif; fill: var(--c, var(--text)); }
 
 /* ---------- Koło kwintowe ---------- */
 .circle-layout { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 20px 28px; align-items: center; margin-top: 12px; }

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChordBuilder — testy</title>
+  <style>
+    :root { --bg: #fff; --text: #1f1d1a; --ok: #15803d; --no: #b91c1c; --muted: #6b665d; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #141311; --text: #f1ede6; --ok: #4ade80; --no: #f87171; --muted: #a39d92; } }
+    body { margin: 0; padding: 24px 16px; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; }
+    main { max-width: 760px; margin: 0 auto; }
+    li { margin: 4px 0; list-style: none; }
+    .ok { color: var(--ok); } .no { color: var(--no); }
+    pre { margin: 4px 0 8px 22px; color: var(--muted); white-space: pre-wrap; font-size: 13px; }
+    #summary { font-size: 18px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Testy teorii muzyki</h1>
+    <p id="summary"></p>
+    <ul id="list" style="padding:0"></ul>
+    <p><a href="../">← ChordBuilder</a></p>
+  </main>
+  <script src="../js/theory.js"></script>
+  <script src="theory.test.js"></script>
+  <script>
+    const results = TheoryTests.run(Theory);
+    const failed = results.filter((r) => !r.ok).length;
+    const sum = document.getElementById('summary');
+    sum.textContent = `${results.length - failed}/${results.length} testów zaliczonych`;
+    sum.className = failed ? 'no' : 'ok';
+    const list = document.getElementById('list');
+    for (const r of results) {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="${r.ok ? 'ok' : 'no'}">${r.ok ? '✓' : '✗'}</span> `;
+      li.append(r.name);
+      if (!r.ok) { const pre = document.createElement('pre'); pre.textContent = r.errors.join('\n'); li.append(pre); }
+      list.append(li);
+    }
+  </script>
+</body>
+</html>

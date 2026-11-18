@@ -10,6 +10,9 @@ rozpoznawanie akordu wklikanego na pianinie lub gryfie (punkt 2.1).
 Wersja 1.2 (gotowa): koło kwintowe (2.3) i progresje akordów z odtwarzaniem
 oraz własnymi progresjami (2.4).
 
+Wersja 1.3 (gotowa): testy i CI (5.5), zapis nutowy (5.4), ściąga do druku
+(5.3, wydruk/PDF), działanie offline i instalacja jako aplikacja (5.2).
+
 Poniżej propozycje rozszerzeń, pogrupowane w etapy od najbardziej przydatnych
 i najtańszych w realizacji.
 
@@ -49,10 +52,10 @@ i najtańszych w realizacji.
 | # | Funkcja | Opis | Nakład |
 |---|---|---|---|
 | 5.1 | **Wersja angielska** | Przełącznik PL/EN (teksty w jednym słowniku). | S |
-| 5.2 | **PWA / offline** | Manifest + service worker: instalacja na telefonie, działanie bez sieci. | S |
-| 5.3 | **Eksport** | Zapis diagramu chwytu / klawiatury jako PNG lub SVG, wydruk „ściągi” akordów tonacji. | S |
-| 5.4 | **Pięciolinia** | Akord zapisany nutami (np. biblioteka VexFlow). | M |
-| 5.5 | **Testy i CI** | Testy jednostkowe teorii (pisownia, interwały, chwyty) + GitHub Actions. | S |
+| 5.2 | ~~**PWA / offline**~~ ✓ | Manifest + service worker: instalacja na telefonie, działanie bez sieci. | S |
+| 5.3 | ~~**Eksport**~~ ✓ | Zapis diagramu chwytu / klawiatury jako PNG lub SVG, wydruk „ściągi” akordów tonacji. | S |
+| 5.4 | ~~**Pięciolinia**~~ ✓ | Akord zapisany nutami (np. biblioteka VexFlow). | M |
+| 5.5 | ~~**Testy i CI**~~ ✓ | Testy jednostkowe teorii (pisownia, interwały, chwyty) + GitHub Actions. | S |
 | 5.6 | **Więcej skal** | Zmniejszona (półton–cały ton), bebop, skale harmoniczna durowa, węgierska, japońskie (hirajōshi, in-sen). | S |
 
 **Nakład:** S — do kilku godzin, M — dzień–dwa, L — więcej.
@@ -62,6 +65,6 @@ i najtańszych w realizacji.
 1. **2.2 Funkcje harmoniczne** + **2.6 Porównanie trybów** — szybkie, duża wartość dydaktyczna.
 2. ~~**2.1 Rozpoznawanie akordu**~~ — zrobione w wersji 1.1.
 3. ~~**2.4 Progresje** + **2.3 Koło kwintowe**~~ — zrobione w wersji 1.2.
-4. **5.5 Testy** — zanim logika teorii zacznie się rozrastać.
+4. ~~**5.5 Testy**~~ — zrobione w wersji 1.3.
 5. **3.1 / 3.2 CAGED i pozycje skal** — dla gitarzystów.
 6. Reszta wg potrzeb (quiz, MIDI, PWA, wersja EN).

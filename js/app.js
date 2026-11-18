@@ -191,6 +191,7 @@
     if (!NOTE_KEYS.includes(state.tonic)) $('tonic').prepend(new Option(nameForKey(state.tonic), state.tonic, true, true));
 
     fillSelect($('scale'), T.SCALES.map((s) => [s.id, s.name]), state.scale);
+    $('sheet-link').href = 'sheet.html#' + new URLSearchParams({ t: state.tonic, s: state.scale, nt: state.notation, tu: state.tuning });
 
     // Pryma: ✓ przy dźwiękach skali (w pisowni skali, np. B♭ w F-dur, a nie A♯).
     const scaleKeys = new Set(sc.notes.map((n) => T.noteKey(n.note)));
@@ -339,6 +340,9 @@
       h('div', {}, h('span', { class: 'lbl' }, 'Wzór: '), h('code', {}, chord.notes.map((n) => n.info.symbol).join(' – '))),
       h('div', {}, h('span', { class: 'lbl' }, 'Półtony od prymy: '), h('code', {}, chord.notes.map((n) => n.iv.semi).join(' – '))),
       h('div', {}, h('span', { class: 'lbl' }, 'Klasy wysokości (0 = C): '), h('code', {}, chord.notes.map((n) => n.note.pc).join(', '))));
+
+    const midis = pianoMidis(chord, voiced);
+    I.renderStaff($('staff'), voiced.map((n, i) => ({ midi: midis[i], note: n.note, role: n.role, name: nn(n.note) })));
     return voiced;
   }
 
@@ -841,6 +845,11 @@
       Sound.play(pianoMidis(c, T.inversion(c, state.inv)), 'arp');
     });
     window.addEventListener('hashchange', () => { loadHash(); render(); });
+  }
+
+  // Działanie offline / instalacja jako aplikacja (wymaga https lub localhost).
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
   }
 
   loadPrefs();

@@ -189,6 +189,85 @@
     return svg;
   }
 
+  /* ---------- Pięciolinia (system fortepianowy) ---------- */
+
+  const ACC_GLYPH = { '-2': '𝄫', '-1': '♭', '1': '♯', '2': '𝄪' };
+
+  /**
+   * notes: [{ midi, note: {letter, acc}, role, name }]
+   * Rysuje akord nutami całymi na systemie wiolinowo-basowym, bez znaków
+   * przykluczowych (znaki chromatyczne stoją przy nutach).
+   */
+  function renderStaff(container, notes, opts = {}) {
+    const sp = 5; // pół odstępu między liniami
+    const GAP = 30; // dodatkowy odstęp między pięciolinią wiolinową a basową
+    const pos = notes.map((n) => {
+      const natural = n.midi - n.note.acc;
+      const octave = Math.floor(natural / 12) - 1;
+      return { ...n, step: octave * 7 + n.note.letter, staff: n.midi >= 60 ? 'T' : 'B' };
+    }).sort((a, b) => a.midi - b.midi || a.step - b.step);
+    const top = Math.max(42, ...pos.filter((p) => p.staff === 'T').map((p) => p.step + 3));
+    const bottom = Math.min(14, ...pos.filter((p) => p.staff === 'B').map((p) => p.step - 3));
+    const W = opts.width || 230, x0 = opts.noteX || 132, left = 8;
+    const y = (s, staff) => 8 + (top - s) * sp + (staff === 'B' ? GAP : 0);
+    const H = y(bottom, 'B') + 8;
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, class: 'staff', role: 'img', 'aria-label': 'Zapis nutowy akordu' });
+
+    for (const s of [30, 32, 34, 36, 38]) el('line', { x1: left, x2: W - 6, y1: y(s, 'T'), y2: y(s, 'T'), class: 'st-line' }, svg);
+    for (const s of [18, 20, 22, 24, 26]) el('line', { x1: left, x2: W - 6, y1: y(s, 'B'), y2: y(s, 'B'), class: 'st-line' }, svg);
+    el('line', { x1: left, x2: left, y1: y(38, 'T'), y2: y(18, 'B'), class: 'st-line' }, svg);
+    el('line', { x1: W - 6, x2: W - 6, y1: y(38, 'T'), y2: y(18, 'B'), class: 'st-line' }, svg);
+    const clefG = el('text', { x: left + 5, y: y(32, 'T') + 9, class: 'st-clef g' }, svg); clefG.textContent = '𝄞';
+    const clefF = el('text', { x: left + 5, y: y(24, 'B') + 8, class: 'st-clef f' }, svg); clefF.textContent = '𝄢';
+
+    // Sekundy w obrębie jednej pięciolinii: wyższa nuta przesunięta w prawo.
+    let prev = null;
+    for (const p of pos) {
+      p.dx = prev && prev.staff === p.staff && p.step - prev.step === 1 && !prev.dx ? 12 : 0;
+      prev = p;
+    }
+    // Linie dodane.
+    for (const p of pos) {
+      const ledgers = [];
+      if (p.staff === 'T') {
+        for (let l = 40; l <= p.step; l += 2) ledgers.push(l);
+        for (let l = 28; l >= p.step; l -= 2) ledgers.push(l);
+      } else {
+        for (let l = 28; l <= p.step; l += 2) ledgers.push(l);
+        for (let l = 16; l >= p.step; l -= 2) ledgers.push(l);
+      }
+      for (const l of ledgers) {
+        el('line', { x1: x0 - 10 + p.dx, x2: x0 + 10 + p.dx, y1: y(l, p.staff), y2: y(l, p.staff), class: 'st-line ledger' }, svg);
+      }
+    }
+    // Znaki chromatyczne: kolumny od góry, w kolumnie min. 28 px odstępu.
+    const cols = [];
+    for (const p of [...pos].reverse()) {
+      if (!p.note.acc) continue;
+      const py = y(p.step, p.staff);
+      let c = 0;
+      while (cols[c] && cols[c].some((v) => Math.abs(v - py) < 28)) c++;
+      (cols[c] = cols[c] || []).push(py);
+      const t = el('text', { x: x0 - 17 - c * 12, y: py, class: 'st-acc role-' + p.role, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, svg);
+      t.textContent = ACC_GLYPH[p.note.acc] || '';
+    }
+    for (const p of pos) {
+      const cx = x0 + p.dx, cy = y(p.step, p.staff);
+      el('ellipse', { cx, cy, rx: 6.4, ry: 4.4, transform: `rotate(-22 ${cx} ${cy})`, class: 'st-head role-' + p.role }, svg);
+      if (p.name) {
+        const t = el('text', { x: x0 + 30, y: cy, class: 'st-name role-' + p.role, 'dominant-baseline': 'central' }, svg);
+        t.textContent = p.name;
+      }
+    }
+    // Nazwy przy nutach mogą na siebie nachodzić przy sekundach — rozsuń je pionowo.
+    const labels = [...svg.querySelectorAll('.st-name')];
+    for (let i = labels.length - 2; i >= 0; i--) {
+      const a = +labels[i].getAttribute('y'), b = +labels[i + 1].getAttribute('y');
+      if (a - b < 10) labels[i].setAttribute('y', b + 10);
+    }
+    container.replaceChildren(svg);
+  }
+
   /* ---------- Koło kwintowe ---------- */
 
   function arcPath(cx, cy, r1, r2, a0, a1) {
@@ -241,5 +320,5 @@
     container.replaceChildren(svg);
   }
 
-  global.Instruments = { renderPiano, renderFretboard, renderChordDiagram, renderCircle };
+  global.Instruments = { renderPiano, renderFretboard, renderChordDiagram, renderCircle, renderStaff };
 })(window);

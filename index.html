@@ -5,10 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ChordBuilder — budowa akordów</title>
   <meta name="description" content="Interaktywna strona pokazująca, jak budowane są akordy w różnych skalach: dźwięki, interwały, półtony, wizualizacja na pianinie i gitarze.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c2410c'/%3E%3Ccircle cx='11' cy='22' r='4' fill='white'/%3E%3Ccircle cx='21' cy='18' r='4' fill='white'/%3E%3Cpath d='M15 22V6h10v12' stroke='white' stroke-width='2.4' fill='none'/%3E%3C/svg%3E">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#c2410c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="ChordBuilder">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Music&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -44,6 +49,7 @@
       <div class="controls">
         <label class="field"><span>Tonika</span><select id="tonic"></select></label>
         <label class="field grow"><span>Skala / tryb</span><select id="scale"></select></label>
+        <a class="btn ghost" id="sheet-link" href="sheet.html" target="_blank" rel="noopener" title="Wszystkie akordy skali na jednej stronie — do wydruku lub zapisu jako PDF">🖨 Ściąga do druku</a>
       </div>
       <div id="scale-notes" class="scale-notes" aria-live="polite"></div>
       <p class="hint">Liczby między dźwiękami to odległości w półtonach (2 = cały ton, 1 = półton). Kliknij dźwięk skali, aby zbudować na nim akord.</p>
@@ -133,6 +139,12 @@
       <h3>Jak to jest zbudowane</h3>
       <div id="chord-stack" class="stack"></div>
       <div id="chord-formula" class="formula"></div>
+
+      <h3>Zapis nutowy</h3>
+      <div class="staff-row">
+        <div id="staff" class="staff-wrap"></div>
+        <p class="hint">Akord w wybranym przewrocie, w tej samej oktawie co na pianinie (dźwięki od C4 w górę na pięciolinii wiolinowej, niższe na basowej). Bez znaków przykluczowych — krzyżyki i bemole stoją przy nutach.</p>
+      </div>
     </section>
 
     <section class="card" id="piano-section">

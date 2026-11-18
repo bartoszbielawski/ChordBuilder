@@ -38,6 +38,13 @@ kroku budowania), więc działa od razu na GitHub Pages.
   albo na gryfie, a strona poda nazwę akordu (z przewrotem, np. C/E, wariantem
   bez kwinty lub akordem z obcym basem), interwały od basu i pozwoli przejść
   do pełnej budowy akordu.
+- **Zapis nutowy:** akord na systemie wiolinowo-basowym (nuty całe, znaki
+  chromatyczne, linie dodane), w tej samej oktawie co na pianinie.
+- **Ściąga do druku** (`sheet.html`): wszystkie akordy tonacji — trójdźwięki
+  i septymowe — z dźwiękami, półtonami, nutami, klawiaturą i chwytem gitarowym.
+  Wydruk A4 lub zapis jako PDF z okna drukowania.
+- **Działa offline i instaluje się jak aplikacja** (PWA) — na telefonie
+  „Dodaj do ekranu głównego”, na komputerze ikona instalacji w pasku adresu.
 - **Nazwy wszystkich klawiszy i pozycji na gryfie** (można wyłączyć).
 - **Dźwięk:** odtwarzanie akordu, arpeggia, pojedynczych klawiszy i strun
   (Web Audio, bez plików z próbkami).
@@ -75,16 +82,38 @@ i wejść na <http://localhost:8765>.
 
 Plik `.nojekyll` wyłącza przetwarzanie przez Jekyll (strona jest serwowana bez zmian).
 
+## Testy
+
+Testy logiki teorii muzyki (pisownia skal, interwały, akordy, rozpoznawanie,
+chwyty gitarowe, progresje) są w `tests/theory.test.js`:
+
+- w przeglądarce: otwórz `tests/index.html` (np. <http://localhost:8765/tests/>),
+- w Node: `node tests/run-node.js`.
+
+GitHub Actions (`.github/workflows/test.yml`) uruchamia je przy każdym pushu
+i pull requeście.
+
+## Tryb offline (service worker)
+
+`sw.js` zapisuje pliki strony w pamięci przeglądarki i serwuje je od razu,
+pobierając w tle nowsze wersje — zmiany są widoczne **przy następnym otwarciu**
+strony. Przy zmianie listy plików podbij `VERSION` w `sw.js`. Podczas pracy
+lokalnej odśwież stronę dwukrotnie albo wyłącz service worker w narzędziach
+deweloperskich (Application → Service Workers → „Update on reload”).
+
 ## Struktura
 
 | Plik | Zawartość |
 |---|---|
 | `index.html` | układ strony |
+| `sheet.html`, `js/sheet.js`, `css/sheet.css` | ściąga do druku |
 | `css/style.css` | wygląd (tokeny kolorów, tryb ciemny, wersja mobilna) |
 | `js/theory.js` | teoria muzyki: dźwięki, interwały, skale, akordy, wyszukiwanie chwytów gitarowych |
-| `js/instruments.js` | rysowanie SVG: klawiatura, gryf, diagram chwytu |
+| `js/instruments.js` | rysowanie SVG: klawiatura, gryf, diagram chwytu, pięciolinia, koło kwintowe |
 | `js/audio.js` | prosty syntezator Web Audio |
 | `js/app.js` | stan, interfejs, zdarzenia |
+| `sw.js`, `manifest.webmanifest`, `icons/` | tryb offline i instalacja (PWA) |
+| `tests/` | testy logiki (przeglądarka i Node) |
 | `ROADMAP.md` | plan dalszego rozwoju |
 
 ### Jak dodać skalę lub akord

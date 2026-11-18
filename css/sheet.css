@@ -1,0 +1,53 @@
+/* ChordBuilder — ściąga do druku */
+.sheet-page { background: #fff; }
+.sheet-toolbar {
+  display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between;
+  padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 18px;
+}
+.sheet-head h1 { font-size: 26px; }
+.sheet-head p { margin: 4px 0 10px; }
+.sheet-scale { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.ss-note { display: inline-grid; justify-items: center; min-width: 36px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 8px; }
+.ss-note small { font: 500 10px "JetBrains Mono", monospace; color: var(--muted); }
+.ss-note b { font-size: 16px; }
+.ss-gap { font: 600 11px "JetBrains Mono", monospace; color: var(--muted); }
+
+.sheet-section { margin-top: 22px; }
+.sheet-section h2 { font-size: 18px; margin-bottom: 10px; }
+.sheet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.sheet-card {
+  border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
+  display: grid; gap: 6px; break-inside: avoid; page-break-inside: avoid; background: #fff;
+}
+.sc-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.sc-roman { font: 600 13px "JetBrains Mono", monospace; color: var(--accent); }
+.sc-sym { font-size: 22px; font-weight: 700; }
+.sc-name { font-size: 12px; color: var(--muted); }
+.sc-notes { display: flex; flex-wrap: wrap; gap: 4px; }
+.sc-notes .pill { font-size: 13px; padding: 1px 8px; }
+.sc-formula { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 12px; color: var(--muted); }
+.sc-media { display: grid; grid-template-columns: 1fr 96px; gap: 8px; align-items: center; }
+.sc-staff svg { width: 100%; max-width: 170px; height: auto; display: block; }
+.sc-guitar svg { width: 96px; height: auto; display: block; }
+.sc-piano svg { width: 100%; height: auto; display: block; }
+.sc-piano .octave-label { display: none; }
+.sheet-foot { font-size: 12px; margin: 24px 0; }
+.small { font-size: 12px; }
+
+.hide-triads .opt-triads, .hide-sevenths .opt-sevenths, .hide-piano .opt-piano,
+.hide-guitar .opt-guitar, .hide-staff .opt-staff { display: none; }
+.hide-staff .sc-media, .hide-guitar .sc-media { grid-template-columns: 1fr; }
+.hide-staff .sc-guitar svg { margin: 0 auto; }
+
+@page { size: A4; margin: 10mm; }
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .no-print { display: none !important; }
+  body { font-size: 12px; }
+  .wrap { max-width: none; padding: 0; }
+  .sheet-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .sheet-card { padding: 8px; border-radius: 8px; }
+  .sc-sym { font-size: 18px; }
+  .sheet-section { break-before: auto; }
+  .sheet-section + .sheet-section { break-before: page; }
+}

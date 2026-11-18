@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pl" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ściąga akordów — ChordBuilder</title>
+  <meta name="theme-color" content="#c2410c">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Music&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/sheet.css">
+</head>
+<body class="sheet-page">
+  <div class="wrap">
+    <div class="sheet-toolbar no-print">
+      <a href="./" id="back">← ChordBuilder</a>
+      <div class="controls tight">
+        <label class="check"><input type="checkbox" id="opt-triads" checked> trójdźwięki</label>
+        <label class="check"><input type="checkbox" id="opt-sevenths" checked> septymowe</label>
+        <label class="check"><input type="checkbox" id="opt-piano" checked> pianino</label>
+        <label class="check"><input type="checkbox" id="opt-guitar" checked> chwyt gitarowy</label>
+        <label class="check"><input type="checkbox" id="opt-staff" checked> nuty</label>
+        <button type="button" class="btn" id="print">🖨 Drukuj / zapisz PDF</button>
+      </div>
+    </div>
+
+    <header class="sheet-head">
+      <h1 id="sheet-title"></h1>
+      <p class="muted" id="sheet-sub"></p>
+      <div id="sheet-scale" class="sheet-scale"></div>
+    </header>
+
+    <div id="sheet-body"></div>
+    <p class="sheet-foot muted">Wygenerowano w ChordBuilder · <span id="sheet-url"></span></p>
+  </div>
+
+  <script src="js/theory.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/sheet.js"></script>
+</body>
+</html>
