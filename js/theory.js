@@ -338,12 +338,45 @@
       desc: 'Wersja molowa: akord półzmniejszony, dominanta, molowa tonika.' },
     { id: 'turnaround', group: 'Jazz i blues', name: 'Turnaround: I–vi–ii–V', steps: '1:maj7 6:m7 2:m7 5:7',
       desc: 'Krótki ciąg prowadzący z powrotem do toniki, np. na końcu chorusu.' },
+    { id: 'perfect', group: 'Kadencje', name: 'Doskonała (autentyczna): IV–V7–I', steps: '1:maj 4:maj 5:7 1:maj',
+      desc: 'Najmocniejsze zakończenie: dominanta septymowa rozwiązuje się na tonikę — dźwięk prowadzący idzie o półton w górę, septyma o sekundę w dół.' },
+    { id: 'plagal', group: 'Kadencje', name: 'Plagalna („amen”): IV–I', steps: '1:maj 4:maj 4:maj 1:maj',
+      desc: 'Subdominanta prosto do toniki — łagodne, „kościelne” zakończenie (amen na końcu hymnów).' },
+    { id: 'half', group: 'Kadencje', name: 'Zawieszona (półkadencja): …–V', steps: '1:maj 6:min 2:min 5:maj',
+      desc: 'Fraza kończy się na dominancie — brzmi jak pytanie, które czeka na odpowiedź.' },
+    { id: 'deceptive', group: 'Kadencje', name: 'Zwodnicza: V7–vi', steps: '1:maj 4:maj 5:7 6:min',
+      desc: 'Dominanta zamiast na tonikę idzie na vi — słuchacz spodziewa się końca, a słyszy zaskoczenie (I i vi mają dwa wspólne dźwięki).' },
+    { id: 'picardy', group: 'Kadencje', name: 'Z tercją pikardyjską: i–iv–V–I', steps: '1:min 4:min 5:maj 1:maj',
+      desc: 'Utwór molowy kończy się akordem durowym — dawny barokowy zwyczaj, jasne zakończenie po smutnej frazie.' },
     { id: 'blues', group: 'Jazz i blues', name: '12-taktowy blues', steps: '1:7 1:7 1:7 1:7 4:7 4:7 1:7 1:7 5:7 4:7 1:7 5:7',
       desc: 'Klasyczny schemat bluesa: 12 taktów, trzy akordy dominantowe.' },
   ].map((p) => ({
     ...p,
     steps: p.steps.split(' ').map((s) => { const [iv, type] = s.split(':'); return { iv: parseInterval(iv), type }; }),
   }));
+
+  /** Tradycyjne nazwy stopni skali (dla skal siedmiodźwiękowych). */
+  function degreeName(iv) {
+    const sd = mod(iv.deg - 1, 7);
+    if (sd === 6) return iv.semi === 11 ? 'dźwięk prowadzący' : 'subtonika';
+    return ['tonika', 'supertonika', 'medianta', 'subdominanta', 'dominanta', 'submedianta'][sd];
+  }
+
+  /**
+   * Akordy zapożyczone: diatoniczne trójdźwięki (i septymowe) równoległej skali
+   * dur/moll, których nie ma w bieżącej skali.
+   */
+  function borrowedChords(sc, size = 3) {
+    if (sc.notes.length !== 7) return [];
+    const minorThird = sc.notes[2].iv.semi === 3;
+    const parallel = buildScale(sc.tonic, minorThird ? 'major' : 'minor');
+    return diatonicChords(parallel, size)
+      .filter((d) => ![...d.chord.pcs].every((pc) => sc.pcs.has(pc)))
+      .map((d) => {
+        const iv = intervalBetween(sc.tonic, d.chord.root);
+        return { ...d, from: parallel.scale, roman: romanFor(iv.deg, iv.diff, d.chord.type) };
+      });
+  }
 
   /* ---------- Rozpoznawanie akordu ---------- */
 
@@ -623,7 +656,7 @@
   global.Theory = {
     staffStep, intervalOf, invertInterval, consonance, enharmonicIntervals,
     keySignature, alterationsVsMajor, smoothVoicing, voiceMoves, secondaryDominant,
-    MAJOR_SEMI, INTERVALS,
+    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords,
     LETTERS, SCALES, CHORD_TYPES, CHORD_GROUPS, TUNINGS,
     mod, makeNote, parseNote, noteKey, noteName,
     parseInterval, describeInterval, intervalBetween, transpose,

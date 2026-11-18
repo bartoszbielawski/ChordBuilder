@@ -510,3 +510,12 @@ kbd {
 .secdom { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 .secdom-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .secdom-row .arrow { color: var(--muted); }
+.modes-table td:first-child, .modes-table th:first-child { position: sticky; left: 0; background: var(--surface); z-index: 1; }
+@media (max-width: 600px) { .modes-table td:first-child { min-width: 118px; } .modes-table .small-text { display: none; } }
+.degree-names { display: flex; flex-wrap: wrap; gap: 2px 12px; }
+.degree-names b { color: var(--accent); font-weight: 600; }
+.quiz-answers.inline { display: flex; flex-wrap: wrap; gap: 8px; }
+.quiz-instrument { width: 100%; }
+.quiz-piano { width: 100%; max-width: 640px; }
+.quiz-feedback .quiz-piano { margin-top: 6px; }
+.btn:disabled { opacity: .45; cursor: default; }

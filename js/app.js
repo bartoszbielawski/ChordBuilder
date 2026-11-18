@@ -179,6 +179,7 @@
     renderDiatonic(sc, chord);
     renderFitting(sc, chord);
     renderSecondary(sc);
+    renderBorrowed(sc);
     const voiced = renderChord(sc, chord);
     const rec = recognition(sc);
     renderPiano(sc, voiced, rec);
@@ -243,7 +244,7 @@
       const info = T.describeInterval(sn.iv.deg, sn.iv.semi);
       items.push(h('button', {
         type: 'button', class: 'scale-note' + (sn.note.pc === T.parseNote(state.root).pc ? ' active' : ''),
-        title: `${nn(sn.note)} — ${info.name} od toniki (${sn.iv.semi} półt.)`,
+        title: `${nn(sn.note)} — ${info.name} od toniki (${sn.iv.semi} półt.)` + (sc.notes.length === 7 ? ` · ${T.degreeName(sn.iv)}` : ''),
         onclick: () => {
           const fit = T.fittingChords(sc)[i];
           const dia = T.diatonicChords(sc, state.size).find((d) => d.degree === i);
@@ -304,6 +305,10 @@
       const cn = sc.notes[charIdx];
       rows.push(['Dźwięk charakterystyczny', h('span', {}, h('span', { class: 'char-note' }, `${T.describeInterval(cn.iv.deg, cn.iv.semi).symbol} = ${nn(cn.note)}`), ' — zaznaczony na fioletowo')]);
     }
+    if (sc.notes.length === 7) {
+      rows.push(['Nazwy stopni', h('span', { class: 'degree-names' }, sc.notes.map((n, i) =>
+        h('span', {}, h('b', {}, ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][i]), ' ' + T.degreeName(n.iv))))]);
+    }
     if (sc.scale.mood) rows.push(['Brzmienie', sc.scale.mood]);
     $('scale-info').replaceChildren(...rows.flatMap(([a, b]) => [h('dt', {}, a), h('dd', {}, b)]));
   }
@@ -333,6 +338,24 @@
     h('span', { class: 'sym' }, T.chordSymbol(d.chord, state.notation)),
     h('span', { class: 'notes' }, d.chord.notes.map((n) => nn(n.note)).join(' · ')),
     h('span', { class: 'qual' }, d.chord.type.name))));
+  }
+
+  function renderBorrowed(sc) {
+    const wrap = $('borrowed-wrap');
+    const list = T.borrowedChords(sc, state.size);
+    wrap.hidden = !list.length;
+    if (!list.length) return;
+    const minorThird = sc.notes[2].iv.semi === 3;
+    const par = `${nn(sc.tonic)} ${minorThird ? 'durowej' : 'molowej'}`;
+    $('borrowed-summary').textContent = `Akordy zapożyczone z równoległej ${minorThird ? 'durowej' : 'molowej'} (${list.length})`;
+    $('borrowed-hint').textContent = (minorThird
+      ? `Akordy ze skali ${par} (ta sama tonika), których nie ma w bieżącej skali. W molu najczęściej pożycza się durową dominantę V i tonikę I na zakończenie (tercja pikardyjska).`
+      : `Akordy ze skali ${par} (ta sama tonika), których nie ma w bieżącej skali — tzw. mieszanie trybów. Najczęstsze: iv (molowa subdominanta), ♭VI i ♭VII (rock, muzyka filmowa), ♭III. Dodają „ciemny” odcień bez zmiany tonacji.`)
+      + ' Kliknij akord, aby zobaczyć jego budowę.';
+    $('borrowed').replaceChildren(...list.map((d) => h('button', {
+      type: 'button', class: 'chip' + (isActive(d.chord) ? ' active' : ''), title: d.chord.type.name,
+      onclick: () => selectChord(d.chord.root, d.chord.type.id),
+    }, h('b', {}, d.roman + ' '), T.chordSymbol(d.chord, state.notation))));
   }
 
   function renderSecondary(sc) {

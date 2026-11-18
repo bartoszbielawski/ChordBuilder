@@ -25,10 +25,11 @@ kroku budowania), więc działa od razu na GitHub Pages.
   dźwiękiem charakterystycznym i akordem tonicznym; odsłuch na tle burdonu toniki.
   Modusy względne jednej tonacji (te same dźwięki, inny początek) z zapisem nutowym
   i układem półtonów.
-- **Ćwiczenia** (`quiz.html`): 9 rodzajów ćwiczeń w 3 poziomach trudności —
+- **Ćwiczenia** (`quiz.html`): 12 rodzajów ćwiczeń w 3 poziomach trudności —
   interwały, akordy i skale/modusy ze słuchu, czytanie nut (klucz wiolinowy i basowy),
   znaki przykluczowe (dur i moll), nazywanie interwałów i akordów z nut, budowanie
-  akordów z poprawną pisownią, akordy na stopniach tonacji. Każda odpowiedź ma
+  akordów z poprawną pisownią, akordy na stopniach tonacji, a na instrumentach:
+  zaznaczanie akordu i skali na klawiaturze oraz szukanie dźwięków na gryfie. Każda odpowiedź ma
   wyjaśnienie z zapisem nutowym; elementy, w których się mylisz, wracają częściej;
   statystyki zapisują się w przeglądarce; obsługa klawiaturą (1–9, spacja, Enter).
 
@@ -39,9 +40,12 @@ kroku budowania), więc działa od razu na GitHub Pages.
   dominantowa, pentatoniki, bluesowa, całotonowa — z odległościami w półtonach.
 - **Skala na pięciolinii** ze znakami przykluczowymi (dźwięki spoza nich jako
   znaki przygodne), tonacją macierzystą, porównaniem z durową (np. dorycka: ♭3, ♭7),
-  dźwiękiem charakterystycznym i opisem brzmienia; odsłuch skali.
+  dźwiękiem charakterystycznym, nazwami stopni (tonika, supertonika, medianta…)
+  i opisem brzmienia; odsłuch skali.
 - **Akordy diatoniczne:** trójdźwięki i akordy septymowe na każdym stopniu skali,
   z oznaczeniem rzymskim (I, ii, iii°, V7…).
+- **Akordy zapożyczone** z tonacji jednoimiennej (iv, ♭VI, ♭VII… w dur;
+  V, IV, tercja pikardyjska w moll).
 - **Dominanty wtrącone** (V7/ii, V7/V…): z dźwiękami spoza skali, dźwiękiem
   prowadzącym i odsłuchem rozwiązania.
 - **Wszystkie akordy pasujące do skali:** lista akordów zbudowanych wyłącznie
@@ -59,8 +63,9 @@ kroku budowania), więc działa od razu na GitHub Pages.
 - **Koło kwintowe:** tonacje durowe i równoległe molowe ze znakami przykluczowymi;
   zaznacza wybraną tonację i jej akordy (I, IV, V, ii, iii, vi, vii°), kliknięcie
   zmienia tonację. Dla trybów (np. doryckiego) pokazuje tonację macierzystą.
-- **Progresje akordów:** 14 gotowych schematów (pop, kadencje, kanon, andaluzyjska,
-  ii–V–I, 12-taktowy blues…) w wybranej tonacji, z oznaczeniami rzymskimi,
+- **Progresje akordów:** 19 gotowych schematów (pop, kanon, andaluzyjska, ii–V–I,
+  12-taktowy blues, kadencje: doskonała, plagalna, zawieszona, zwodnicza,
+  z tercją pikardyjską…) w wybranej tonacji, z oznaczeniami rzymskimi,
   odtwarzaniem (tempo, liczba uderzeń, zapętlenie) i pokazywaniem bieżącego
   akordu na pianinie i gryfie. Własne progresje: dodawanie, usuwanie, kopiowanie
   gotowego schematu do edycji, zapis w adresie URL. **Płynne prowadzenie głosów:**

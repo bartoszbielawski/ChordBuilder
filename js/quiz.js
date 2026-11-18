@@ -16,7 +16,7 @@
   const prefs = C.loadPrefs();
   const state = {
     notation: prefs.notation === 'H' ? 'H' : 'intl',
-    ex: null, level: 1, opts: {}, q: null, answered: null,
+    ex: null, level: 1, opts: {}, q: null, answered: null, ok: false, sel: new Set(), picked: null,
     session: { ok: 0, total: 0, streak: 0 },
   };
   const stats = C.loadJSON(STATS_KEY, {});
@@ -430,7 +430,137 @@
         };
       },
     },
+    {
+      id: 'piano-chord', group: 'Instrumenty', title: 'Akord na klawiaturze',
+      desc: 'Zaznacz na klawiaturze dźwięki podanego akordu (w dowolnym układzie).',
+      levels: ['dur i moll', '+ zmniejszony, zwiększony, 7', '+ maj7, m7, m7♭5, °7, 6'],
+      sets: [['maj', 'min'], ['maj', 'min', 'dim', 'aug', '7'], ['maj', 'min', 'dim', 'aug', '7', 'maj7', 'm7', 'm7b5', 'dim7', '6', 'm6']],
+      make(level) {
+        const type = weighted(this.id, this.sets[level]);
+        const root = T.parseNote(pick(level === 0 ? ROOTS_MED : ROOTS_ALL));
+        const chord = T.buildChord(root, type);
+        const notes = chordMidis(chord, 0, 60);
+        return {
+          input: 'piano', answers: [], item: type,
+          prompt: h('span', {}, 'Zaznacz na klawiaturze akord ', h('b', { class: 'big-sym' }, T.chordSymbol(chord, state.notation)), ' i kliknij „Sprawdź”.'),
+          correctLabel: chordNotesLabel(chord.notes.map((n) => n.note)),
+          check: (sel) => {
+            const pcs = new Set([...sel].map((m) => T.mod(m, 12)));
+            return pcs.size === chord.pcs.size && [...chord.pcs].every((pc) => pcs.has(pc));
+          },
+          renderInput: (box, st) => pianoInput(box, st, (pc) => chord.pcs.has(pc), (pc) => {
+            const n = chord.notes.find((x) => x.note.pc === pc); return n ? nn(n.note) : null;
+          }),
+          explain: (box) => {
+            const hl = new Map(notes.map((n) => [n.midi, { label: nn(n.note), role: n.role }]));
+            const pb = h('div', { class: 'quiz-piano' });
+            I.renderPiano(pb, { startMidi: 48, octaves: 3, highlights: hl, onKey: (m) => Sound.play([m]) });
+            box.append(h('p', {}, `${T.chordSymbol(chord, state.notation)}: ${chord.notes.map((n) => `${nn(n.note)} (${n.info.symbol}, ${n.iv.semi} pt)`).join(', ')}. Liczy się zestaw dźwięków — oktawa i przewrót są dowolne.`), pb);
+            Sound.play(notes.map((n) => n.midi), 'chord', 'piano', 1.6);
+          },
+        };
+      },
+    },
+    {
+      id: 'piano-scale', group: 'Instrumenty', title: 'Skala na klawiaturze',
+      desc: 'Zaznacz wszystkie dźwięki podanej skali.',
+      levels: ['dur do 2 znaków', 'dur i moll naturalny', '+ moll harmoniczny i modusy'],
+      make(level) {
+        const ids = [['major'], ['major', 'minor'], ['major', 'minor', 'harmonicMinor', 'dorian', 'mixolydian', 'lydian', 'phrygian']][level];
+        const roots = level === 0 ? ['C', 'G', 'D', 'F', 'Bb'] : ROOTS_MED;
+        const id = weighted(this.id, ids);
+        const sc = T.buildScale(T.parseNote(pick(roots)), id);
+        const name = `${nn(sc.tonic)} ${sc.scale.name.toLowerCase()}`;
+        const start = 60 + sc.tonic.pc - (sc.tonic.pc > 6 ? 12 : 0);
+        const ms = [...sc.notes.map((n) => start + n.iv.semi), start + 12];
+        return {
+          input: 'piano', answers: [], item: id,
+          prompt: h('span', {}, 'Zaznacz dźwięki skali ', h('b', {}, name), ' i kliknij „Sprawdź”.'),
+          correctLabel: sc.notes.map((n) => nn(n.note)).join(' – '),
+          check: (sel) => {
+            const pcs = new Set([...sel].map((m) => T.mod(m, 12)));
+            return pcs.size === sc.pcs.size && [...sc.pcs].every((pc) => pcs.has(pc));
+          },
+          renderInput: (box, st) => pianoInput(box, st, (pc) => sc.pcs.has(pc), (pc) => {
+            const n = sc.notes.find((x) => x.note.pc === pc); return n ? nn(n.note) : null;
+          }),
+          explain: (box) => {
+            const steps = sc.notes.map((n, i) => (i + 1 < sc.notes.length ? sc.notes[i + 1].iv.semi : 12) - n.iv.semi);
+            const st = staffBox();
+            I.renderMelody(st, ms.map((m, i) => [{ midi: m, note: i < sc.notes.length ? sc.notes[i].note : sc.tonic, role: i === 0 || i === ms.length - 1 ? 'root' : null }]), {
+              keySig: T.keySignature(sc.tonic, id), gap: 30,
+            });
+            box.append(h('p', {}, `${name}: ${sc.notes.map((n) => nn(n.note)).join(' – ')}. Odległości w półtonach: ${steps.join(' ')}.`), st);
+            Sound.play(ms, 'arp', 'piano', 1.0);
+          },
+        };
+      },
+    },
+    {
+      id: 'fret-note', group: 'Instrumenty', title: 'Dźwięki na gryfie',
+      desc: 'Znajdź podany dźwięk na wskazanej strunie gitary.',
+      levels: ['struny E i A, bez znaków', 'wszystkie struny, bez znaków', 'wszystkie struny, z ♯ i ♭'],
+      make(level) {
+        const tuning = T.TUNINGS[0].midi;
+        const strings = level === 0 ? [0, 1] : [0, 1, 2, 3, 4, 5];
+        const keys = level === 2 ? ROOTS_ALL : ROOTS_EASY;
+        const pairs = [];
+        for (const s of strings) for (const k of keys) pairs.push([s, k]);
+        const [string, key] = weighted(this.id, pairs, (p) => p.join(':'));
+        const note = T.parseNote(key);
+        const fret = T.mod(note.pc - tuning[string], 12);
+        const sName = (s) => nn(T.parseNote(['E', 'A', 'D', 'G', 'B', 'E'][s]));
+        return {
+          input: 'fret', answers: [], item: string + ':' + key,
+          prompt: h('span', {}, 'Znajdź ', h('b', { class: 'big-sym' }, nn(note)), ` na strunie ${6 - string} (${sName(string)}).`),
+          correctLabel: `próg ${fret}` + (fret + 12 <= 12 ? ` lub ${fret + 12}` : ''),
+          check: (p) => p.s === string && T.mod(tuning[p.s] + p.f, 12) === note.pc,
+          renderInput: (box, st) => {
+            const fb = h('div', { class: 'scroll-x' }, h('div', { class: 'instrument' }));
+            I.renderFretboard(fb.firstChild, {
+              tuning, frets: 12, stringNames: [0, 1, 2, 3, 4, 5].map(sName),
+              cell: (s, f) => {
+                if (!st.answered) return null;
+                const isTarget = s === string && T.mod(tuning[s] + f, 12) === note.pc;
+                if (st.picked && st.picked.s === s && st.picked.f === f) return { label: nn(noteOfMidi(tuning[s] + f)), role: isTarget ? 'fifth' : 'root', strong: true };
+                if (isTarget) return { label: nn(note), role: 'fifth', strong: true };
+                if (T.mod(tuning[s] + f, 12) === note.pc) return { label: nn(note), role: 'scale', strong: false };
+                return null;
+              },
+              cellTitle: (s, f) => `Struna ${6 - s}, ${f === 0 ? 'pusta' : 'próg ' + f}`,
+              onCell: (s, f) => { Sound.play([tuning[s] + f], 'chord', 'guitar'); if (!st.answered) st.pick({ s, f }); },
+            });
+            box.append(fb);
+          },
+          explain: (box) => {
+            box.append(h('p', {}, `${nn(note)} na strunie ${6 - string} (${sName(string)}) to próg ${fret}${fret + 12 <= 12 ? ` (i ${fret + 12})` : ''} — od pustej struny ${sName(string)} liczymy ${fret} półtonów w górę.`),
+              h('p', { class: 'muted' }, 'Wskazówki: 12. próg to ta sama nazwa co pusta struna (oktawa wyżej). Ten sam dźwięk co na 5. progu jest na następnej (cieńszej) pustej strunie — poza struną G, gdzie trzeba wziąć 4. próg. Na szarych kropkach — ten sam dźwięk na innych strunach.'));
+          },
+        };
+      },
+    },
   ];
+
+  /** Klawiatura do zaznaczania dźwięków; po sprawdzeniu: zielone dobre, czerwone błędne, kropki — brakujące. */
+  function pianoInput(box, st, isRight, nameOf) {
+    const pb = h('div', { class: 'quiz-piano' });
+    const hl = new Map();
+    for (const m of st.sel) {
+      const pc = T.mod(m, 12);
+      hl.set(m, st.answered ? { label: nameOf(pc) || nn(noteOfMidi(m)), role: isRight(pc) ? 'fifth' : 'root' } : { label: '●', role: 'sel' });
+    }
+    const missing = new Set();
+    if (st.answered) {
+      const chosen = new Set([...st.sel].map((m) => T.mod(m, 12)));
+      for (let pc = 0; pc < 12; pc++) if (isRight(pc) && !chosen.has(pc)) missing.add(pc);
+    }
+    I.renderPiano(pb, {
+      startMidi: 48, octaves: 2, highlights: hl, scalePcs: missing,
+      onKey: (m) => { Sound.play([m]); if (!st.answered) st.toggle(m); },
+    });
+    box.append(pb);
+    if (st.answered && missing.size) box.append(h('p', { class: 'muted small-text' }, 'Kropki na klawiszach — dźwięki, których zabrakło.'));
+  }
 
   /* ---------- Interfejs ---------- */
 
@@ -494,6 +624,8 @@
     }
     state.q = q;
     state.answered = null;
+    state.sel = new Set();
+    state.picked = null;
     render();
     if (q.play && (ex.group === 'Słuch')) q.play();
   }
@@ -501,8 +633,9 @@
   function answer(key) {
     if (state.answered) return;
     const q = state.q;
-    const ok = key === q.correct;
-    state.answered = key;
+    const ok = q.input ? q.check(key === undefined ? state.sel : key) : key === q.correct;
+    state.answered = q.input ? 'input' : key;
+    state.ok = ok;
     state.session.total++;
     if (ok) { state.session.ok++; state.session.streak++; } else state.session.streak = 0;
     record(state.ex, q.item, ok);
@@ -546,7 +679,25 @@
         h('button', { type: 'button', class: 'btn' + (ex.group === 'Słuch' ? '' : ' ghost'), onclick: () => q.play() }, ex.group === 'Słuch' ? '▶ Odtwórz ponownie (spacja)' : '▶ Posłuchaj')));
     }
 
+    if (q.input) {
+      const ibox = h('div', { class: 'quiz-instrument' });
+      q.renderInput(ibox, {
+        sel: state.sel, picked: state.picked, answered: !!state.answered,
+        toggle: (m) => { if (state.sel.has(m)) state.sel.delete(m); else state.sel.add(m); render(); },
+        pick: (v) => { state.picked = v; answer(v); },
+      });
+      media.prepend(ibox);
+    }
+
     $('ex-answers').className = 'quiz-answers' + (q.wide ? ' wide' : '');
+    if (q.input === 'piano') {
+      $('ex-answers').replaceChildren(
+        h('button', { type: 'button', class: 'btn', disabled: !!state.answered || !state.sel.size, onclick: () => answer() }, '✓ Sprawdź (Enter)'),
+        h('button', { type: 'button', class: 'btn ghost', disabled: !!state.answered || !state.sel.size, onclick: () => { state.sel.clear(); render(); } }, 'Wyczyść'));
+      $('ex-answers').className = 'quiz-answers inline';
+    } else if (q.input) {
+      $('ex-answers').replaceChildren();
+    } else
     $('ex-answers').replaceChildren(...q.answers.map((a, i) => {
       let cls = 'quiz-answer';
       if (state.answered) {
@@ -562,10 +713,11 @@
     fb.replaceChildren();
     fb.hidden = !state.answered;
     if (state.answered) {
-      const ok = state.answered === q.correct;
+      const ok = state.ok;
       fb.className = 'quiz-feedback ' + (ok ? 'ok' : 'bad');
+      const correctLabel = q.correctLabel || (q.answers.find((a) => a.key === q.correct) || {}).label;
       fb.append(h('div', { class: 'qf-head' }, h('b', {}, ok ? '✓ Dobrze!' : '✗ Niestety.'),
-        ok ? null : h('span', {}, ' Poprawna odpowiedź: ', h('b', {}, q.answers.find((a) => a.key === q.correct).label))));
+        ok || !correctLabel ? null : h('span', {}, ' Poprawna odpowiedź: ', h('b', {}, correctLabel))));
       q.explain(fb);
       fb.append(h('div', { class: 'controls tight' }, h('button', { type: 'button', class: 'btn', id: 'next-btn', onclick: next }, 'Dalej → (Enter)')));
     }
@@ -595,11 +747,13 @@
     });
     document.addEventListener('keydown', (e) => {
       if (!state.ex || !state.q || e.target.closest('select, input, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (/^[1-9]$/.test(e.key) && !state.answered) {
+      if (/^[1-9]$/.test(e.key) && !state.answered && !state.q.input) {
         const a = state.q.answers[+e.key - 1];
         if (a) { e.preventDefault(); answer(a.key); }
       } else if (e.key === ' ' && state.q.play && !e.target.closest('button')) {
         e.preventDefault(); state.q.play();
+      } else if (e.key === 'Enter' && !state.answered && state.q.input === 'piano' && state.sel.size && !e.target.closest('button')) {
+        e.preventDefault(); answer();
       } else if (e.key === 'Enter' && state.answered && !e.target.closest('button')) {
         e.preventDefault(); next();
       }

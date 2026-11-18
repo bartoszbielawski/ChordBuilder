@@ -268,6 +268,16 @@
       ok(g7.midis.length === 4 && T.voiceMoves(a.midis, g7.midis).every((m) => Math.abs(m.semis) <= 2), 'C→G7 blisko');
       eq(c('C', 'maj').pcs.size, 3);
     }],
+    ['Akordy zapożyczone', (T, eq) => {
+      const b = (t, id) => T.borrowedChords(T.buildScale(T.parseNote(t), id)).map((d) => d.roman + '=' + T.chordSymbol(d.chord)).join(' ');
+      eq(b('C', 'major'), 'i=Cm ii°=D° ♭III=E♭ iv=Fm v=Gm ♭VI=A♭ ♭VII=B♭');
+      eq(b('A', 'minor'), 'I=A ii=Bm iii=C♯m IV=D V=E vi=F♯m vii°=G♯°');
+    }],
+    ['Nazwy stopni', (T, eq) => {
+      eq(T.buildScale(T.parseNote('C'), 'major').notes.map((n) => T.degreeName(n.iv)).join(','),
+        'tonika,supertonika,medianta,subdominanta,dominanta,submedianta,dźwięk prowadzący');
+      eq(T.degreeName(T.parseInterval('b7')), 'subtonika');
+    }],
     ['Dominanty wtrącone', (T, eq) => {
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('D'))), 'A7');
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('Bb'))), 'F7');
