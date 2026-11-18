@@ -13,6 +13,12 @@ oraz własnymi progresjami (2.4).
 Wersja 1.3 (gotowa): testy i CI (5.5), zapis nutowy (5.4), ściąga do druku
 (5.3, wydruk/PDF), działanie offline i instalacja jako aplikacja (5.2).
 
+Wersja 2.0 (gotowa): działy do nauki teorii — **Interwały** (kalkulator,
+tabela, zasady), **Modusy** (2.6) i **Ćwiczenia** (4.2 oraz quiz z budowania
+akordów 4.1 w formie wyboru); skala na pięciolinii ze znakami przykluczowymi;
+dominanty wtrącone (część 2.5); płynne prowadzenie głosów w progresjach
+(część 3.6).
+
 Poniżej propozycje rozszerzeń, pogrupowane w etapy od najbardziej przydatnych
 i najtańszych w realizacji.
 
@@ -24,8 +30,8 @@ i najtańszych w realizacji.
 | 2.2 | **Funkcje harmoniczne** | Przy akordach diatonicznych: T, S, D, Tp, Sp, Dp…, oraz kolorowanie wg funkcji. | S |
 | 2.3 | ~~**Koło kwintowe**~~ ✓ | Interaktywne koło: wybór toniki, pokazanie tonacji pokrewnych, liczby znaków przykluczowych i akordów diatonicznych. | M |
 | 2.4 | ~~**Progresje akordów**~~ ✓ | Gotowe schematy (I–V–vi–IV, ii–V–I, 12-taktowy blues, kadencja andaluzyjska) w wybranej tonacji, z odtwarzaniem i chwytami. Własna progresja z klocków. | M |
-| 2.5 | **Akordy zapożyczone i wtrącone dominanty** | Np. ♭VI, ♭VII, iv w dur; V/V, V/vi — z oznaczeniem, skąd pochodzą. | M |
-| 2.6 | **Porównanie trybów** | Tabela 7 trybów od tej samej toniki z zaznaczonymi „charakterystycznymi” dźwiękami (np. ♯4 w lidyjskim). | S |
+| 2.5 | **Akordy zapożyczone** (~~wtrącone dominanty~~ ✓) | Np. ♭VI, ♭VII, iv w dur; V/V, V/vi — z oznaczeniem, skąd pochodzą. | M |
+| 2.6 | ~~**Porównanie trybów**~~ ✓ | Tabela 7 trybów od tej samej toniki z zaznaczonymi „charakterystycznymi” dźwiękami (np. ♯4 w lidyjskim). | S |
 
 ## Etap 3 — gitara i pianino na poważnie
 
@@ -42,8 +48,8 @@ i najtańszych w realizacji.
 
 | # | Funkcja | Opis | Nakład |
 |---|---|---|---|
-| 4.1 | **Quiz: zbuduj akord** | „Zaznacz dźwięki Am7” — sprawdzanie na pianinie/gryfie. | M |
-| 4.2 | **Kształcenie słuchu** | Rozpoznawanie interwałów i rodzajów akordów ze słuchu, statystyki postępów. | M |
+| 4.1 | **Quiz: zbuduj akord na instrumencie** | „Zaznacz dźwięki Am7” — sprawdzanie na pianinie/gryfie (wersja z wyborem odpowiedzi ✓). | M |
+| 4.2 | ~~**Kształcenie słuchu**~~ ✓ | Rozpoznawanie interwałów i rodzajów akordów ze słuchu, statystyki postępów. | M |
 | 4.3 | **Lepsze brzmienie** | Próbki pianina i gitary (np. Salamander Piano, licencja CC) zamiast syntezatora. | S |
 | 4.4 | **Wejście MIDI** | Web MIDI: zagraj akord na klawiaturze → rozpoznanie i podświetlenie. | M |
 

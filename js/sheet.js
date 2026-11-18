@@ -119,7 +119,9 @@
   }
   $('print').addEventListener('click', () => window.print());
 
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  let noSW = false;
+  try { noSW = localStorage.getItem('chordbuilder.nosw') === '1'; } catch (e) { /* ignoruj */ }
+  if (!noSW && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 })();

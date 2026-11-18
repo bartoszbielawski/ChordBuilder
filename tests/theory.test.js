@@ -261,6 +261,11 @@
       const moves = T.voiceMoves(a.midis, b.midis);
       ok(moves.some((m) => m.semis === 0), 'C→F: dźwięk wspólny');
       ok(moves.every((m) => Math.abs(m.semis) <= 2), 'C→F: ruchy o max sekundę');
+      const g = T.smoothVoicing(c('G', 'maj'), a.midis);
+      const mg = T.voiceMoves(a.midis, g.midis).map((m) => m.semis).sort((x, y) => x - y);
+      eq(mg, [-2, -1, 0], 'C→G: C→B, E→D, G zostaje');
+      const g7 = T.smoothVoicing(c('G', '7'), a.midis);
+      ok(g7.midis.length === 4 && T.voiceMoves(a.midis, g7.midis).every((m) => Math.abs(m.semis) <= 2), 'C→G7 blisko');
       eq(c('C', 'maj').pcs.size, 3);
     }],
     ['Dominanty wtrącone', (T, eq) => {

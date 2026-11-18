@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ćwiczenia — ChordBuilder</title>
+  <meta name="description" content="Ćwiczenia z teorii muzyki i kształcenia słuchu: interwały, akordy i skale ze słuchu, czytanie nut, znaki przykluczowe, budowa i nazywanie akordów.">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#c2410c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Music&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div>
+        <h1>ChordBuilder</h1>
+        <p class="tagline">Ćwiczenia — kształcenie słuchu i teoria w praktyce.</p>
+        <nav class="site-nav" aria-label="Działy">
+          <a href="./">Akordy i skale</a>
+          <a href="intervals.html">Interwały</a>
+          <a href="modes.html">Modusy</a>
+          <a href="quiz.html" aria-current="page">Ćwiczenia</a>
+        </nav>
+      </div>
+      <div class="settings">
+        <label class="field">
+          <span>Notacja</span>
+          <div class="seg" id="notation" role="radiogroup" aria-label="Notacja nazw dźwięków">
+            <button type="button" data-value="intl" title="Międzynarodowa: … A B C">A B C</button>
+            <button type="button" data-value="H" title="Polska/niemiecka: … A H C, B = B♭">A H C</button>
+          </div>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" id="exercise" hidden>
+      <div class="card-head">
+        <h2 id="ex-title"></h2>
+        <button type="button" class="btn ghost small" id="ex-close">✕ Zamknij</button>
+      </div>
+      <div class="controls">
+        <div class="field"><span>Poziom: <b id="ex-level-desc"></b></span>
+          <div class="seg" id="ex-level" role="radiogroup" aria-label="Poziom trudności"></div>
+        </div>
+        <div id="ex-options" class="controls tight inline-opts"></div>
+        <div class="quiz-score" id="ex-score" aria-live="polite"></div>
+      </div>
+      <div class="quiz-q">
+        <p class="quiz-prompt" id="ex-prompt"></p>
+        <div id="ex-media" class="quiz-media"></div>
+        <div id="ex-answers" class="quiz-answers"></div>
+        <div id="ex-feedback" class="quiz-feedback" aria-live="polite" hidden></div>
+      </div>
+      <p class="hint">Klawisze: <kbd>1</kbd>–<kbd>9</kbd> wybierają odpowiedź, <kbd>spacja</kbd> odtwarza ponownie, <kbd>Enter</kbd> przechodzi dalej. Elementy, w których się mylisz, pojawiają się częściej.</p>
+    </section>
+
+    <section class="card" id="menu-card">
+      <div class="card-head">
+        <h2>Wybierz ćwiczenie</h2>
+        <button type="button" class="btn ghost small" id="reset-stats">Wyzeruj statystyki</button>
+      </div>
+      <div id="menu"></div>
+      <p class="hint">Wyniki zapisują się tylko w tej przeglądarce. Do ćwiczeń słuchowych włącz dźwięk.</p>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>ChordBuilder · <a href="./">strona główna</a> · <a href="https://github.com/bartoszbielawski/ChordBuilder">kod na GitHubie</a></p>
+  </footer>
+
+  <script src="js/theory.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/quiz.js"></script>
+</body>
+</html>

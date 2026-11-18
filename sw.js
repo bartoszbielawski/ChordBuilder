@@ -4,12 +4,15 @@
  * a w tle pobranie świeżej wersji (zmiany widać przy kolejnym otwarciu).
  * Po zmianie listy plików podbij VERSION.
  */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'chordbuilder-' + VERSION;
 const ASSETS = [
   './',
   'index.html',
   'sheet.html',
+  'intervals.html',
+  'modes.html',
+  'quiz.html',
   'css/style.css',
   'css/sheet.css',
   'js/theory.js',
@@ -17,6 +20,10 @@ const ASSETS = [
   'js/audio.js',
   'js/app.js',
   'js/sheet.js',
+  'js/common.js',
+  'js/intervals.js',
+  'js/modes.js',
+  'js/quiz.js',
   'manifest.webmanifest',
   'icons/icon.svg',
   'icons/icon-192.png',

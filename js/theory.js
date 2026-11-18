@@ -582,9 +582,11 @@
         const avg = midis.reduce((a, b) => a + b, 0) / midis.length;
         let cost;
         if (prev && prev.length) {
-          const near = (m, list) => Math.min(...list.map((p) => Math.abs(p - m)));
-          cost = midis.reduce((s, m) => s + near(m, prev), 0) + prev.reduce((s, p) => s + near(p, midis), 0) +
-            Math.abs(avg - center) * 0.15;
+          cost = voiceMoves(prev, midis).reduce((s, m) => s + Math.abs(m.semis), 0) + Math.abs(avg - center) * 0.15;
+          if (prev.length !== midis.length) {
+            // Różna liczba głosów: dolicz też drogę „porzuconych” dźwięków poprzedniego akordu.
+            cost += prev.reduce((s, p) => s + Math.min(...midis.map((m) => Math.abs(p - m))), 0);
+          }
         } else {
           cost = Math.abs(avg - center) + inv * 0.5;
         }
@@ -599,6 +601,11 @@
    * Zwraca [{ from, to, semis }] — każdy dźwięk nowego akordu z najbliższym poprzednim.
    */
   function voiceMoves(prev, next) {
+    if (prev.length === next.length) {
+      // Tyle samo głosów: każdy głos idzie do odpowiadającego mu (od dołu) dźwięku.
+      const a = [...prev].sort((x, y) => x - y);
+      return [...next].sort((x, y) => x - y).map((m, i) => ({ from: a[i], to: m, semis: m - a[i] }));
+    }
     return next.map((m) => {
       let from = prev[0];
       for (const p of prev) if (Math.abs(p - m) < Math.abs(from - m)) from = p;

@@ -17,7 +17,7 @@
     notation: 'intl', labels: 'note',
     tuning: 'standard', showAll: true, showScale: false, voicing: 0,
     pianoNames: true, fbNames: true,
-    prog: 'pop', custom: [], bpm: 90, beats: 4, loop: true,
+    prog: 'pop', custom: [], bpm: 90, beats: 4, loop: true, smooth: true,
   };
 
   // Tryb „wklikaj akord”: dźwięki wybrane na pianinie albo na gryfie.
@@ -25,7 +25,7 @@
 
   /* ---------- Trwałość: preferencje + URL ---------- */
 
-  const PREF_KEYS = ['notation', 'labels', 'tuning', 'showAll', 'showScale', 'pianoNames', 'fbNames', 'bpm', 'beats', 'loop'];
+  const PREF_KEYS = ['notation', 'labels', 'tuning', 'showAll', 'showScale', 'pianoNames', 'fbNames', 'bpm', 'beats', 'loop', 'smooth'];
   function loadPrefs() {
     try {
       const p = JSON.parse(localStorage.getItem('chordbuilder.prefs') || '{}');
@@ -178,6 +178,7 @@
     renderProgression(sc);
     renderDiatonic(sc, chord);
     renderFitting(sc, chord);
+    renderSecondary(sc);
     const voiced = renderChord(sc, chord);
     const rec = recognition(sc);
     renderPiano(sc, voiced, rec);
@@ -332,6 +333,38 @@
     h('span', { class: 'sym' }, T.chordSymbol(d.chord, state.notation)),
     h('span', { class: 'notes' }, d.chord.notes.map((n) => nn(n.note)).join(' · ')),
     h('span', { class: 'qual' }, d.chord.type.name))));
+  }
+
+  function renderSecondary(sc) {
+    const wrap = $('secdom-wrap');
+    const dia = T.diatonicChords(sc, 3);
+    const targets = dia.filter((d) => d.degree !== 0 && ['maj', 'min'].includes(d.chord.type.id));
+    wrap.hidden = !targets.length;
+    if (!targets.length) return;
+    $('secdom').replaceChildren(...targets.map((d) => {
+      const dom = T.secondaryDominant(d.chord.root);
+      const target = d.roman.replace(/[°+]/g, '');
+      const foreign = dom.notes.filter((n) => !sc.pcs.has(n.note.pc));
+      const leading = dom.notes.find((n) => n.iv.deg === 3);
+      return h('div', { class: 'secdom-row' },
+        h('button', { type: 'button', class: 'chip' + (isActive(dom) ? ' active' : ''), title: 'Pokaż budowę', onclick: () => selectChord(dom.root, dom.type.id) },
+          h('b', {}, `V7/${target} `), T.chordSymbol(dom, state.notation)),
+        h('span', { class: 'arrow' }, '→'),
+        h('button', { type: 'button', class: 'chip' + (isActive(d.chord) ? ' active' : ''), onclick: () => selectChord(d.chord.root, d.chord.type.id) },
+          h('b', {}, d.roman + ' '), T.chordSymbol(d.chord, state.notation)),
+        h('button', {
+          type: 'button', class: 'btn small ghost', title: 'Posłuchaj rozwiązania', 'aria-label': 'Zagraj ' + T.chordSymbol(dom) + ' i ' + T.chordSymbol(d.chord),
+          onclick: () => {
+            const a = T.smoothVoicing(dom, null);
+            const b = T.smoothVoicing(d.chord, a.midis);
+            Sound.play([36 + dom.root.pc, ...a.midis], 'chord', 'piano', 1.3);
+            setTimeout(() => Sound.play([36 + d.chord.root.pc, ...b.midis], 'chord', 'piano', 2), 1100);
+          },
+        }, '▶'),
+        h('span', { class: 'muted small-text' }, foreign.length
+          ? `spoza skali: ${foreign.map((n) => nn(n.note)).join(', ')}` + (leading && foreign.includes(leading) ? ` (${nn(leading.note)} prowadzi do ${nn(d.chord.root)})` : '')
+          : 'wszystkie dźwięki w skali (to zwykła dominanta)'));
+    }));
   }
 
   function renderFitting(sc, active) {
@@ -520,13 +553,14 @@
     }
     player.idx = i;
     const c = steps[i].chord;
+    const vl = state.smooth ? voiceLeading(steps)[i] : null;
     state.root = T.noteKey(c.root);
     state.type = c.type.id;
-    state.inv = centeredInversion(c);
+    state.inv = vl ? Math.min(vl.inv, 3) : centeredInversion(c);
     state.voicing = 0;
     render();
     const dur = (60 / state.bpm) * state.beats;
-    Sound.play([36 + c.root.pc, ...pianoMidis(c, T.inversion(c, state.inv))], 'chord', 'piano', dur + 0.4);
+    Sound.play([36 + c.root.pc, ...(vl ? vl.midis : pianoMidis(c, T.inversion(c, state.inv)))], 'chord', 'piano', dur + 0.4);
     player.timer = setTimeout(() => playStep(i + 1), dur * 1000);
   }
 
@@ -542,6 +576,26 @@
     player.playing = false;
     player.idx = -1;
     if (rerender && was) render();
+  }
+
+  /** Układy akordów progresji z płynnym prowadzeniem głosów (każdy względem poprzedniego). */
+  function voiceLeading(steps) {
+    const out = [];
+    let prev = null;
+    for (const st of steps) {
+      const v = T.smoothVoicing(st.chord, prev);
+      out.push(v);
+      prev = v.midis;
+    }
+    return out;
+  }
+
+  function movesText(prev, cur) {
+    const moves = T.voiceMoves(prev.midis, cur.midis);
+    const nameAt = (v, m) => nn(v.notes[v.midis.indexOf(m)].note);
+    const common = moves.filter((m) => m.semis === 0).map((m) => nameAt(cur, m.to));
+    const moved = moves.filter((m) => m.semis !== 0).map((m) => `${nameAt(prev, m.from)}→${nameAt(cur, m.to)}`);
+    return [common.length ? 'wspólne: ' + common.join(', ') : '', moved.join(' ')].filter(Boolean).join(' · ');
   }
 
   function renderProgression(sc) {
@@ -574,6 +628,16 @@
       : p.desc + ` W tonacji ${nn(sc.tonic)} — zmień tonikę w sekcji 1 lub na kole kwintowym, aby przetransponować.`;
 
     const outside = (c) => c.notes.some((n) => !sc.pcs.has(n.note.pc));
+    const vls = state.smooth && steps.length ? voiceLeading(steps) : null;
+    $('smooth').checked = state.smooth;
+    $('prog-vl').hidden = !vls;
+    if (vls) {
+      I.renderMelody($('prog-staff'), vls.map((v) => v.notes.map((n, k) => ({ midi: v.midis[k], note: n.note, role: n.role }))), {
+        gap: 52, labels: steps.map((st) => T.chordSymbol(st.chord, state.notation)), clef: 'treble',
+        activeCol: player.playing ? player.idx : -1, ariaLabel: 'Progresja z płynnym prowadzeniem głosów',
+        onColumn: (k) => Sound.play([36 + steps[k].chord.root.pc, ...vls[k].midis], 'chord', 'piano', 1.8),
+      });
+    }
     $('prog-steps').replaceChildren(...steps.map((st, i) => {
       const playing = player.playing && player.idx === i;
       const card = h('div', {
@@ -590,7 +654,8 @@
       h('span', { class: 'roman' }, st.roman),
       h('span', { class: 'sym' }, T.chordSymbol(st.chord, state.notation)),
       h('span', { class: 'notes' }, st.chord.notes.map((n) => nn(n.note)).join(' · ')),
-      outside(st.chord) ? h('span', { class: 'qual out' }, 'spoza skali ' + sc.scale.name.toLowerCase()) : null);
+      outside(st.chord) ? h('span', { class: 'qual out' }, 'spoza skali ' + sc.scale.name.toLowerCase()) : null,
+      vls && i > 0 ? h('span', { class: 'moves', title: 'Ruch głosów względem poprzedniego akordu' }, movesText(vls[i - 1], vls[i])) : null);
       if (state.prog === 'custom') {
         card.append(h('button', {
           type: 'button', class: 'remove', title: 'Usuń z progresji', 'aria-label': 'Usuń z progresji',
@@ -878,6 +943,7 @@
     $('bpm').addEventListener('input', (e) => { state.bpm = +e.target.value; $('bpm-val').textContent = state.bpm; savePrefs(); });
     $('beats').addEventListener('change', (e) => { state.beats = +e.target.value; savePrefs(); });
     $('loop').addEventListener('change', (e) => { state.loop = e.target.checked; savePrefs(); });
+    $('smooth').addEventListener('change', (e) => { state.smooth = e.target.checked; savePrefs(); render(); });
     $('prog-play').addEventListener('click', () => (player.playing ? stopProg() : startProg()));
     $('input-piano').addEventListener('click', () => toggleInput('piano'));
     $('input-guitar').addEventListener('click', () => toggleInput('guitar'));
@@ -897,7 +963,9 @@
   }
 
   // Działanie offline / instalacja jako aplikacja (wymaga https lub localhost).
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  let noSW = false; // localStorage chordbuilder.nosw = '1' — wyłącza SW (do pracy nad stroną)
+  try { noSW = localStorage.getItem('chordbuilder.nosw') === '1'; } catch (e) { /* ignoruj */ }
+  if (!noSW && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
   }
 

@@ -4,16 +4,46 @@ Interaktywna strona pokazująca, **jak zbudowane są akordy** w różnych skalac
 które dźwięki wchodzą do akordu, jakie są między nimi interwały (nazwy i liczba
 półtonów) oraz jak akord wygląda na **pianinie** i **gitarze**.
 
+Oprócz strony głównej są trzy działy do nauki teorii: **Interwały**,
+**Modusy** i **Ćwiczenia** (kształcenie słuchu i quizy).
+
 Strona jest w pełni statyczna (HTML + CSS + JavaScript, bez frameworków i bez
 kroku budowania), więc działa od razu na GitHub Pages.
 
 ## Co potrafi
 
+### Działy do nauki
+
+- **Interwały** (`intervals.html`): kalkulator — dwa dźwięki (lub dźwięk +
+  interwał) → nazwa (np. „seksta mała”, skróty 6m / m6), liczba półtonów i tonów,
+  konsonans/dysonans z wyjaśnieniem, przewrót (reguła 9 i 12), interwały złożone,
+  odpowiedniki enharmoniczne; zapis nutowy, klawiatura z policzonymi półtonami,
+  odsłuch melodyczny i harmoniczny. Tabela wszystkich interwałów od wybranego
+  dźwięku i zasady nazywania krok po kroku.
+- **Modusy** (`modes.html`): siedem modusów od wspólnej toniki — od lidyjskiego
+  (najjaśniejszego) do lokryckiego, z dźwiękami obniżanymi kolejno wg koła kwintowego,
+  dźwiękiem charakterystycznym i akordem tonicznym; odsłuch na tle burdonu toniki.
+  Modusy względne jednej tonacji (te same dźwięki, inny początek) z zapisem nutowym
+  i układem półtonów.
+- **Ćwiczenia** (`quiz.html`): 9 rodzajów ćwiczeń w 3 poziomach trudności —
+  interwały, akordy i skale/modusy ze słuchu, czytanie nut (klucz wiolinowy i basowy),
+  znaki przykluczowe (dur i moll), nazywanie interwałów i akordów z nut, budowanie
+  akordów z poprawną pisownią, akordy na stopniach tonacji. Każda odpowiedź ma
+  wyjaśnienie z zapisem nutowym; elementy, w których się mylisz, wracają częściej;
+  statystyki zapisują się w przeglądarce; obsługa klawiaturą (1–9, spacja, Enter).
+
+### Strona główna
+
 - **Skale i tryby:** durowa, molowe (naturalna, harmoniczna, melodyczna), tryby
   kościelne (dorycki, frygijski, lidyjski, miksolidyjski, lokrycki), frygijska
   dominantowa, pentatoniki, bluesowa, całotonowa — z odległościami w półtonach.
+- **Skala na pięciolinii** ze znakami przykluczowymi (dźwięki spoza nich jako
+  znaki przygodne), tonacją macierzystą, porównaniem z durową (np. dorycka: ♭3, ♭7),
+  dźwiękiem charakterystycznym i opisem brzmienia; odsłuch skali.
 - **Akordy diatoniczne:** trójdźwięki i akordy septymowe na każdym stopniu skali,
   z oznaczeniem rzymskim (I, ii, iii°, V7…).
+- **Dominanty wtrącone** (V7/ii, V7/V…): z dźwiękami spoza skali, dźwiękiem
+  prowadzącym i odsłuchem rozwiązania.
 - **Wszystkie akordy pasujące do skali:** lista akordów zbudowanych wyłącznie
   z dźwięków wybranej skali (sus, 6, add9, 9, 13…).
 - **Konstruktor akordów:** dowolna pryma + 30 typów akordów, przewroty.
@@ -33,7 +63,9 @@ kroku budowania), więc działa od razu na GitHub Pages.
   ii–V–I, 12-taktowy blues…) w wybranej tonacji, z oznaczeniami rzymskimi,
   odtwarzaniem (tempo, liczba uderzeń, zapętlenie) i pokazywaniem bieżącego
   akordu na pianinie i gryfie. Własne progresje: dodawanie, usuwanie, kopiowanie
-  gotowego schematu do edycji, zapis w adresie URL.
+  gotowego schematu do edycji, zapis w adresie URL. **Płynne prowadzenie głosów:**
+  każdy akord w przewrocie najbliższym poprzedniemu, zapis całej progresji na
+  pięciolinii i opis ruchu głosów (wspólne dźwięki, np. „E→F G→A”).
 - **Rozpoznawanie akordu („✎ Wklikaj akord”):** wybierz dźwięki na pianinie
   albo na gryfie, a strona poda nazwę akordu (z przewrotem, np. C/E, wariantem
   bez kwinty lub akordem z obcym basem), interwały od basu i pozwoli przejść
@@ -88,7 +120,8 @@ Testy logiki teorii muzyki (pisownia skal, interwały, akordy, rozpoznawanie,
 chwyty gitarowe, progresje) są w `tests/theory.test.js`:
 
 - w przeglądarce: otwórz `tests/index.html` (np. <http://localhost:8765/tests/>),
-- w Node: `node tests/run-node.js`.
+- w Node: `node tests/run-node.js`,
+- na macOS bez Node można użyć wbudowanego JavaScriptCore (`jsc`).
 
 GitHub Actions (`.github/workflows/test.yml`) uruchamia je przy każdym pushu
 i pull requeście.
@@ -98,18 +131,23 @@ i pull requeście.
 `sw.js` zapisuje pliki strony w pamięci przeglądarki i serwuje je od razu,
 pobierając w tle nowsze wersje — zmiany są widoczne **przy następnym otwarciu**
 strony. Przy zmianie listy plików podbij `VERSION` w `sw.js`. Podczas pracy
-lokalnej odśwież stronę dwukrotnie albo wyłącz service worker w narzędziach
-deweloperskich (Application → Service Workers → „Update on reload”).
+lokalnej odśwież stronę dwukrotnie albo wyłącz service worker: w konsoli
+przeglądarki `localStorage.setItem('chordbuilder.nosw', '1')`, a potem wyrejestruj
+go w narzędziach deweloperskich (Application → Service Workers).
 
 ## Struktura
 
 | Plik | Zawartość |
 |---|---|
-| `index.html` | układ strony |
+| `index.html` | strona główna: skale, akordy, progresje, instrumenty |
+| `intervals.html`, `js/intervals.js` | dział „Interwały” |
+| `modes.html`, `js/modes.js` | dział „Modusy” |
+| `quiz.html`, `js/quiz.js` | dział „Ćwiczenia” (generatory pytań, statystyki) |
+| `js/common.js` | wspólne pomocnicze funkcje podstron |
 | `sheet.html`, `js/sheet.js`, `css/sheet.css` | ściąga do druku |
 | `css/style.css` | wygląd (tokeny kolorów, tryb ciemny, wersja mobilna) |
-| `js/theory.js` | teoria muzyki: dźwięki, interwały, skale, akordy, wyszukiwanie chwytów gitarowych |
-| `js/instruments.js` | rysowanie SVG: klawiatura, gryf, diagram chwytu, pięciolinia, koło kwintowe |
+| `js/theory.js` | teoria muzyki: dźwięki, interwały, skale, akordy, znaki przykluczowe, prowadzenie głosów, wyszukiwanie chwytów gitarowych |
+| `js/instruments.js` | rysowanie SVG: klawiatura, gryf, diagram chwytu, pięciolinia (akord i melodia ze znakami przykluczowymi), koło kwintowe |
 | `js/audio.js` | prosty syntezator Web Audio |
 | `js/app.js` | stan, interfejs, zdarzenia |
 | `sw.js`, `manifest.webmanifest`, `icons/` | tryb offline i instalacja (PWA) |

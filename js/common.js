@@ -69,7 +69,9 @@
   const octaveName = (note, midi) => Math.floor((midi - note.acc) / 12) - 1;
 
   function registerSW() {
-    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    let dev = false;
+    try { dev = localStorage.getItem('chordbuilder.nosw') === '1'; } catch (e) { /* ignoruj */ }
+    if (!dev && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
       global.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
     }
   }

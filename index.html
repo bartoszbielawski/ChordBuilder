@@ -97,6 +97,11 @@
       </div>
       <p class="hint" id="diatonic-hint"></p>
       <div id="diatonic" class="diatonic"></div>
+      <details class="fitting" id="secdom-wrap">
+        <summary>Dominanty wtrącone (V7/x) — akordy spoza skali, które prowadzą do akordów skali</summary>
+        <p class="hint">Każdy akord durowy lub molowy w tonacji może mieć „własną” dominantę: akord septymowy kwintę wyżej, który do niego prowadzi — tak jak V7 prowadzi do I. Zawiera dźwięk spoza skali (zwykle podwyższony), który działa jak dźwięk prowadzący do prymy celu.</p>
+        <div id="secdom" class="secdom"></div>
+      </details>
       <details class="fitting">
         <summary>Wszystkie akordy zbudowane wyłącznie z dźwięków tej skali</summary>
         <div id="fitting"></div>
@@ -112,10 +117,15 @@
           <select id="beats"><option value="1">1</option><option value="2">2</option><option value="4">4</option></select>
         </label>
         <label class="check"><input type="checkbox" id="loop"> zapętl</label>
+        <label class="check" title="Każdy akord w takim przewrocie, by głosy przesuwały się jak najmniej"><input type="checkbox" id="smooth"> płynne prowadzenie głosów</label>
         <button type="button" class="btn" id="prog-play">▶ Odtwórz</button>
       </div>
       <p class="hint" id="prog-desc"></p>
       <div id="prog-steps" class="prog-steps"></div>
+      <div id="prog-vl" class="prog-vl" hidden>
+        <div id="prog-staff" class="melody-wrap"></div>
+        <p class="hint">Prowadzenie głosów: wspólne dźwięki zostają na miejscu, pozostałe przesuwają się do najbliższego dźwięku następnego akordu (zwykle o sekundę). Tak brzmi to płynnie — tak też grają pianiści i chóry. Kliknij akord na pięciolinii, aby go usłyszeć.</p>
+      </div>
       <div class="controls tight prog-tools" id="prog-tools"></div>
     </section>
 
