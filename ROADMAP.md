@@ -68,9 +68,13 @@ i najtańszych w realizacji.
 
 ## Proponowana kolejność
 
-1. **2.2 Funkcje harmoniczne** + **2.6 Porównanie trybów** — szybkie, duża wartość dydaktyczna.
-2. ~~**2.1 Rozpoznawanie akordu**~~ — zrobione w wersji 1.1.
-3. ~~**2.4 Progresje** + **2.3 Koło kwintowe**~~ — zrobione w wersji 1.2.
-4. ~~**5.5 Testy**~~ — zrobione w wersji 1.3.
-5. **3.1 / 3.2 CAGED i pozycje skal** — dla gitarzystów.
-6. Reszta wg potrzeb (quiz, MIDI, PWA, wersja EN).
+Zrobione do wersji 2.0: rozpoznawanie akordów, koło kwintowe, progresje i kadencje,
+testy, porównanie modusów, akordy zapożyczone i dominanty wtrącone, kształcenie
+słuchu i quizy, ćwiczenia na instrumentach, karta ćwiczeń do druku, słowniczek, MIDI.
+
+Co jeszcze miałoby sens (malejąco wg wartości dla nauki):
+
+1. **3.1 / 3.2 Pozycje skal i CAGED** — dla nauczycieli gitary.
+2. **3.4 Inne instrumenty** (ukulele, bas) — wymaga uogólnienia gryfu i chwytów na 4 struny.
+3. **Dyktando melodyczne** — zapisz usłyszaną krótką melodię (wymaga wprowadzania nut).
+4. **4.3 Lepsze brzmienie** (próbki zamiast syntezatora) i **5.1 wersja angielska**.
