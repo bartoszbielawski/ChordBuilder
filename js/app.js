@@ -16,11 +16,12 @@
     root: 'C', type: 'maj', inv: 0,
     notation: 'intl', labels: 'note',
     tuning: 'standard', showAll: true, showScale: false, voicing: 0,
+    pianoNames: true, fbNames: true,
   };
 
   /* ---------- Trwałość: preferencje + URL ---------- */
 
-  const PREF_KEYS = ['notation', 'labels', 'tuning', 'showAll', 'showScale'];
+  const PREF_KEYS = ['notation', 'labels', 'tuning', 'showAll', 'showScale', 'pianoNames', 'fbNames'];
   function loadPrefs() {
     try {
       const p = JSON.parse(localStorage.getItem('chordbuilder.prefs') || '{}');
@@ -53,6 +54,31 @@
 
   const nn = (note) => T.noteName(note, state.notation);
   const nameForKey = (k) => nn(T.parseNote(k));
+
+  const SHARP_KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const FLAT_KEYS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+  /**
+   * Nazwa dowolnej klasy wysokości w kontekście: najpierw pisownia z akordu,
+   * potem ze skali, a dla pozostałych — krzyżyki lub bemole zależnie od tonacji.
+   */
+  function pcNamer(chord, sc) {
+    const map = new Map();
+    for (const n of sc.notes) map.set(n.note.pc, n.note);
+    for (const n of chord.notes) map.set(n.note.pc, n.note);
+    const flats = sc.notes.some((n) => n.note.acc < 0) || (sc.notes.every((n) => n.note.acc === 0) && chord.root.acc < 0);
+    const keys = flats ? FLAT_KEYS : SHARP_KEYS;
+    return (pc) => nn(map.get(pc) || T.parseNote(keys[pc]));
+  }
+
+  function midiTitle(name, midi, chord, sc) {
+    const pc = T.mod(midi, 12);
+    const parts = [name + (Math.floor(midi / 12) - 1)];
+    const cn = chord.notes.find((n) => n.note.pc === pc);
+    if (cn) parts.push(`${cn.info.name} akordu (${cn.info.symbol})`);
+    else if (sc.pcs.has(pc)) parts.push('dźwięk skali');
+    return parts.join(' — ');
+  }
 
   function labelFor(entry) {
     if (state.labels === 'interval') return entry.info.symbol;
@@ -170,6 +196,8 @@
     fillSelect($('tuning'), T.TUNINGS.map((t) => [t.id, t.name]), state.tuning);
     $('show-all').checked = state.showAll;
     $('show-scale').checked = state.showScale;
+    $('piano-names').checked = state.pianoNames;
+    $('fb-names').checked = state.fbNames;
   }
 
   function renderScale(sc) {
@@ -290,8 +318,11 @@
     const highlights = new Map();
     midis.forEach((m, i) => highlights.set(m, { label: labelFor(voiced[i]), role: voiced[i].role }));
     const octaves = Math.max(3, Math.ceil((Math.max(...midis) - PIANO_START + 1) / 12));
+    const name = pcNamer(chord, sc);
     I.renderPiano($('piano'), {
       startMidi: PIANO_START, octaves, highlights, scalePcs: sc.pcs,
+      keyName: state.pianoNames ? (m) => name(T.mod(m, 12)) : null,
+      keyTitle: (m) => midiTitle(name(T.mod(m, 12)), m, chord, sc),
       onKey: (m) => Sound.play([m]),
     });
   }
@@ -307,9 +338,15 @@
     const byPc = new Map(chord.notes.map((n) => [n.note.pc, n]));
     const stringNames = tuning.midi.map((m) => nameForKey(PC_KEYS[T.mod(m, 12)]));
     const scaleByPc = new Map(sc.notes.map((n) => [n.note.pc, n]));
+    const name = pcNamer(chord, sc);
 
     I.renderFretboard($('fretboard'), {
       tuning: tuning.midi, frets: 15, stringNames,
+      cellName: state.fbNames ? (s, f) => name(T.mod(tuning.midi[s] + f, 12)) : null,
+      cellTitle: (s, f) => {
+        const m = tuning.midi[s] + f;
+        return `Struna ${6 - s} (${stringNames[s]}), ${f === 0 ? 'pusta' : 'próg ' + f}: ` + midiTitle(name(T.mod(m, 12)), m, chord, sc);
+      },
       cell: (s, f) => {
         const pc = T.mod(tuning.midi[s] + f, 12);
         const n = byPc.get(pc);
@@ -375,6 +412,8 @@
     $('tuning').addEventListener('change', (e) => { state.tuning = e.target.value; state.voicing = 0; savePrefs(); render(); });
     $('show-all').addEventListener('change', (e) => { state.showAll = e.target.checked; savePrefs(); render(); });
     $('show-scale').addEventListener('change', (e) => { state.showScale = e.target.checked; savePrefs(); render(); });
+    $('piano-names').addEventListener('change', (e) => { state.pianoNames = e.target.checked; savePrefs(); render(); });
+    $('fb-names').addEventListener('change', (e) => { state.fbNames = e.target.checked; savePrefs(); render(); });
     $('play-chord').addEventListener('click', () => {
       const c = currentChord();
       Sound.play(pianoMidis(c, T.inversion(c, state.inv)), 'chord');

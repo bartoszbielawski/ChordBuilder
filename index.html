@@ -109,8 +109,11 @@
           <span><i class="role-root"></i>pryma</span><span><i class="role-third"></i>tercja</span><span><i class="role-fifth"></i>kwinta</span><span><i class="role-seventh"></i>septyma</span><span><i class="role-ext"></i>inne (2/4/6/9/11/13)</span><span><i class="scale-swatch"></i>dźwięk skali</span>
         </div>
       </div>
+      <div class="controls tight below-head">
+        <label class="check"><input type="checkbox" id="piano-names"> nazwy wszystkich klawiszy</label>
+      </div>
       <div id="piano" class="instrument"></div>
-      <p class="hint">Akord w wybranym przewrocie, od C3. Kliknij klawisz, aby go usłyszeć.</p>
+      <p class="hint">Akord w wybranym przewrocie, od C3. Kliknij klawisz, aby go usłyszeć; najedź na klawisz, aby zobaczyć dźwięk z oktawą.</p>
     </section>
 
     <section class="card" id="guitar-section">
@@ -120,6 +123,7 @@
           <label class="field"><span>Strój</span><select id="tuning"></select></label>
           <label class="check"><input type="checkbox" id="show-all"> wszystkie dźwięki akordu</label>
           <label class="check"><input type="checkbox" id="show-scale"> dźwięki skali</label>
+          <label class="check"><input type="checkbox" id="fb-names"> nazwy wszystkich dźwięków</label>
         </div>
       </div>
       <div class="scroll-x"><div id="fretboard" class="instrument"></div></div>

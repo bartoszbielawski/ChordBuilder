@@ -28,7 +28,7 @@
    *         scalePcs: Set, onKey(midi) }
    */
   function renderPiano(container, opts) {
-    const { startMidi = 48, octaves = 3, highlights = new Map(), scalePcs = new Set(), onKey } = opts;
+    const { startMidi = 48, octaves = 3, highlights = new Map(), scalePcs = new Set(), onKey, keyName, keyTitle } = opts;
     const W = 34, H = 150, BW = 20, BH = 94;
     const whiteCount = octaves * 7 + 1;
     const svg = el('svg', {
@@ -58,6 +58,11 @@
         class: (k.black ? 'key black' : 'key white') + (h ? ' on role-' + h.role : ''),
       }, g);
       const cx = k.x + (k.black ? BW : W) / 2;
+      if (keyTitle) el('title', {}, g).textContent = keyTitle(midi);
+      if (!h && keyName) {
+        const nm = keyName(midi);
+        text(g, cx, k.black ? BH - 30 : H - 36, nm, 'key-name ' + (k.black ? 'on-black' : 'on-white') + (nm.length > 1 ? ' small' : ''));
+      }
       if (h) {
         const cy = k.black ? BH - 16 : H - 20;
         el('circle', { cx, cy, r: k.black ? 9 : 12, class: 'dot role-' + h.role }, g);
@@ -85,7 +90,7 @@
    * Struny: indeks 0 = najniższa (E), rysowana na dole.
    */
   function renderFretboard(container, opts) {
-    const { tuning, frets = 15, cell, stringNames = [], onCell } = opts;
+    const { tuning, frets = 15, cell, stringNames = [], onCell, cellName, cellTitle } = opts;
     const x0 = 44, width = 900, top = 18, gap = 28;
     const h = top * 2 + gap * 5;
     const svg = el('svg', {
@@ -121,9 +126,14 @@
         const c = cell(s, f);
         const g = el('g', { class: 'fb-cell' }, svg);
         el('rect', { x: cx - 14, y: cy - 13, width: 28, height: 26, class: 'fb-hit' }, g);
+        if (cellTitle) el('title', {}, g).textContent = cellTitle(s, f);
         if (c) {
           el('circle', { cx, cy, r: 11, class: 'dot role-' + c.role + (c.strong ? '' : ' faint') }, g);
           text(g, cx, cy, c.label, 'dot-label' + (c.label.length > 2 ? ' small' : '') + (c.strong ? '' : ' faint'));
+        } else if (cellName && f > 0) {
+          const nm = cellName(s, f);
+          el('rect', { x: cx - 10, y: cy - 7, width: 20, height: 14, rx: 7, class: 'fb-name-bg' }, g);
+          text(g, cx, cy, nm, 'fb-name' + (nm.length > 1 ? ' small' : ''));
         }
         if (onCell) g.addEventListener('click', () => onCell(s, f));
       }

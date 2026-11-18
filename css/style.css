@@ -237,6 +237,14 @@ select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); o
 .piano .key.black.on { fill: color-mix(in srgb, var(--c) 55%, var(--key-black)); }
 .piano .key-g:hover .key.white { fill: color-mix(in srgb, var(--accent) 10%, var(--key-white)); }
 .piano .scale-dot { fill: var(--scale); pointer-events: none; }
+.below-head { margin-top: 10px; }
+.key-name { font: 600 11px Inter, sans-serif; pointer-events: none; }
+.key-name.small { font-size: 9.5px; }
+.key-name.on-white { fill: #8a8378; }
+.key-name.on-black { fill: #cfc8bc; font-size: 8.5px; }
+.fb-name-bg { fill: rgb(0 0 0 / .28); pointer-events: none; }
+.fb-name { font: 600 9.5px Inter, sans-serif; fill: var(--string); pointer-events: none; }
+.fb-name.small { font-size: 8px; }
 .octave-label { font: 500 10px Inter, sans-serif; fill: var(--muted); }
 
 .dot { fill: var(--c); pointer-events: none; }
