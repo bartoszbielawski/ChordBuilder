@@ -76,6 +76,35 @@
     }
   }
 
+  /**
+   * Wejście MIDI (Web MIDI API — Chrome, Edge, Firefox; nie Safari).
+   * handlers: { on(midi), off(midi), status(text) }. Zwraca Promise<boolean>.
+   */
+  function connectMidi(handlers) {
+    if (!navigator.requestMIDIAccess) {
+      handlers.status('Ta przeglądarka nie obsługuje MIDI (spróbuj Chrome lub Edge).');
+      return Promise.resolve(false);
+    }
+    return navigator.requestMIDIAccess().then((access) => {
+      const attach = () => {
+        let n = 0;
+        for (const input of access.inputs.values()) {
+          n++;
+          input.onmidimessage = (e) => {
+            const [st, note, vel] = e.data;
+            const cmd = st & 0xf0;
+            if (cmd === 0x90 && vel > 0) handlers.on(note);
+            else if (cmd === 0x80 || (cmd === 0x90 && vel === 0)) handlers.off(note);
+          };
+        }
+        handlers.status(n ? `MIDI: połączono (${[...access.inputs.values()].map((i) => i.name).join(', ')})` : 'MIDI: nie wykryto urządzenia — podłącz klawiaturę.');
+      };
+      access.onstatechange = attach;
+      attach();
+      return true;
+    }).catch(() => { handlers.status('MIDI: brak zgody na dostęp.'); return false; });
+  }
+
   /** Losowy element tablicy. */
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
   function shuffle(arr) {
@@ -89,6 +118,6 @@
 
   global.Common = {
     h, loadPrefs, savePref, loadJSON, saveJSON, seg, NOTE_KEYS, DEFAULT_SPELLING,
-    noteOfMidi, midiOf, octaveName, registerSW, pick, shuffle,
+    noteOfMidi, midiOf, octaveName, registerSW, pick, shuffle, connectMidi,
   };
 })(window);

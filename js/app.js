@@ -983,6 +983,19 @@
       Sound.play(pianoMidis(c, T.inversion(c, state.inv)), 'arp');
     });
     window.addEventListener('hashchange', () => { loadHash(); render(); });
+    $('midi-btn').addEventListener('click', () => {
+      const held = new Set();
+      window.Common.connectMidi({
+        status: (t) => { $('midi-status').textContent = t; },
+        on: (m) => {
+          if (!held.size || !input.on || input.source !== 'piano') { clearInput(); input.on = true; input.source = 'piano'; }
+          held.add(m);
+          input.piano.add(m);
+          render();
+        },
+        off: (m) => { held.delete(m); },
+      }).then((ok) => { if (ok) $('midi-btn').hidden = true; });
+    });
   }
 
   // Działanie offline / instalacja jako aplikacja (wymaga https lub localhost).

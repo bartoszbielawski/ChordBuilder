@@ -529,3 +529,4 @@ kbd {
 .gl-letter dt { font-weight: 700; margin-top: 10px; scroll-margin-top: 16px; }
 .gl-letter dd { margin: 2px 0 0; line-height: 1.55; }
 .gl-links { display: inline-flex; flex-wrap: wrap; gap: 4px 12px; margin-left: 8px; font-size: 13.5px; }
+.midi-status { margin: 0; }

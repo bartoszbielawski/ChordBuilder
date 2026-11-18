@@ -17,7 +17,7 @@ Wersja 2.0 (gotowa): działy do nauki teorii — **Interwały** (kalkulator,
 tabela, zasady), **Modusy** (2.6) i **Ćwiczenia** (4.2 oraz quiz z budowania
 akordów 4.1 w formie wyboru); skala na pięciolinii ze znakami przykluczowymi;
 akordy zapożyczone i dominanty wtrącone (2.5); kadencje; ćwiczenia na klawiaturze i gryfie (4.1); płynne prowadzenie głosów w progresjach
-(część 3.6).
+(część 3.6); słowniczek pojęć; karta ćwiczeń do druku; wejście MIDI (4.4).
 
 Poniżej propozycje rozszerzeń, pogrupowane w etapy od najbardziej przydatnych
 i najtańszych w realizacji.
@@ -51,7 +51,7 @@ i najtańszych w realizacji.
 | 4.1 | ~~**Quiz: zbuduj akord na instrumencie**~~ ✓ | „Zaznacz dźwięki Am7” na klawiaturze, skale na klawiaturze, dźwięki na gryfie. | M |
 | 4.2 | ~~**Kształcenie słuchu**~~ ✓ | Rozpoznawanie interwałów i rodzajów akordów ze słuchu, statystyki postępów. | M |
 | 4.3 | **Lepsze brzmienie** | Próbki pianina i gitary (np. Salamander Piano, licencja CC) zamiast syntezatora. | S |
-| 4.4 | **Wejście MIDI** | Web MIDI: zagraj akord na klawiaturze → rozpoznanie i podświetlenie. | M |
+| 4.4 | ~~**Wejście MIDI**~~ ✓ | Web MIDI: zagraj akord na klawiaturze → rozpoznanie i podświetlenie. | M |
 
 ## Etap 5 — wygoda i zasięg
 

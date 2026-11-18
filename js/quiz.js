@@ -53,6 +53,7 @@
   /* ---------- Dźwięk ---------- */
 
   let timers = [];
+  let midiOn = false;
   function seq(midis, gap = 0.62, dur = 1.1) {
     timers.forEach(clearTimeout);
     timers = midis.map((m, i) => setTimeout(() => Sound.play([].concat(m), 'chord', 'piano', dur), i * gap * 1000));
@@ -689,6 +690,7 @@
       media.prepend(ibox);
     }
 
+    $('midi-btn').hidden = q.input !== 'piano' || midiOn;
     $('ex-answers').className = 'quiz-answers' + (q.wide ? ' wide' : '');
     if (q.input === 'piano') {
       $('ex-answers').replaceChildren(
@@ -738,6 +740,22 @@
       for (const k of Object.keys(stats)) delete stats[k];
       C.saveJSON(STATS_KEY, stats);
       render();
+    });
+    $('midi-btn').addEventListener('click', () => {
+      const held = new Set();
+      C.connectMidi({
+        status: (t) => { $('midi-status').textContent = t; },
+        on: (m) => {
+          if (!state.q || state.q.input !== 'piano' || state.answered) return;
+          if (!held.size) state.sel.clear(); // nowy akord po puszczeniu klawiszy
+          held.add(m);
+          while (m < 48) m += 12; // na widoczną klawiaturę C3–H4
+          while (m > 71) m -= 12;
+          state.sel.add(m);
+          render();
+        },
+        off: (m) => { held.delete(m); },
+      }).then((ok) => { midiOn = ok; render(); });
     });
     window.addEventListener('hashchange', () => {
       const before = state.ex + '/' + state.level;

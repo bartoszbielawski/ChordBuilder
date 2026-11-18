@@ -90,6 +90,9 @@ kroku budowania), więc działa od razu na GitHub Pages.
   Wydruk A4 lub zapis jako PDF z okna drukowania.
 - **Działa offline i instaluje się jak aplikacja** (PWA) — na telefonie
   „Dodaj do ekranu głównego”, na komputerze ikona instalacji w pasku adresu.
+- **Klawiatura MIDI** (Chrome, Edge, Firefox): zagraj akord na podłączonym
+  instrumencie — strona go rozpozna; w ćwiczeniach na klawiaturze można
+  odpowiadać, grając.
 - **Nazwy wszystkich klawiszy i pozycji na gryfie** (można wyłączyć).
 - **Dźwięk:** odtwarzanie akordu, arpeggia, pojedynczych klawiszy i strun
   (Web Audio, bez plików z próbkami).
