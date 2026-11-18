@@ -231,7 +231,9 @@
       '7': '7', maj7: 'maj7', m7: '7', m7b5: 'ø7', dim7: '°7',
       mMaj7: '(maj7)', augMaj7: '+maj7', aug7: '+7',
     }[type.id];
-    return r + (suffix !== undefined ? suffix : type.symbol);
+    // Dla akordów molowych mała litera już mówi „moll”: vi7, i6, ii9 (nie „im6”).
+    const sym = minorThird && /^m(?!aj)/.test(type.symbol) ? type.symbol.slice(1) : type.symbol;
+    return r + (suffix !== undefined ? suffix : sym);
   }
 
   /**
@@ -279,6 +281,52 @@
       return { ...n, semiAbs: s };
     });
   }
+
+  /**
+   * Oznaczenie rzymskie dla akordu na dowolnym (także chromatycznym) stopniu:
+   * deg — stopień 1..7, diff — przesunięcie względem skali durowej (−1 = ♭).
+   */
+  function romanFor(deg, diff, type) {
+    const prefix = diff < 0 ? '♭'.repeat(-diff) : '♯'.repeat(Math.max(0, diff));
+    return prefix + romanNumeral(mod(deg - 1, 7), type);
+  }
+
+  /* ---------- Progresje ---------- */
+
+  // Kroki: "interwał od toniki:typ akordu".
+  const PROGRESSIONS = [
+    { id: 'pop', group: 'Durowe', name: 'Pop: I–V–vi–IV', steps: '1:maj 5:maj 6:min 4:maj',
+      desc: 'Najpopularniejsza progresja muzyki pop — „cztery akordy”, na których oparto setki przebojów.' },
+    { id: 'doowop', group: 'Durowe', name: 'Lata 50.: I–vi–IV–V', steps: '1:maj 6:min 4:maj 5:maj',
+      desc: 'Progresja doo-wop, typowa dla ballad lat 50. i 60.' },
+    { id: 'cadence', group: 'Durowe', name: 'Kadencja: I–IV–V–I', steps: '1:maj 4:maj 5:maj 1:maj',
+      desc: 'Podstawowa kadencja: tonika – subdominanta – dominanta – tonika (T–S–D–T).' },
+    { id: 'sensitive', group: 'Durowe', name: 'vi–IV–I–V', steps: '6:min 4:maj 1:maj 5:maj',
+      desc: 'Ta sama czwórka akordów co „pop”, ale zaczęta od vi — brzmi bardziej melancholijnie.' },
+    { id: 'canon', group: 'Durowe', name: 'Kanon: I–V–vi–iii–IV–I–IV–V', steps: '1:maj 5:maj 6:min 3:min 4:maj 1:maj 4:maj 5:maj',
+      desc: 'Ciąg harmoniczny znany z Kanonu D-dur Pachelbela; schodzący bas co kwartę i sekundę.' },
+    { id: 'mixo', group: 'Durowe', name: 'Rock: I–♭VII–IV–I', steps: '1:maj b7:maj 4:maj 1:maj',
+      desc: 'Brzmienie miksolidyjskie: akord na obniżonym VII stopniu, częsty w rocku.' },
+    { id: 'minorPop', group: 'Molowe', name: 'i–♭VI–♭III–♭VII', steps: '1:min b6:maj b3:maj b7:maj',
+      desc: 'Molowa progresja popowa (np. a – F – C – G).' },
+    { id: 'andalusian', group: 'Molowe', name: 'Kadencja andaluzyjska: i–♭VII–♭VI–V', steps: '1:min b7:maj b6:maj 5:maj',
+      desc: 'Schodzący bas z flamenco; V jest durowe dzięki podwyższonej septymie (moll harmoniczny).' },
+    { id: 'minorCadence', group: 'Molowe', name: 'Kadencja molowa: i–iv–V–i', steps: '1:min 4:min 5:maj 1:min',
+      desc: 'Kadencja w molu z durową dominantą (z molowej skali harmonicznej).' },
+    { id: 'epic', group: 'Molowe', name: 'i–♭VI–♭VII–i', steps: '1:min b6:maj b7:maj 1:min',
+      desc: 'Częsta w muzyce filmowej i metalu — „epickie” rozwiązanie przez ♭VI i ♭VII.' },
+    { id: '251', group: 'Jazz i blues', name: 'ii–V–I', steps: '2:m7 5:7 1:maj7',
+      desc: 'Podstawa harmonii jazzowej: subdominanta – dominanta – tonika z septymami.' },
+    { id: '251minor', group: 'Jazz i blues', name: 'Molowe ii–V–i', steps: '2:m7b5 5:7 1:m6',
+      desc: 'Wersja molowa: akord półzmniejszony, dominanta, molowa tonika.' },
+    { id: 'turnaround', group: 'Jazz i blues', name: 'Turnaround: I–vi–ii–V', steps: '1:maj7 6:m7 2:m7 5:7',
+      desc: 'Krótki ciąg prowadzący z powrotem do toniki, np. na końcu chorusu.' },
+    { id: 'blues', group: 'Jazz i blues', name: '12-taktowy blues', steps: '1:7 1:7 1:7 1:7 4:7 4:7 1:7 1:7 5:7 4:7 1:7 5:7',
+      desc: 'Klasyczny schemat bluesa: 12 taktów, trzy akordy dominantowe.' },
+  ].map((p) => ({
+    ...p,
+    steps: p.steps.split(' ').map((s) => { const [iv, type] = s.split(':'); return { iv: parseInterval(iv), type }; }),
+  }));
 
   /* ---------- Rozpoznawanie akordu ---------- */
 
@@ -406,6 +454,6 @@
     parseInterval, describeInterval, intervalBetween, transpose,
     scaleById, buildScale, chordTypeById, buildChord, chordSymbol,
     identifyType, diatonicChords, fittingChords, inversion,
-    tuningById, findVoicings, roleOf, recognize,
+    tuningById, findVoicings, roleOf, recognize, romanFor, PROGRESSIONS,
   };
 })(window);

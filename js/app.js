@@ -17,6 +17,7 @@
     notation: 'intl', labels: 'note',
     tuning: 'standard', showAll: true, showScale: false, voicing: 0,
     pianoNames: true, fbNames: true,
+    prog: 'pop', custom: [], bpm: 90, beats: 4, loop: true,
   };
 
   // Tryb „wklikaj akord”: dźwięki wybrane na pianinie albo na gryfie.
@@ -24,7 +25,7 @@
 
   /* ---------- Trwałość: preferencje + URL ---------- */
 
-  const PREF_KEYS = ['notation', 'labels', 'tuning', 'showAll', 'showScale', 'pianoNames', 'fbNames'];
+  const PREF_KEYS = ['notation', 'labels', 'tuning', 'showAll', 'showScale', 'pianoNames', 'fbNames', 'bpm', 'beats', 'loop'];
   function loadPrefs() {
     try {
       const p = JSON.parse(localStorage.getItem('chordbuilder.prefs') || '{}');
@@ -47,9 +48,17 @@
     if (p.get('c') && T.CHORD_TYPES.some((c) => c.id === p.get('c'))) state.type = p.get('c');
     if (p.get('i')) state.inv = Math.max(0, Math.min(3, +p.get('i') || 0));
     if (p.get('n') === '4') state.size = 4;
+    if (p.get('p') && (p.get('p') === 'custom' || T.PROGRESSIONS.some((x) => x.id === p.get('p')))) state.prog = p.get('p');
+    if (p.get('pc')) {
+      state.custom = p.get('pc').split(',').filter((k) => {
+        const [r, t] = k.split('.');
+        return isNote(r) && T.CHORD_TYPES.some((c) => c.id === t);
+      });
+    }
   }
   function saveHash() {
-    const p = new URLSearchParams({ t: state.tonic, s: state.scale, r: state.root, c: state.type, i: state.inv, n: state.size });
+    const p = new URLSearchParams({ t: state.tonic, s: state.scale, r: state.root, c: state.type, i: state.inv, n: state.size, p: state.prog });
+    if (state.custom.length) p.set('pc', state.custom.join(','));
     history.replaceState(null, '', '#' + p.toString());
   }
 
@@ -165,6 +174,8 @@
 
     renderSelects(chord);
     renderScale(sc);
+    renderCircle(sc);
+    renderProgression(sc);
     renderDiatonic(sc, chord);
     renderFitting(sc, chord);
     const voiced = renderChord(sc, chord);
@@ -320,6 +331,226 @@
 
   function pianoMidis(chord, voiced) {
     return voiced.map((n) => PIANO_START + chord.root.pc + n.semiAbs);
+  }
+
+  /* ---------- Koło kwintowe ---------- */
+
+  const COF_MAJOR = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
+  const COF_MINOR = ['A', 'E', 'B', 'F#', 'C#', 'G#', 'D#', 'Bb', 'F', 'C', 'G', 'D'];
+  const COF_ENH = { major: 'Gb', minor: 'Eb' }; // pozycja 6: 6♯ = 6♭
+  // O ile półtonów tonika skali leży powyżej toniki „macierzystej” tonacji durowej.
+  const PARENT_OFFSET = {
+    major: 0, dorian: 2, phrygian: 4, lydian: 5, mixolydian: 7, minor: 9, locrian: 11,
+    harmonicMinor: 9, melodicMinor: 9, phrygianDominant: 4,
+    majorPentatonic: 0, minorPentatonic: 9, blues: 9,
+  };
+  const cofPos = (pc) => T.mod(pc * 7, 12);
+
+  function signature(pos) {
+    if (pos === 0) return { short: '0', notes: [] };
+    const sharps = 'F C G D A E B'.split(' '), flats = 'B E A D G C F'.split(' ');
+    if (pos === 6) return { short: '6♯/6♭', notes: sharps.slice(0, 6).map((l) => l + '#') };
+    if (pos < 6) return { short: pos + '♯', notes: sharps.slice(0, pos).map((l) => l + '#') };
+    return { short: (12 - pos) + '♭', notes: flats.slice(0, 12 - pos).map((l) => l + 'b') };
+  }
+
+  function renderCircle(sc) {
+    const off = PARENT_OFFSET[sc.scale.id];
+    const parentPos = off === undefined ? null : cofPos(sc.tonic.pc - off);
+    const minorTonic = sc.notes.some((n) => n.iv.deg === 3 && n.iv.semi === 3);
+    const tonicPos = minorTonic ? cofPos(sc.tonic.pc + 3) : cofPos(sc.tonic.pc);
+    const near = (i) => parentPos !== null && [11, 0, 1].includes(T.mod(i - parentPos, 12));
+    const keyName = (list, i, minor) => {
+      const a = nn(T.parseNote(list[i]));
+      const s = i === 6 ? a + '/' + nn(T.parseNote(minor ? COF_ENH.minor : COF_ENH.major)) : a;
+      return minor ? s.toLowerCase() : s;
+    };
+
+    const majors = COF_MAJOR.map((k, i) => ({
+      label: keyName(COF_MAJOR, i, false), sub: signature(i).short,
+      title: `${keyName(COF_MAJOR, i, false)}-dur — ${signature(i).short}`,
+      cls: (!minorTonic && i === tonicPos ? 'active ' : '') + (near(i) ? 'dia' : ''),
+    }));
+    const minors = COF_MINOR.map((k, i) => ({
+      label: keyName(COF_MINOR, i, true),
+      title: `${keyName(COF_MINOR, i, true)}-moll — ${signature(i).short}`,
+      cls: (minorTonic && i === tonicPos ? 'active ' : '') + (near(i) ? 'dia' : ''),
+    }));
+
+    const infoPos = parentPos !== null ? parentPos : tonicPos;
+    const sig = signature(infoPos);
+    const majName = keyName(COF_MAJOR, infoPos, false), minName = keyName(COF_MINOR, infoPos, true);
+    const dimRoot = parentPos !== null ? T.transpose(T.parseNote(COF_MAJOR[parentPos]), T.parseInterval('7')) : null;
+
+    I.renderCircle($('circle'), {
+      majors, minors,
+      dimAt: parentPos !== null ? (parentPos + 2) % 12 : null,
+      dimLabel: dimRoot ? nn(dimRoot) + '°' : '',
+      center: [majName + '-dur', minName + '-moll', sig.short],
+      onMajor: (i) => { stopProg(); state.tonic = COF_MAJOR[i]; state.scale = 'major'; selectFirstChord(); render(); },
+      onMinor: (i) => { stopProg(); state.tonic = COF_MINOR[i]; state.scale = 'minor'; selectFirstChord(); render(); },
+    });
+
+    const info = $('circle-info');
+    if (parentPos === null) {
+      info.replaceChildren(h('p', {}, `Skala ${sc.scale.name.toLowerCase()} nie należy do systemu dur–moll, więc nie ma swojego miejsca na kole. Pokazano pozycję toniki.`));
+      return;
+    }
+    const parentNote = T.parseNote(COF_MAJOR[parentPos]);
+    const ps = T.buildScale(parentNote, 'major');
+    const dia = T.diatonicChords(ps, 3);
+    const k = (i) => keyName(COF_MAJOR, T.mod(i, 12), false);
+    const rows = [
+      ['Tonacje', `${majName}-dur i równoległa ${minName}-moll`],
+      ['Znaki przykluczowe', sig.notes.length ? `${sig.short}: ${sig.notes.map(nameForKey).join(', ')}` : 'brak (same białe klawisze)'],
+      ['Sąsiedzi', `subdominanta ${k(parentPos - 1)}-dur (${signature(T.mod(parentPos - 1, 12)).short}), dominanta ${k(parentPos + 1)}-dur (${signature(T.mod(parentPos + 1, 12)).short})`],
+    ];
+    if (sc.scale.id !== 'major' && sc.scale.id !== 'minor') {
+      rows.unshift(['Skala', `${nn(sc.tonic)} ${sc.scale.name.toLowerCase()} używa znaków tonacji ${majName}-dur`]);
+    }
+    info.replaceChildren(
+      h('dl', { class: 'circle-dl' }, rows.flatMap(([a, b]) => [h('dt', {}, a), h('dd', {}, b)])),
+      h('div', { class: 'chips' }, dia.map((d) => h('button', {
+        type: 'button', class: 'chip' + (isActive(d.chord) ? ' active' : ''),
+        onclick: () => selectChord(d.chord.root, d.chord.type.id),
+      }, h('b', {}, d.roman + ' '), T.chordSymbol(d.chord, state.notation)))));
+  }
+
+  /* ---------- Progresje ---------- */
+
+  const player = { playing: false, idx: -1, timer: null };
+
+  function progSteps(sc) {
+    if (state.prog === 'custom') {
+      return state.custom.map((key) => {
+        const [r, t] = key.split('.');
+        const chord = T.buildChord(T.parseNote(r), t);
+        const iv = T.intervalBetween(sc.tonic, chord.root);
+        return { chord, roman: T.romanFor(iv.deg, iv.diff, chord.type) };
+      });
+    }
+    const p = T.PROGRESSIONS.find((x) => x.id === state.prog) || T.PROGRESSIONS[0];
+    return p.steps.map((s) => {
+      const chord = T.buildChord(T.transpose(sc.tonic, s.iv), s.type);
+      const d = T.describeInterval(s.iv.deg, s.iv.semi);
+      return { chord, roman: T.romanFor(s.iv.deg, d.diff, chord.type) };
+    });
+  }
+
+  /** Przewrót, który trzyma akord blisko środka klawiatury (płynniejsze przejścia). */
+  function centeredInversion(chord) {
+    let best = 0, bestD = Infinity;
+    for (let i = 0; i <= Math.min(3, chord.notes.length - 1); i++) {
+      const ms = pianoMidis(chord, T.inversion(chord, i));
+      const avg = ms.reduce((a, b) => a + b, 0) / ms.length;
+      const d = Math.abs(avg - 62);
+      if (d < bestD) { bestD = d; best = i; }
+    }
+    return best;
+  }
+
+  function playStep(i) {
+    const steps = progSteps(currentScale());
+    if (!steps.length) return stopProg();
+    if (i >= steps.length) {
+      if (!state.loop) return stopProg();
+      i = 0;
+    }
+    player.idx = i;
+    const c = steps[i].chord;
+    state.root = T.noteKey(c.root);
+    state.type = c.type.id;
+    state.inv = centeredInversion(c);
+    state.voicing = 0;
+    render();
+    const dur = (60 / state.bpm) * state.beats;
+    Sound.play([36 + c.root.pc, ...pianoMidis(c, T.inversion(c, state.inv))], 'chord', 'piano', dur + 0.4);
+    player.timer = setTimeout(() => playStep(i + 1), dur * 1000);
+  }
+
+  function startProg() {
+    stopProg(false);
+    player.playing = true;
+    playStep(0);
+  }
+
+  function stopProg(rerender = true) {
+    clearTimeout(player.timer);
+    const was = player.playing;
+    player.playing = false;
+    player.idx = -1;
+    if (rerender && was) render();
+  }
+
+  function renderProgression(sc) {
+    const sel = $('prog');
+    const groups = [...new Set(T.PROGRESSIONS.map((p) => p.group))];
+    sel.replaceChildren(
+      ...groups.map((g) => {
+        const og = document.createElement('optgroup');
+        og.label = g;
+        for (const p of T.PROGRESSIONS.filter((x) => x.group === g)) og.append(new Option(p.name, p.id, false, p.id === state.prog));
+        return og;
+      }),
+      (() => {
+        const og = document.createElement('optgroup');
+        og.label = 'Własna';
+        og.append(new Option(`Własna progresja (${state.custom.length})`, 'custom', false, state.prog === 'custom'));
+        return og;
+      })());
+
+    $('bpm').value = state.bpm;
+    $('bpm-val').textContent = state.bpm;
+    $('beats').value = String(state.beats);
+    $('loop').checked = state.loop;
+    $('prog-play').textContent = player.playing ? '■ Zatrzymaj' : '▶ Odtwórz';
+
+    const steps = progSteps(sc);
+    const p = T.PROGRESSIONS.find((x) => x.id === state.prog);
+    $('prog-desc').textContent = state.prog === 'custom'
+      ? 'Twoja progresja. Wybierz akord (np. w „Akordach w skali” lub w sekcji 3) i dodaj go przyciskiem poniżej. Oznaczenia rzymskie liczone są od toniki ' + nn(sc.tonic) + '.'
+      : p.desc + ` W tonacji ${nn(sc.tonic)} — zmień tonikę w sekcji 1 lub na kole kwintowym, aby przetransponować.`;
+
+    const outside = (c) => c.notes.some((n) => !sc.pcs.has(n.note.pc));
+    $('prog-steps').replaceChildren(...steps.map((st, i) => {
+      const playing = player.playing && player.idx === i;
+      const card = h('div', {
+        class: 'chord-card prog-card' + (playing ? ' playing' : '') + (!player.playing && isActive(st.chord) ? ' active' : ''),
+        role: 'button', tabindex: '0', title: 'Pokaż i zagraj ten akord',
+        onclick: () => {
+          stopProg(false);
+          selectChord(st.chord.root, st.chord.type.id);
+          Sound.play(pianoMidis(st.chord, T.inversion(st.chord, 0)));
+        },
+        onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } },
+      },
+      h('span', { class: 'bar' }, String(i + 1)),
+      h('span', { class: 'roman' }, st.roman),
+      h('span', { class: 'sym' }, T.chordSymbol(st.chord, state.notation)),
+      h('span', { class: 'notes' }, st.chord.notes.map((n) => nn(n.note)).join(' · ')),
+      outside(st.chord) ? h('span', { class: 'qual out' }, 'spoza skali ' + sc.scale.name.toLowerCase()) : null);
+      if (state.prog === 'custom') {
+        card.append(h('button', {
+          type: 'button', class: 'remove', title: 'Usuń z progresji', 'aria-label': 'Usuń z progresji',
+          onclick: (e) => { e.stopPropagation(); stopProg(false); state.custom.splice(i, 1); render(); },
+        }, '×'));
+      }
+      return card;
+    }));
+    if (!steps.length) $('prog-steps').append(h('p', { class: 'muted' }, 'Progresja jest pusta.'));
+
+    const cur = currentChord();
+    const tools = state.prog === 'custom'
+      ? [
+        h('button', { type: 'button', class: 'btn ghost small', onclick: () => { state.custom.push(state.root + '.' + state.type); render(); } },
+          `+ Dodaj wybrany akord (${T.chordSymbol(cur, state.notation)})`),
+        state.custom.length ? h('button', { type: 'button', class: 'btn ghost small', onclick: () => { stopProg(false); state.custom = []; render(); } }, 'Wyczyść') : null,
+      ]
+      : [h('button', {
+        type: 'button', class: 'btn ghost small',
+        onclick: () => { stopProg(false); state.custom = steps.map((s) => T.noteKey(s.chord.root) + '.' + s.chord.type.id); state.prog = 'custom'; render(); },
+      }, 'Skopiuj jako własną (do edycji)')];
+    $('prog-tools').replaceChildren(...tools.filter(Boolean));
   }
 
   /* ---------- Rozpoznawanie akordu (tryb „wklikaj”) ---------- */
@@ -581,6 +812,11 @@
     $('show-scale').addEventListener('change', (e) => { state.showScale = e.target.checked; savePrefs(); render(); });
     $('piano-names').addEventListener('change', (e) => { state.pianoNames = e.target.checked; savePrefs(); render(); });
     $('fb-names').addEventListener('change', (e) => { state.fbNames = e.target.checked; savePrefs(); render(); });
+    $('prog').addEventListener('change', (e) => { stopProg(false); state.prog = e.target.value; render(); });
+    $('bpm').addEventListener('input', (e) => { state.bpm = +e.target.value; $('bpm-val').textContent = state.bpm; savePrefs(); });
+    $('beats').addEventListener('change', (e) => { state.beats = +e.target.value; savePrefs(); });
+    $('loop').addEventListener('change', (e) => { state.loop = e.target.checked; savePrefs(); });
+    $('prog-play').addEventListener('click', () => (player.playing ? stopProg() : startProg()));
     $('input-piano').addEventListener('click', () => toggleInput('piano'));
     $('input-guitar').addEventListener('click', () => toggleInput('guitar'));
     $('play-chord').addEventListener('click', () => {

@@ -47,13 +47,13 @@
   }
 
   /** mode: 'chord' | 'arp' | 'strum' */
-  function play(midis, mode = 'chord', timbre = 'piano') {
+  function play(midis, mode = 'chord', timbre = 'piano', dur) {
     if (!ensure() || !midis.length) return;
     const now = ctx.currentTime + 0.03;
     const vol = 0.5 / Math.sqrt(midis.length);
     const step = mode === 'arp' ? 0.28 : mode === 'strum' ? 0.035 : 0;
     const seq = mode === 'arp' ? [...midis, ...midis.slice(0, -1).reverse()] : midis;
-    seq.forEach((m, i) => voice(m, now + i * step, mode === 'arp' ? 1.4 : 2.6, mode === 'arp' ? 0.35 : vol, timbre));
+    seq.forEach((m, i) => voice(m, now + i * step, dur || (mode === 'arp' ? 1.4 : 2.6), mode === 'arp' ? 0.35 : vol, timbre));
   }
 
   global.Sound = { play };

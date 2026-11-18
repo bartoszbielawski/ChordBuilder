@@ -189,5 +189,57 @@
     return svg;
   }
 
-  global.Instruments = { renderPiano, renderFretboard, renderChordDiagram };
+  /* ---------- Koło kwintowe ---------- */
+
+  function arcPath(cx, cy, r1, r2, a0, a1) {
+    const p = (r, a) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+    const [x1, y1] = p(r2, a0), [x2, y2] = p(r2, a1), [x3, y3] = p(r1, a1), [x4, y4] = p(r1, a0);
+    return `M${x1} ${y1} A${r2} ${r2} 0 0 1 ${x2} ${y2} L${x3} ${y3} A${r1} ${r1} 0 0 0 ${x4} ${y4} Z`;
+  }
+
+  /**
+   * opts: { majors[12], minors[12]: {label, sub, cls, title}, center: [line, …],
+   *         onMajor(i), onMinor(i), dimAt: index | null, dimLabel }
+   * Pozycja 0 = C (u góry), dalej zgodnie z ruchem wskazówek zegara co kwintę.
+   */
+  function renderCircle(container, opts) {
+    const S = 400, c = S / 2;
+    const R = [56, 112, 158, 196]; // środek | moll | dur | znaki
+    const svg = el('svg', { viewBox: `0 0 ${S} ${S}`, class: 'circle', role: 'img', 'aria-label': 'Koło kwintowe' });
+    const step = (Math.PI * 2) / 12;
+    for (let i = 0; i < 12; i++) {
+      const a0 = -Math.PI / 2 + (i - 0.5) * step, a1 = a0 + step, am = (a0 + a1) / 2;
+      const pos = (r) => [c + r * Math.cos(am), c + r * Math.sin(am)];
+
+      const M = opts.majors[i];
+      const gM = el('g', { class: 'cof-seg major ' + (M.cls || '') }, svg);
+      el('title', {}, gM).textContent = M.title;
+      el('path', { d: arcPath(c, c, R[2] - 0, R[3], a0, a1) }, gM);
+      const [mx, my] = pos((R[2] + R[3]) / 2);
+      text(gM, mx, my - 6, M.label, 'cof-label' + (M.label.length > 3 ? ' small' : ''));
+      text(gM, mx, my + 11, M.sub, 'cof-sub');
+      gM.addEventListener('click', () => opts.onMajor(i));
+
+      const m = opts.minors[i];
+      const gm = el('g', { class: 'cof-seg minor ' + (m.cls || '') }, svg);
+      el('title', {}, gm).textContent = m.title;
+      el('path', { d: arcPath(c, c, R[1], R[2], a0, a1) }, gm);
+      const [nx, ny] = pos((R[1] + R[2]) / 2);
+      text(gm, nx, ny, m.label, 'cof-label minor' + (m.label.length > 3 ? ' small' : ''));
+      gm.addEventListener('click', () => opts.onMinor(i));
+
+      if (opts.dimAt === i) {
+        const [dx, dy] = pos((R[0] + R[1]) / 2 + 4);
+        el('circle', { cx: dx, cy: dy, r: 15, class: 'cof-dim' }, svg);
+        text(svg, dx, dy, opts.dimLabel, 'cof-dim-label');
+      }
+    }
+    el('circle', { cx: c, cy: c, r: R[0], class: 'cof-center' }, svg);
+    opts.center.forEach((line, k) => {
+      text(svg, c, c + (k - (opts.center.length - 1) / 2) * 17, line, k === 0 ? 'cof-c1' : 'cof-c2');
+    });
+    container.replaceChildren(svg);
+  }
+
+  global.Instruments = { renderPiano, renderFretboard, renderChordDiagram, renderCircle };
 })(window);

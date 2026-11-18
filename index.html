@@ -49,6 +49,22 @@
       <p class="hint">Liczby między dźwiękami to odległości w półtonach (2 = cały ton, 1 = półton). Kliknij dźwięk skali, aby zbudować na nim akord.</p>
     </section>
 
+    <section class="card" id="circle-section">
+      <h2>Koło kwintowe</h2>
+      <div class="circle-layout">
+        <div id="circle" class="circle-wrap"></div>
+        <div class="circle-info">
+          <div id="circle-info"></div>
+          <ul class="circle-legend">
+            <li><i class="sw active"></i> wybrana tonacja</li>
+            <li><i class="sw dia"></i> akordy tonacji: I, IV, V (zewn.) oraz ii, iii, vi (wewn.)</li>
+            <li><i class="sw dim"></i> akord zmniejszony vii°</li>
+          </ul>
+          <p class="hint">Sąsiednie tonacje różnią się jednym znakiem przykluczowym. Zgodnie z ruchem wskazówek zegara dźwięki rosną o kwintę (dochodzi ♯), przeciwnie — o kwartę (dochodzi ♭). Wewnętrzny pierścień to tonacje równoległe molowe (ten sam zestaw znaków). Kliknij tonację, aby ją wybrać.</p>
+        </div>
+      </div>
+    </section>
+
     <section class="card" id="chords-section">
       <div class="card-head">
         <h2><span class="step">2</span> Akordy w skali</h2>
@@ -63,6 +79,22 @@
         <summary>Wszystkie akordy zbudowane wyłącznie z dźwięków tej skali</summary>
         <div id="fitting"></div>
       </details>
+    </section>
+
+    <section class="card" id="prog-section">
+      <h2>Progresje akordów</h2>
+      <div class="controls">
+        <label class="field grow"><span>Progresja</span><select id="prog"></select></label>
+        <label class="field"><span>Tempo: <b id="bpm-val"></b> BPM</span><input type="range" id="bpm" min="50" max="180" step="5"></label>
+        <label class="field"><span>Uderzeń na akord</span>
+          <select id="beats"><option value="1">1</option><option value="2">2</option><option value="4">4</option></select>
+        </label>
+        <label class="check"><input type="checkbox" id="loop"> zapętl</label>
+        <button type="button" class="btn" id="prog-play">▶ Odtwórz</button>
+      </div>
+      <p class="hint" id="prog-desc"></p>
+      <div id="prog-steps" class="prog-steps"></div>
+      <div class="controls tight prog-tools" id="prog-tools"></div>
     </section>
 
     <section class="card" id="chord-section">

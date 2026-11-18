@@ -26,6 +26,14 @@ kroku budowania), więc działa od razu na GitHub Pages.
 - **Pianino:** akord w wybranym przewrocie, dźwięki skali zaznaczone kropkami.
 - **Gitara:** gryf do 15. progu, kilka strojów, automatycznie wyszukiwane
   grywalne chwyty z diagramami (bas zgodny z przewrotem).
+- **Koło kwintowe:** tonacje durowe i równoległe molowe ze znakami przykluczowymi;
+  zaznacza wybraną tonację i jej akordy (I, IV, V, ii, iii, vi, vii°), kliknięcie
+  zmienia tonację. Dla trybów (np. doryckiego) pokazuje tonację macierzystą.
+- **Progresje akordów:** 14 gotowych schematów (pop, kadencje, kanon, andaluzyjska,
+  ii–V–I, 12-taktowy blues…) w wybranej tonacji, z oznaczeniami rzymskimi,
+  odtwarzaniem (tempo, liczba uderzeń, zapętlenie) i pokazywaniem bieżącego
+  akordu na pianinie i gryfie. Własne progresje: dodawanie, usuwanie, kopiowanie
+  gotowego schematu do edycji, zapis w adresie URL.
 - **Rozpoznawanie akordu („✎ Wklikaj akord”):** wybierz dźwięki na pianinie
   albo na gryfie, a strona poda nazwę akordu (z przewrotem, np. C/E, wariantem
   bez kwinty lub akordem z obcym basem), interwały od basu i pozwoli przejść
