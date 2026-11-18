@@ -1,10 +1,11 @@
 /*
  * ChordBuilder — service worker: działanie offline.
- * Strategia „stale-while-revalidate”: odpowiedź od razu z pamięci podręcznej,
- * a w tle pobranie świeżej wersji (zmiany widać przy kolejnym otwarciu).
+ * Strategia dla plików strony: „najpierw sieć” — online zawsze świeże i spójne
+ * wersje plików (HTML, JS i CSS z jednego wdrożenia), offline — kopia z pamięci.
+ * Czcionki Google: najpierw pamięć (nie zmieniają się).
  * Po zmianie listy plików podbij VERSION.
  */
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = 'chordbuilder-' + VERSION;
 const ASSETS = [
   './',
@@ -58,15 +59,24 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.open(CACHE).then(async (cache) => {
-      // Adres z #… lub ?… dla strony głównej → ta sama strona z pamięci.
-      const cached = await cache.match(req, { ignoreSearch: sameOrigin && req.mode === 'navigate' });
-      const network = fetch(req)
-        .then((res) => {
-          if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
-          return res;
-        })
-        .catch(() => cached);
-      return cached || network;
+      // Adres z #… lub ?… dla strony → ta sama strona z pamięci.
+      const match = () => cache.match(req, { ignoreSearch: sameOrigin && req.mode === 'navigate' });
+      if (!sameOrigin) {
+        const cached = await match();
+        if (cached) return cached;
+        const res = await fetch(req);
+        if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
+        return res;
+      }
+      try {
+        const res = await fetch(req, { cache: 'no-cache' });
+        if (res && res.ok) cache.put(req, res.clone());
+        return res;
+      } catch (e) {
+        const cached = await match();
+        if (cached) return cached;
+        throw e;
+      }
     })
   );
 });

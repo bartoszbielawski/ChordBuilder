@@ -144,12 +144,12 @@ i pull requeście.
 
 ## Tryb offline (service worker)
 
-`sw.js` zapisuje pliki strony w pamięci przeglądarki i serwuje je od razu,
-pobierając w tle nowsze wersje — zmiany są widoczne **przy następnym otwarciu**
-strony. Przy zmianie listy plików podbij `VERSION` w `sw.js`. Podczas pracy
-lokalnej odśwież stronę dwukrotnie albo wyłącz service worker: w konsoli
-przeglądarki `localStorage.setItem('chordbuilder.nosw', '1')`, a potem wyrejestruj
-go w narzędziach deweloperskich (Application → Service Workers).
+`sw.js` zapisuje pliki strony w pamięci przeglądarki. Gdy jest sieć, zawsze
+pobiera świeże pliki (wszystkie z tego samego wdrożenia), a bez sieci serwuje
+kopię z pamięci. Po instalacji nowej wersji service workera strona przeładowuje
+się raz. Przy zmianie listy plików podbij `VERSION` w `sw.js`. Do pracy lokalnej
+można go wyłączyć: w konsoli `localStorage.setItem('chordbuilder.nosw', '1')`,
+a potem wyrejestrować w narzędziach deweloperskich (Application → Service Workers).
 
 ## Struktura
 
