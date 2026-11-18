@@ -172,7 +172,7 @@
     syncSeg('labels', state.labels);
     syncSeg('chord-size', state.size);
 
-    renderSelects(chord);
+    renderSelects(chord, sc);
     renderScale(sc);
     renderCircle(sc);
     renderProgression(sc);
@@ -186,25 +186,38 @@
     saveHash();
   }
 
-  function renderSelects(chord) {
+  function renderSelects(chord, sc) {
     fillSelect($('tonic'), NOTE_KEYS.map((k) => [k, nameForKey(k)]), state.tonic);
     if (!NOTE_KEYS.includes(state.tonic)) $('tonic').prepend(new Option(nameForKey(state.tonic), state.tonic, true, true));
 
     fillSelect($('scale'), T.SCALES.map((s) => [s.id, s.name]), state.scale);
 
-    fillSelect($('chord-root'), NOTE_KEYS.map((k) => [k, nameForKey(k)]), state.root);
-    if (!NOTE_KEYS.includes(state.root)) $('chord-root').prepend(new Option(nameForKey(state.root), state.root, true, true));
+    // Pryma: ✓ przy dźwiękach skali (w pisowni skali, np. B♭ w F-dur, a nie A♯).
+    const scaleKeys = new Set(sc.notes.map((n) => T.noteKey(n.note)));
+    const rootKeys = [...NOTE_KEYS];
+    for (const k of scaleKeys) if (!rootKeys.includes(k)) rootKeys.push(k);
+    fillSelect($('chord-root'), rootKeys.map((k) => [k, (scaleKeys.has(k) ? '✓ ' : ' ') + nameForKey(k)]), state.root);
+    if (!rootKeys.includes(state.root)) $('chord-root').prepend(new Option(nameForKey(state.root), state.root, true, true));
 
+    // Rodzaj akordu: ✓ przy akordach, których wszystkie dźwięki należą do skali.
+    const fits = (t) => [...T.buildChord(chord.root, t.id).pcs].every((pc) => sc.pcs.has(pc));
+    let fitCount = 0;
     const typeSel = $('chord-type');
     typeSel.replaceChildren(...T.CHORD_GROUPS.map((g) => {
       const og = document.createElement('optgroup');
       og.label = g.name;
       for (const t of T.CHORD_TYPES.filter((t) => t.group === g.id)) {
-        const o = new Option(`${nn(chord.root)}${t.symbol} — ${t.name}`, t.id, false, t.id === state.type);
+        const ok = fits(t);
+        if (ok) fitCount++;
+        const o = new Option(`${ok ? '✓ ' : ' '}${nn(chord.root)}${t.symbol} — ${t.name}`, t.id, false, t.id === state.type);
         og.append(o);
       }
       return og;
     }));
+    const scaleName = `${nn(sc.tonic)} ${sc.scale.name.toLowerCase()}`;
+    $('chord-list-hint').textContent = !sc.pcs.has(chord.root.pc)
+      ? `${nn(chord.root)} nie należy do skali ${scaleName}, więc żaden akord z tą prymą nie mieści się w skali. ✓ na liście prym oznacza dźwięki skali.`
+      : `✓ — wszystkie dźwięki akordu należą do skali ${scaleName}. Z prymą ${nn(chord.root)} pasuje ${fitCount} z ${T.CHORD_TYPES.length} rodzajów akordów.`;
 
     const invBox = $('inversion');
     const maxInv = Math.min(3, chord.notes.length - 1);
