@@ -32,6 +32,11 @@ kroku budowania), więc działa od razu na GitHub Pages.
   zaznaczanie akordu i skali na klawiaturze oraz szukanie dźwięków na gryfie. Każda odpowiedź ma
   wyjaśnienie z zapisem nutowym; elementy, w których się mylisz, wracają częściej;
   statystyki zapisują się w przeglądarce; obsługa klawiaturą (1–9, spacja, Enter).
+- **Karta ćwiczeń do druku** (`worksheet.html`) dla nauczycieli: wybierasz rodzaje
+  zadań (czytanie nut, znaki przykluczowe, interwały i akordy z nut, budowa akordów,
+  akordy w tonacji), poziom i liczbę — strona losuje zestaw z miejscem na odpowiedź
+  (lub odpowiedziami do wyboru) i kluczem odpowiedzi na osobnej stronie. Każde
+  losowanie daje inną wersję.
 
 ### Strona główna
 
@@ -148,6 +153,7 @@ go w narzędziach deweloperskich (Application → Service Workers).
 | `intervals.html`, `js/intervals.js` | dział „Interwały” |
 | `modes.html`, `js/modes.js` | dział „Modusy” |
 | `quiz.html`, `js/quiz.js` | dział „Ćwiczenia” (generatory pytań, statystyki) |
+| `worksheet.html`, `js/worksheet.js` | karta ćwiczeń do druku z kluczem odpowiedzi |
 | `js/common.js` | wspólne pomocnicze funkcje podstron |
 | `sheet.html`, `js/sheet.js`, `css/sheet.css` | ściąga do druku |
 | `css/style.css` | wygląd (tokeny kolorów, tryb ciemny, wersja mobilna) |

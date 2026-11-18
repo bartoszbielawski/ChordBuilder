@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pl" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Karta ćwiczeń — ChordBuilder</title>
+  <meta name="theme-color" content="#c2410c">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Music&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/sheet.css">
+</head>
+<body class="sheet-page">
+  <div class="wrap">
+    <div class="sheet-toolbar no-print">
+      <a href="quiz.html">← Ćwiczenia</a>
+      <button type="button" class="btn" id="print">🖨 Drukuj / zapisz PDF</button>
+    </div>
+    <div class="ws-settings no-print">
+      <div class="field"><span>Rodzaje zadań</span><div id="ws-types" class="ws-types"></div></div>
+      <div class="controls tight">
+        <label class="field"><span>Poziom</span>
+          <select id="ws-level"><option value="0">łatwy</option><option value="1">średni</option><option value="2">trudny</option></select></label>
+        <label class="field"><span>Zadań każdego rodzaju</span>
+          <select id="ws-count"><option>4</option><option>6</option><option>8</option><option>12</option><option>16</option></select></label>
+        <label class="field"><span>Notacja</span>
+          <select id="ws-notation"><option value="intl">A B C</option><option value="H">A H C</option></select></label>
+        <label class="field grow"><span>Tytuł</span><input type="text" id="ws-title" class="text-input"></label>
+      </div>
+      <div class="controls tight">
+        <label class="check"><input type="checkbox" id="ws-mc"> z odpowiedziami do wyboru</label>
+        <label class="check"><input type="checkbox" id="ws-key" checked> klucz odpowiedzi (na osobnej stronie)</label>
+        <button type="button" class="btn ghost" id="ws-new">↻ Wylosuj nowe zadania</button>
+      </div>
+      <p class="hint">Każde losowanie daje inny zestaw — dobre do kartkówek w kilku wersjach. Klucz odpowiedzi drukuje się na osobnej stronie.</p>
+    </div>
+
+    <header class="sheet-head ws-head">
+      <h1 id="ws-h1"></h1>
+      <div class="ws-name"><span>Imię i nazwisko: ______________________________</span><span>Data: ____________</span><span>Wynik: ______ / <b id="ws-total"></b></span></div>
+    </header>
+    <div id="ws-body"></div>
+    <section id="ws-answers" class="ws-answers"></section>
+    <p class="sheet-foot muted">Wygenerowano w ChordBuilder · <span id="ws-url"></span></p>
+  </div>
+
+  <script src="js/theory.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/worksheet.js"></script>
+</body>
+</html>

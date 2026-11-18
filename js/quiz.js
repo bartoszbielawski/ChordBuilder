@@ -760,6 +760,11 @@
     });
   }
 
+  // Generatory pytań dostępne też dla karty ćwiczeń do druku (worksheet.html) i testów.
+  window.QuizExercises = EXERCISES;
+  window.QuizSetNotation = (n) => { state.notation = n === 'H' ? 'H' : 'intl'; };
+  if (!$('exercise')) return; // strona bez interfejsu ćwiczeń
+
   loadHash();
   bind();
   if (state.ex) {
@@ -768,7 +773,4 @@
   }
   render();
   C.registerSW();
-
-  // Do testów: dostęp do generatorów pytań.
-  window.QuizExercises = EXERCISES;
 })();
