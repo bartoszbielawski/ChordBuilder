@@ -84,7 +84,7 @@ kroku budowania), więc działa od razu na GitHub Pages.
   zaznacza wybraną tonację i jej akordy (I, IV, V, ii, iii, vi, vii°), kliknięcie
   zmienia tonację. Dla trybów (np. doryckiego) pokazuje tonację macierzystą.
   Tabela wszystkich 15 tonacji durowych i równoległych molowych ze znakami.
-- **Progresje akordów:** 19 gotowych schematów (pop, kanon, andaluzyjska, ii–V–I,
+- **Progresje akordów:** 22 gotowe schematy (pop, kanon, ciąg kwintowy, andaluzyjska, ii–V–I, backdoor,
   12-taktowy blues, kadencje: doskonała, plagalna, zawieszona, zwodnicza,
   z tercją pikardyjską…) w wybranej tonacji, z oznaczeniami rzymskimi,
   odtwarzaniem (tempo, liczba uderzeń, zapętlenie) i pokazywaniem bieżącego
