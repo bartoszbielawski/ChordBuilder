@@ -81,7 +81,8 @@ Ostatnio dodane: ćwiczenia rytmiczne, bas cyfrowany, transpozycja, unikanie kwi
 i oktaw równoległych, ukulele i bas, kształty CAGED, harmonizacja melodii z dźwiękami
 obcymi, polskie nazwy tonacji, tabela tonacji, nowe progresje (ciąg kwintowy, backdoor),
 ścieżka nauki (15 lekcji), 22 rodzaje ćwiczeń, słowniczek (66 haseł), ulepszony syntezator,
-wersja angielska (przełącznik PL/EN).
+wersja angielska (przełącznik PL/EN), dla klasy: wspólny zestaw pytań z linku (?seed=),
+tryb sprawdzianu z kopiowaniem wyniku, tryb prezentacji na projektor.
 
 Dalsze pomysły (malejąco wg wartości dla nauki):
 
