@@ -33,6 +33,9 @@ kroku budowania), więc działa od razu na GitHub Pages.
   zaznaczanie akordu i skali na klawiaturze oraz szukanie dźwięków na gryfie. Każda odpowiedź ma
   wyjaśnienie z zapisem nutowym; elementy, w których się mylisz, wracają częściej;
   statystyki zapisują się w przeglądarce; obsługa klawiaturą (1–9, spacja, Enter).
+- **Rytm** (`rhythm.html`): wartości nut i pauz (drzewo podziału, odsłuch),
+  kropka przy nucie, metrum proste, złożone i nieregularne z metronomem
+  i akcentami, układanie taktu z kontrolą wypełnienia.
 - **Słowniczek** (`glossary.html`): ponad 50 pojęć (akord, tryton, tonacja
   równoległa, kadencja, przewrót…) z krótkimi definicjami, wyszukiwarką
   i odnośnikami do miejsc na stronie, gdzie można je zobaczyć i usłyszeć.

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rytm — ChordBuilder</title>
+  <meta name="description" content="Rytm i metrum: wartości nut i pauz, kropka, metrum proste i złożone, metronom, układanie taktów — z dźwiękiem.">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#c2410c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Music&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div>
+        <h1>ChordBuilder</h1>
+        <p class="tagline">Rytm — wartości nut, metrum i takt.</p>
+        <nav class="site-nav" aria-label="Działy">
+          <a href="./">Akordy i skale</a>
+          <a href="intervals.html">Interwały</a>
+          <a href="modes.html">Modusy</a>
+          <a href="rhythm.html" aria-current="page">Rytm</a>
+          <a href="quiz.html">Ćwiczenia</a>
+          <a href="glossary.html">Słowniczek</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" id="values-section">
+      <div class="card-head">
+        <h2><span class="step">1</span> Wartości rytmiczne</h2>
+        <label class="field"><span>Tempo: <b id="bpm-val"></b> ćwierćnut/min</span><input type="range" id="bpm" min="40" max="160" step="4"></label>
+      </div>
+      <p class="hint">Każda wartość trwa dwa razy krócej niż poprzednia: cała nuta = 2 półnuty = 4 ćwierćnuty = 8 ósemek = 16 szesnastek. Kliknij wiersz, aby usłyszeć (na tle metronomu w 4/4).</p>
+      <div id="tree" class="rh-tree"></div>
+      <div class="table-wrap">
+        <table class="chord-table rh-table">
+          <thead><tr><th>Nuta</th><th>Pauza</th><th>Nazwa</th><th>Ile ćwierćnut</th><th>W takcie 4/4</th></tr></thead>
+          <tbody id="values"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="dots-section">
+      <h2><span class="step">2</span> Kropka przy nucie</h2>
+      <p class="hint">Kropka wydłuża nutę (lub pauzę) o połowę jej wartości: ćwierćnuta z kropką = ćwierćnuta + ósemka = 3 ósemki. Porównaj brzmienie:</p>
+      <div id="dots" class="rh-examples"></div>
+    </section>
+
+    <section class="card" id="meter-section">
+      <div class="card-head">
+        <h2><span class="step">3</span> Metrum i metronom</h2>
+        <label class="field"><span>Metrum</span><select id="meter"></select></label>
+      </div>
+      <div class="rh-meter">
+        <div class="rh-sig" id="meter-sig"></div>
+        <div>
+          <p id="meter-desc"></p>
+          <div id="beats" class="rh-beats" aria-hidden="true"></div>
+          <div class="controls tight">
+            <button type="button" class="btn" id="metro">▶ Metronom</button>
+            <span class="hint" style="margin:0">Duża kropka — miara mocna, średnia — półmocna, mała — słaba. Górna liczba to liczba miar w takcie, dolna — jaka wartość jest miarą (4 = ćwierćnuta, 8 = ósemka, 2 = półnuta).</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="bar-section">
+      <h2><span class="step">4</span> Ułóż takt</h2>
+      <p class="hint">Dodawaj nuty i pauzy tak, by dokładnie wypełnić takt w wybranym metrum (powyżej). Potem posłuchaj.</p>
+      <div class="controls tight">
+        <div class="seg" id="kind" role="radiogroup" aria-label="Nuty czy pauzy">
+          <button type="button" data-value="note">nuty</button>
+          <button type="button" data-value="rest">pauzy</button>
+        </div>
+      </div>
+      <div id="palette" class="rh-palette"></div>
+      <div id="bar" class="rh-bar" aria-live="polite"></div>
+      <div class="rh-fill"><div id="fill"></div></div>
+      <p id="bar-msg" class="hint"></p>
+      <div class="controls tight">
+        <button type="button" class="btn" id="bar-play">▶ Zagraj takt</button>
+        <button type="button" class="btn ghost" id="bar-undo">⌫ Cofnij</button>
+        <button type="button" class="btn ghost" id="bar-clear">Wyczyść</button>
+        <button type="button" class="btn ghost" id="bar-random">🎲 Losowy takt</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>ChordBuilder · <a href="./">strona główna</a> · <a href="https://github.com/bartoszbielawski/ChordBuilder">kod na GitHubie</a></p>
+  </footer>
+
+  <script src="js/theory.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/rhythm-core.js"></script>
+  <script src="js/rhythm.js"></script>
+</body>
+</html>

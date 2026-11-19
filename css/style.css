@@ -547,3 +547,26 @@ kbd {
 .an-chords { display: flex; flex-wrap: wrap; gap: 8px; }
 .an-card { min-width: 92px; }
 .an-card.outside { border-style: dashed; }
+
+/* ---------- Rytm ---------- */
+.rh-g { font-family: "Noto Music", "Apple Symbols", "Segoe UI Symbol", serif; font-size: 26px; line-height: 1.2; text-align: center; }
+.rh-g.big { font-size: 30px; }
+.rh-tree, .rh-examples { display: grid; gap: 6px; margin: 12px 0; }
+.rh-row { display: grid; grid-template-columns: 210px 1fr; align-items: center; gap: 10px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.rh-row:hover { border-color: var(--accent); }
+.rh-glyphs { display: flex; gap: 4px; overflow: hidden; }
+@media (max-width: 600px) { .rh-row { grid-template-columns: 1fr; } }
+.rh-meter { display: flex; gap: 20px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+.rh-sig { display: inline-grid; font: 800 34px/0.95 Georgia, serif; text-align: center; }
+.rh-sig.small { font-size: 18px; margin-right: 8px; }
+.rh-beats { display: flex; gap: 10px; align-items: center; margin: 10px 0; }
+.rh-beat { border-radius: 50%; background: var(--border); }
+.rh-beat.a2 { width: 26px; height: 26px; } .rh-beat.a1 { width: 19px; height: 19px; } .rh-beat.a0 { width: 13px; height: 13px; }
+.rh-beat.on { background: var(--accent); }
+.rh-palette { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.rh-pal { flex-direction: column; gap: 0; min-width: 84px; align-items: center; }
+.rh-pal small { font-size: 11px; color: var(--muted); }
+.rh-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 56px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 10px; }
+.rh-barline { font-size: 34px; color: var(--muted); margin-left: auto; }
+.rh-fill { height: 6px; background: var(--surface-2); border-radius: 3px; margin-top: 6px; overflow: hidden; }
+.rh-fill > div { height: 100%; background: var(--accent); transition: width .2s; }
