@@ -17,7 +17,7 @@
     notation: 'intl', labels: 'note',
     tuning: 'standard', showAll: true, showScale: false, voicing: 0,
     pianoNames: true, fbNames: true,
-    prog: 'pop', custom: [], bpm: 90, beats: 4, loop: true, smooth: true, scalePos: -1, melody: [], harmPick: {},
+    prog: 'pop', custom: [], bpm: 90, beats: 4, loop: true, smooth: true, scalePos: -1, melody: [], harmPick: {}, harmGroup: 1,
   };
 
   // Tryb „wklikaj akord”: dźwięki wybrane na pianinie albo na gryfie.
@@ -814,12 +814,20 @@
   /* ---------- Harmonizacja melodii ---------- */
 
   function harmonization(sc) {
-    const res = T.harmonize(sc, state.melody);
-    const choice = res.choice.map((d, i) => {
-      const k = state.harmPick[i];
-      return (k != null && res.options[i].find((o) => o.degree === k)) || d;
+    const g = state.harmGroup;
+    const heads = state.melody.filter((_, i) => i % g === 0);
+    const base = T.harmonize(sc, heads);
+    const headChoice = base.choice.map((d, j) => {
+      const k = state.harmPick[j];
+      return (k != null && base.options[j].find((o) => o.degree === k)) || d;
     });
-    return { ...res, choice };
+    const choice = state.melody.map((_, i) => headChoice[Math.floor(i / g)]);
+    const nct = state.melody.map((k, i) => {
+      const c = choice[i];
+      if (!c || c.chord.notes.some((n) => n.note.pc === sc.notes[k].note.pc)) return null;
+      return T.nonChordTone(state.melody[i - 1], k, state.melody[i + 1]);
+    });
+    return { options: base.options, heads: headChoice, choice, nct };
   }
 
   function harmMidi(sc, k) {
@@ -847,15 +855,23 @@
     const hz = harmonization(sc);
     I.renderMelody($('harm-staff'), state.melody.map((k) => [{ midi: harmMidi(sc, k), note: sc.notes[k].note, role: null }]), {
       keySig: T.keySignature(sc.tonic, sc.scale.id), gap: 40, clef: 'treble',
-      labels: hz.choice.map((d) => T.chordSymbol(d.chord, state.notation)),
+      labels: hz.choice.map((d, i) => (i % state.harmGroup === 0 ? T.chordSymbol(d.chord, state.notation)
+        : hz.nct[i] ? { przejściowy: 'przej.', pomocniczy: 'pom.', obcy: 'obcy' }[hz.nct[i]] : '·')),
       onColumn: (i) => Sound.play([harmMidi(sc, state.melody[i]), 48 + hz.choice[i].chord.root.pc, ...T.smoothVoicing(hz.choice[i].chord, null, 55).midis], 'chord', 'piano', 1.4),
     });
-    $('harm-alts').replaceChildren(...state.melody.map((k, i) => h('div', { class: 'harm-col' },
-      h('span', { class: 'harm-note' }, `${i + 1}. ${nn(sc.notes[k].note)}`),
-      hz.options[i].map((o) => h('button', {
-        type: 'button', class: 'chip' + (o === hz.choice[i] || o.degree === hz.choice[i].degree ? ' active' : ''), title: o.chord.type.name,
-        onclick: () => { state.harmPick[i] = o.degree; render(); },
+    const g = state.harmGroup;
+    $('harm-alts').replaceChildren(...hz.heads.map((cur, j) => h('div', { class: 'harm-col' },
+      h('span', { class: 'harm-note' }, g === 1 ? `${j + 1}. ${nn(sc.notes[state.melody[j]].note)}`
+        : `nuty ${j * g + 1}–${Math.min(state.melody.length, (j + 1) * g)}: ${state.melody.slice(j * g, (j + 1) * g).map((k) => nn(sc.notes[k].note)).join(' ')}`),
+      hz.options[j].map((o) => h('button', {
+        type: 'button', class: 'chip' + (o.degree === cur.degree ? ' active' : ''), title: o.chord.type.name,
+        onclick: () => { state.harmPick[j] = o.degree; render(); },
       }, h('b', {}, o.roman + ' '), T.chordSymbol(o.chord, state.notation))))));
+    const counts = hz.nct.filter(Boolean);
+    if (counts.length) {
+      $('harm-alts').append(h('p', { class: 'hint harm-nct' }, `Dźwięki obce akordom: ${counts.length} — `,
+        'przej. = przejściowy (łączy krokami dwa dźwięki akordu), pom. = pomocniczy (krok od dźwięku i powrót), obcy = inny (np. skokiem). Akord pasuje do pierwszej, akcentowanej nuty grupy.'));
+    }
   }
 
   function playHarmonization() {
@@ -863,13 +879,15 @@
     if (!state.melody.length || sc.notes.length !== 7) return;
     const hz = harmonization(sc);
     let prev = null;
+    const g = state.harmGroup;
+    const step = g === 1 ? 650 : g === 2 ? 450 : 330;
     state.melody.forEach((k, i) => {
-      const v = T.smoothVoicing(hz.choice[i].chord, prev, 55);
-      prev = v.midis;
+      let v = null;
+      if (i % g === 0) { v = T.smoothVoicing(hz.choice[i].chord, prev, 55); prev = v.midis; }
       setTimeout(() => {
-        Sound.play([36 + hz.choice[i].chord.root.pc, ...v.midis], 'chord', 'piano', 0.9);
-        Sound.play([harmMidi(sc, k) + 12], 'chord', 'piano', 0.8);
-      }, i * 650);
+        if (v) Sound.play([36 + hz.choice[i].chord.root.pc, ...v.midis], 'chord', 'piano', (step * g) / 1000 + 0.2);
+        Sound.play([harmMidi(sc, k) + 12], 'chord', 'piano', 0.6);
+      }, i * step);
     });
   }
 
@@ -1181,6 +1199,7 @@
     window.addEventListener('hashchange', () => { loadHash(); render(); });
     $('an-input').addEventListener('input', renderAnalysis);
     $('harm-play').addEventListener('click', playHarmonization);
+    $('harm-group').addEventListener('change', (e) => { state.harmGroup = +e.target.value; state.harmPick = {}; render(); });
     $('harm-undo').addEventListener('click', () => { state.melody.pop(); delete state.harmPick[state.melody.length]; render(); });
     $('harm-clear').addEventListener('click', () => { state.melody = []; state.harmPick = {}; render(); });
     $('harm-example').addEventListener('click', () => {
@@ -1196,7 +1215,7 @@
       if (!state.melody.length || sc.notes.length !== 7) return;
       const hz = harmonization(sc);
       stopProg(false);
-      state.custom = hz.choice.map((d) => T.noteKey(d.chord.root) + '.' + d.chord.type.id);
+      state.custom = hz.heads.map((d) => T.noteKey(d.chord.root) + '.' + d.chord.type.id);
       state.prog = 'custom';
       render();
       $('prog-section').scrollIntoView({ behavior: 'smooth' });

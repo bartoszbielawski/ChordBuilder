@@ -363,6 +363,14 @@
       const am = T.buildScale(T.parseNote('A'), 'minor');
       eq(T.harmonize(am, [0, 1, 0]).choice.map((d) => T.chordSymbol(d.chord)).join(' '), 'Am E Am');
     }],
+    ['Dźwięki obce w harmonizacji', (T, eq) => {
+      const sc = T.buildScale(T.parseNote('C'), 'major');
+      eq(T.nonChordTone(0, 1, 2), 'przejściowy');
+      eq(T.nonChordTone(2, 3, 2), 'pomocniczy');
+      const r = T.harmonizeGroups(sc, [0, 1, 2, 1, 0, 0], 2);
+      eq(r.choice.map((d) => d.roman).join(' '), 'I I I I I I');
+      eq(r.nct, [null, 'przejściowy', null, 'przejściowy', null, null]);
+    }],
     ['Polskie nazwy tonacji', (T, eq) => {
       const k = (n, m) => T.polishKeyName(T.parseNote(n), m);
       eq(k('Eb', 'major'), 'Es-dur'); eq(k('Ab', 'major'), 'As-dur'); eq(k('Bb', 'major'), 'B-dur');

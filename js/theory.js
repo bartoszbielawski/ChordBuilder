@@ -431,6 +431,34 @@
    * Wybór: programowanie dynamiczne — I na początku i końcu, V przed końcowym I,
    * naturalne ruchy basu (kwarta w górę, sekunda w górę, tercja w dół).
    */
+  /**
+   * Rodzaj dźwięku obcego: przejściowy (krokami w jednym kierunku między dźwiękami akordu),
+   * pomocniczy (krok od dźwięku i powrót), w przeciwnym razie — „obcy”. a, x, b — stopnie.
+   */
+  function nonChordTone(a, x, b) {
+    if (a == null || b == null) return 'obcy';
+    const d1 = x - a, d2 = b - x;
+    if (Math.abs(d1) === 1 && Math.abs(d2) === 1) return d1 === d2 ? 'przejściowy' : 'pomocniczy';
+    return 'obcy';
+  }
+
+  /**
+   * Harmonizacja z jednym akordem na grupę nut (group = 1, 2 lub 4). Akord zawiera
+   * pierwszą (akcentowaną) nutę grupy; pozostałe spoza akordu są opisane jako dźwięki obce.
+   * Zwraca { options (dla pierwszych nut grup), choice[] (dla każdej nuty), nct[] }.
+   */
+  function harmonizeGroups(sc, degrees, group = 1) {
+    const heads = degrees.filter((_, i) => i % group === 0);
+    const res = harmonize(sc, heads);
+    const choice = degrees.map((_, i) => res.choice[Math.floor(i / group)]);
+    const nct = degrees.map((k, i) => {
+      const c = choice[i];
+      if (!c || c.chord.notes.some((n) => n.note.pc === sc.notes[k].note.pc)) return null;
+      return nonChordTone(degrees[i - 1], k, degrees[i + 1]);
+    });
+    return { options: res.options, choice, nct, heads: res.choice };
+  }
+
   function harmonize(sc, degrees) {
     let dia = diatonicChords(sc, 3);
     // W molu dominanta durowa (z harmonicznej), jak w praktyce.
@@ -900,7 +928,7 @@
   global.Theory = {
     staffStep, intervalOf, invertInterval, consonance, enharmonicIntervals,
     keySignature, alterationsVsMajor, smoothVoicing, voiceMoves, secondaryDominant,
-    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels, cagedShape, harmonize, polishNoteName, polishKeyName,
+    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels, cagedShape, harmonize, harmonizeGroups, nonChordTone, polishNoteName, polishKeyName,
     LETTERS, SCALES, CHORD_TYPES, CHORD_GROUPS, TUNINGS,
     mod, makeNote, parseNote, noteKey, noteName,
     parseInterval, describeInterval, intervalBetween, transpose,

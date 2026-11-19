@@ -98,7 +98,8 @@ kroku budowania), więc działa od razu na GitHub Pages.
   (zapożyczone, dominanty wtrącone); jednym kliknięciem zrobisz z nich progresję
   albo przetransponujesz je do innej tonacji.
 - **Harmonizacja melodii:** melodia ze stopni skali → akord do każdej nuty
-  (tonika na początku i końcu, dominanta przed końcem, naturalne ruchy basu),
+  (tonika na początku i końcu, dominanta przed końcem, naturalne ruchy basu);
+  akord na każdą nutę albo co 2–4 nuty z opisem dźwięków obcych (przejściowe, pomocnicze),
   inne pasujące akordy do wyboru, odsłuch i przeniesienie do progresji.
 - **Rozpoznawanie akordu („✎ Wklikaj akord”):** wybierz dźwięki na pianinie
   albo na gryfie, a strona poda nazwę akordu (z przewrotem, np. C/E, wariantem
