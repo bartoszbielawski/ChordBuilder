@@ -581,3 +581,5 @@ kbd {
 .keys-table td { vertical-align: middle; }
 .keys-staff svg { display: block; }
 .chord-table tr.active-row td { background: var(--accent-soft); }
+.rh-glyphs .rh-g { min-width: 0; }
+@media (max-width: 600px) { .rh-tree .rh-g { font-size: 18px; } }
