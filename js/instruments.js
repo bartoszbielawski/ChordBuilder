@@ -91,35 +91,36 @@
    */
   function renderFretboard(container, opts) {
     const { tuning, frets = 15, cell, stringNames = [], onCell, cellName, cellTitle } = opts;
+    const N = tuning.length, L = N - 1;
     const x0 = 44, width = 900, top = 18, gap = 28;
-    const h = top * 2 + gap * 5;
+    const h = top * 2 + gap * L;
     const svg = el('svg', {
       viewBox: `0 0 ${x0 + width + 16} ${h + 22}`, class: 'fretboard', role: 'img',
-      'aria-label': 'Gryf gitary z zaznaczonymi dźwiękami akordu',
+      'aria-label': N === 6 ? 'Gryf gitary z zaznaczonymi dźwiękami' : 'Gryf instrumentu z zaznaczonymi dźwiękami',
     });
-    const yOf = (s) => top + (5 - s) * gap;
+    const yOf = (s) => top + (L - s) * gap;
 
-    el('rect', { x: x0, y: top - 8, width, height: gap * 5 + 16, class: 'fb-wood', rx: 3 }, svg);
+    el('rect', { x: x0, y: top - 8, width, height: gap * L + 16, class: 'fb-wood', rx: 3 }, svg);
     for (const f of [3, 5, 7, 9, 15]) {
       const cx = (fretX(f - 1, frets, x0, width) + fretX(f, frets, x0, width)) / 2;
-      if (f <= frets) el('circle', { cx, cy: top + gap * 2.5, r: 6, class: 'fb-inlay' }, svg);
+      if (f <= frets) el('circle', { cx, cy: top + gap * L / 2, r: 6, class: 'fb-inlay' }, svg);
     }
     if (frets >= 12) {
       const cx = (fretX(11, frets, x0, width) + fretX(12, frets, x0, width)) / 2;
-      el('circle', { cx, cy: top + gap * 1.5, r: 6, class: 'fb-inlay' }, svg);
-      el('circle', { cx, cy: top + gap * 3.5, r: 6, class: 'fb-inlay' }, svg);
+      el('circle', { cx, cy: top + gap * (L / 2 - 1), r: 6, class: 'fb-inlay' }, svg);
+      el('circle', { cx, cy: top + gap * (L / 2 + 1), r: 6, class: 'fb-inlay' }, svg);
     }
     for (let f = 0; f <= frets; f++) {
       const x = fretX(f, frets, x0, width);
-      el('line', { x1: x, x2: x, y1: top - 8, y2: top + gap * 5 + 8, class: f === 0 ? 'fb-nut' : 'fb-fret' }, svg);
+      el('line', { x1: x, x2: x, y1: top - 8, y2: top + gap * L + 8, class: f === 0 ? 'fb-nut' : 'fb-fret' }, svg);
       if (f > 0) text(svg, (fretX(f - 1, frets, x0, width) + x) / 2, h + 10, String(f), 'fb-num');
     }
-    for (let s = 0; s < 6; s++) {
-      el('line', { x1: x0, x2: x0 + width, y1: yOf(s), y2: yOf(s), class: 'fb-string', 'stroke-width': 0.8 + (5 - s) * 0.35 }, svg);
+    for (let s = 0; s < N; s++) {
+      el('line', { x1: x0, x2: x0 + width, y1: yOf(s), y2: yOf(s), class: 'fb-string', 'stroke-width': 0.8 + (L - s) * 0.35 }, svg);
       text(svg, 12, yOf(s), stringNames[s] || '', 'fb-sname');
     }
 
-    for (let s = 0; s < 6; s++) {
+    for (let s = 0; s < N; s++) {
       for (let f = 0; f <= frets; f++) {
         const cx = f === 0 ? x0 - 16 : (fretX(f - 1, frets, x0, width) + fretX(f, frets, x0, width)) / 2;
         const cy = yOf(s);
@@ -150,12 +151,13 @@
     const maxF = fretted.length ? Math.max(...fretted) : 0;
     const minF = fretted.length ? Math.min(...fretted) : 1;
     const base = maxF <= 4 ? 1 : minF;
+    const N = voicing.frets.length, L = N - 1;
     const x0 = 32, dx = 16, y0 = 26, dy = 20, rows = 4;
-    const svg = el('svg', { viewBox: `0 0 ${x0 + dx * 5 + 16} ${y0 + dy * rows + 26}`, class: 'diagram' });
+    const svg = el('svg', { viewBox: `0 0 ${x0 + dx * L + 16} ${y0 + dy * rows + 26}`, class: 'diagram' });
 
-    for (let s = 0; s < 6; s++) el('line', { x1: x0 + s * dx, x2: x0 + s * dx, y1: y0, y2: y0 + dy * rows, class: 'dg-line' }, svg);
+    for (let s = 0; s < N; s++) el('line', { x1: x0 + s * dx, x2: x0 + s * dx, y1: y0, y2: y0 + dy * rows, class: 'dg-line' }, svg);
     for (let r = 0; r <= rows; r++) {
-      el('line', { x1: x0, x2: x0 + dx * 5, y1: y0 + r * dy, y2: y0 + r * dy, class: r === 0 && base === 1 ? 'dg-nut' : 'dg-line' }, svg);
+      el('line', { x1: x0, x2: x0 + dx * L, y1: y0 + r * dy, y2: y0 + r * dy, class: r === 0 && base === 1 ? 'dg-nut' : 'dg-line' }, svg);
     }
     if (base > 1) text(svg, 13, y0 + dy / 2, base + 'fr', 'dg-base');
 
@@ -184,8 +186,8 @@
     });
     const marks = frets.map((f) => (f < 0 ? 'x' : String(f)));
     const wide = frets.some((f) => f > 9);
-    const t = text(svg, x0 + dx * 2.5, y0 + dy * rows + 16, marks.join(wide ? ' ' : ''), 'dg-tab');
-    if (wide) { t.setAttribute('textLength', dx * 5 + 16); t.setAttribute('lengthAdjust', 'spacingAndGlyphs'); }
+    const t = text(svg, x0 + dx * L / 2, y0 + dy * rows + 16, marks.join(wide ? ' ' : ''), 'dg-tab');
+    if (wide) { t.setAttribute('textLength', dx * L + 16); t.setAttribute('lengthAdjust', 'spacingAndGlyphs'); }
     return svg;
   }
 

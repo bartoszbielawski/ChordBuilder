@@ -72,7 +72,7 @@ kroku budowania), więc działa od razu na GitHub Pages.
 - **Poprawna pisownia enharmoniczna:** F-dur ma B♭, nie A♯; C♯-dur ma E♯ i B♯.
 - **Notacja A B C lub A H C** (polska/niemiecka, gdzie B = B♭).
 - **Pianino:** akord w wybranym przewrocie, dźwięki skali zaznaczone kropkami.
-- **Gitara:** gryf do 15. progu, kilka strojów, automatycznie wyszukiwane
+- **Gitara, ukulele i gitara basowa:** gryf do 15. progu, kilka strojów (także ukulele GCEA i bas EADG), automatycznie wyszukiwane
   grywalne chwyty z diagramami (bas zgodny z przewrotem).
 - **Pozycje skali na gryfie:** skala w oknie 5 progów od wybranego stopnia
   na 6. strunie (np. G-dur w pozycji od 3. progu), z toniką i stopniami.

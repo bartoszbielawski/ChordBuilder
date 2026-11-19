@@ -21,7 +21,7 @@
   };
 
   // Tryb „wklikaj akord”: dźwięki wybrane na pianinie albo na gryfie.
-  const input = { on: false, source: 'piano', piano: new Set(), guitar: [-1, -1, -1, -1, -1, -1] };
+  const input = { on: false, source: 'piano', piano: new Set(), guitar: [] };
 
   /* ---------- Trwałość: preferencje + URL ---------- */
 
@@ -823,7 +823,7 @@
 
   function clearInput() {
     input.piano.clear();
-    input.guitar = [-1, -1, -1, -1, -1, -1];
+    input.guitar = T.tuningById(state.tuning).midi.map(() => -1);
   }
 
   function renderRecognize(sc, rec) {
@@ -956,6 +956,8 @@
     const scaleByPc = new Map(sc.notes.map((n) => [n.note.pc, n]));
     const name = input.on ? (pc) => nn(rec.noteOf(pc)) : pcNamer(chord, sc);
 
+    document.querySelector('#guitar-section h2').textContent =
+      tuning.id.startsWith('ukulele') ? 'Ukulele' : tuning.id === 'bass' ? 'Gitara basowa' : 'Gitara';
     // Pozycja skali: okno 5 progów zaczynające się od wybranego stopnia na 6. strunie.
     const posSel = $('scale-pos');
     const low = tuning.midi[0];
@@ -976,7 +978,7 @@
       cellName: state.fbNames ? (s, f) => name(T.mod(tuning.midi[s] + f, 12)) : null,
       cellTitle: (s, f) => {
         const m = tuning.midi[s] + f;
-        const pos = `Struna ${6 - s} (${stringNames[s]}), ${f === 0 ? 'pusta' : 'próg ' + f}: `;
+        const pos = `Struna ${tuning.midi.length - s} (${stringNames[s]}), ${f === 0 ? 'pusta' : 'próg ' + f}: `;
         return pos + (input.on ? name(T.mod(m, 12)) + (Math.floor(m / 12) - 1) : midiTitle(name(T.mod(m, 12)), m, chord, sc));
       },
       cell: (s, f) => {
@@ -1060,7 +1062,7 @@
     $('scale').addEventListener('change', (e) => { state.scale = e.target.value; state.scalePos = -1; selectFirstChord(); render(); });
     $('chord-root').addEventListener('change', (e) => { state.root = e.target.value; state.voicing = 0; render(); });
     $('chord-type').addEventListener('change', (e) => { state.type = e.target.value; state.inv = 0; state.voicing = 0; render(); });
-    $('tuning').addEventListener('change', (e) => { state.tuning = e.target.value; state.voicing = 0; savePrefs(); render(); });
+    $('tuning').addEventListener('change', (e) => { state.tuning = e.target.value; state.voicing = 0; state.scalePos = -1; clearInput(); savePrefs(); render(); });
     $('show-all').addEventListener('change', (e) => { state.showAll = e.target.checked; savePrefs(); render(); });
     $('scale-pos').addEventListener('change', (e) => { state.scalePos = +e.target.value; render(); });
     $('show-scale').addEventListener('change', (e) => { state.showScale = e.target.checked; savePrefs(); render(); });

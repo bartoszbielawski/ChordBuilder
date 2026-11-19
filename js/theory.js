@@ -547,6 +547,9 @@
     { id: 'dropD', name: 'Drop D (D A D G B E)', midi: [38, 45, 50, 55, 59, 64] },
     { id: 'dadgad', name: 'DADGAD', midi: [38, 45, 50, 55, 57, 62] },
     { id: 'openG', name: 'Open G (D G D G B D)', midi: [38, 43, 50, 55, 59, 62] },
+    { id: 'ukulele', name: 'Ukulele (G C E A)', midi: [67, 60, 64, 69], reentrant: true, strings: 4 },
+    { id: 'ukuleleLow', name: 'Ukulele z niskim G (G C E A)', midi: [55, 60, 64, 69], strings: 4 },
+    { id: 'bass', name: 'Gitara basowa (E A D G)', midi: [28, 33, 38, 43], strings: 4 },
   ];
   const tuningById = (id) => TUNINGS.find((t) => t.id === id) || TUNINGS[0];
 
@@ -561,7 +564,8 @@
       chord.notes.filter((n) => chord.type.optional.includes(n.iv.sym)).map((n) => n.note.pc)
     );
     const required = [...allPcs].filter((pc) => !optionalPcs.has(pc) || pc === bassPc);
-    const minStrings = Math.min(allPcs.size >= 4 ? 4 : 3, 6);
+    const N = strings.length;
+    const minStrings = Math.min(allPcs.size >= 4 ? 4 : 3, N);
     const found = new Map();
 
     for (let start = 1; start <= maxFret - 3; start++) {
@@ -571,9 +575,9 @@
         for (let f = start; f <= start + 3; f++) if (allPcs.has(mod(open + f, 12))) o.push(f);
         return o;
       });
-      const cur = new Array(6);
+      const cur = new Array(N);
       (function rec(s) {
-        if (s === 6) return evaluate(cur.slice());
+        if (s === N) return evaluate(cur.slice());
         for (const f of opts[s]) { cur[s] = f; rec(s + 1); }
       })(0);
     }
@@ -583,7 +587,10 @@
       if (sounding.length < minStrings) return;
       const lo = sounding[0], hi = sounding[sounding.length - 1];
       if (hi - lo + 1 !== sounding.length) return; // wytłumiona struna w środku
-      if (mod(strings[lo] + frets[lo], 12) !== bassPc) return;
+      // Bas = najniższy brzmiący dźwięk (w stroju „re-entrant”, np. ukulele, nie musi to być struna 0).
+      const lowest = sounding.reduce((a, i) => (strings[i] + frets[i] < strings[a] + frets[a] ? i : a), sounding[0]);
+      if (!tuning.reentrant && mod(strings[lo] + frets[lo], 12) !== bassPc) return;
+      if (tuning.reentrant && mod(strings[lowest] + frets[lowest], 12) !== bassPc && N > 4) return;
       const pcs = new Set(sounding.map((i) => mod(strings[i] + frets[i], 12)));
       if (!required.every((pc) => pcs.has(pc))) return;
       const fretted = frets.filter((f) => f > 0);
@@ -605,7 +612,7 @@
       if (fingers > 4) return;
       const complete = pcs.size === allPcs.size;
       const openPosition = hasOpen && maxF <= 3;
-      const score = (6 - sounding.length) * 1.2 + minF * 0.4 + fingers * 0.6 +
+      const score = (N - sounding.length) * 1.2 + minF * 0.4 + fingers * 0.6 +
         (complete ? 0 : 1.5) - (openPosition ? 1 : 0);
       const key = frets.join(',');
       if (!found.has(key)) found.set(key, { frets, score, minF, complete, fingers });

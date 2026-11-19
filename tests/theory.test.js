@@ -326,6 +326,20 @@
       eq(T.parallels([48, 55], [47, 54]).length, 1);
       eq(T.parallels([48, 55], [50, 55]).length, 0);
     }],
+    ['Ukulele i bas: chwyty na 4 strunach', (T, eq, ok) => {
+      const uke = T.tuningById('ukulele');
+      const fr4 = (v) => v.frets.join('');
+      const best = (r, t) => fr4(T.findVoicings(T.buildChord(T.parseNote(r), t), T.parseNote(r).pc, uke)[0]);
+      eq(best('C', 'maj'), '0003');
+      eq(best('A', 'min'), '2000');
+      eq(best('F', 'maj'), '2010');
+      eq(best('G', 'maj'), '0232');
+      for (const t of ['maj', 'min', '7', 'm7']) for (const r of ['C', 'D', 'E', 'F', 'G', 'A', 'Bb']) {
+        const c = T.buildChord(T.parseNote(r), t);
+        ok(T.findVoicings(c, c.root.pc, uke).length > 0, `ukulele ${r}${t}`);
+        ok(T.findVoicings(c, c.root.pc, T.tuningById('bass')).every((v) => v.frets.length === 4), `bas ${r}${t}`);
+      }
+    }],
     ['Dominanty wtrącone', (T, eq) => {
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('D'))), 'A7');
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('Bb'))), 'F7');

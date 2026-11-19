@@ -40,7 +40,7 @@ i najtańszych w realizacji.
 | 3.1 | ~~**Pozycje skali na gryfie**~~ ✓ (okna 5 progów) | System CAGED i 3-nuty-na-strunę, przełączanie pozycji. | M |
 | 3.2 | **Kształty CAGED dla akordów** | Pokazanie, z którego kształtu (C, A, G, E, D) pochodzi chwyt. | M |
 | 3.3 | **Gitara leworęczna, odwrócony gryf, więcej progów** | Ustawienia widoku. | S |
-| 3.4 | **Inne instrumenty strunowe** | Ukulele (GCEA), gitara basowa, mandolina, gitara 7-strunowa, własny strój. | S |
+| 3.4 | ~~**Inne instrumenty strunowe**~~ ✓ (ukulele, bas) | Ukulele (GCEA), gitara basowa, mandolina, gitara 7-strunowa, własny strój. | S |
 | 3.5 | **Wybór wariantu chwytu** | Filtry: tylko otwarte / tylko barré / drop 2 / drop 3 / określone struny. | M |
 | 3.6 | **Układy pianistyczne** | Close / open / drop 2, układy lewa+prawa ręka, rootless voicings (jazz), prowadzenie głosów między akordami. | L |
 
@@ -84,5 +84,4 @@ Rytm i nowe ćwiczenia na stronie na żywo.
 Dalsze pomysły (malejąco wg wartości dla nauki):
 
 1. **3.2 Kształty CAGED** dla akordów (pozycje skal ✓) — dla nauczycieli gitary.
-2. **3.4 Inne instrumenty** (ukulele, bas) — wymaga uogólnienia gryfu i chwytów na 4 struny.
-3. **4.3 Lepsze brzmienie** (próbki zamiast syntezatora) i **5.1 wersja angielska**.
+2. **4.3 Lepsze brzmienie** (próbki zamiast syntezatora) i **5.1 wersja angielska**.
