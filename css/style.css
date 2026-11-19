@@ -607,3 +607,7 @@ html.present .site-footer, html.present .settings .field:first-child { display: 
 @media (max-width: 760px) { .present-btn { display: none; } html.present body { zoom: 1; } }
 .share-note { font-size: 13px; color: var(--muted); }
 .share-note a { word-break: break-all; }
+#ex-share { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.test-log { margin: 6px 0 10px; padding-left: 22px; font-size: 14px; }
+.test-log li { margin-bottom: 4px; }
+.test-log .no { color: var(--no); text-decoration: line-through; }

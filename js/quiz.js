@@ -29,7 +29,7 @@
   const prefs = C.loadPrefs();
   const state = {
     notation: prefs.notation === 'H' ? 'H' : 'intl',
-    ex: null, level: 1, opts: {}, q: null, answered: null, ok: false, sel: new Set(), seq: [], picked: null,
+    ex: null, level: 1, opts: {}, q: null, answered: null, ok: false, sel: new Set(), seq: [], picked: null, test: null,
     session: { ok: 0, total: 0, streak: 0 },
   };
   const stats = C.loadJSON(STATS_KEY, {});
@@ -967,6 +967,7 @@
   }
 
   function start(id) {
+    state.test = null;
     state.ex = id;
     state.session = { ok: 0, total: 0, streak: 0 };
     state.opts = optsFor(exById(id));
@@ -1014,6 +1015,16 @@
     record(state.ex, q.item, ok);
     const s = exStats(state.ex);
     if (state.session.streak > s.best) { s.best = state.session.streak; C.saveJSON(STATS_KEY, stats); }
+    if (state.test && !state.test.done) {
+      const t = state.test;
+      const given = q.input ? '' : (q.answers.find((a) => a.key === key) || {}).label;
+      t.log.push({ prompt: typeof q.prompt === 'string' ? q.prompt : q.prompt.textContent, given, correct: q.correctLabel || (q.answers.find((a) => a.key === q.correct) || {}).label, ok });
+      if (ok) t.ok++;
+      if (t.log.length >= t.n) t.done = true;
+      render();
+      if (!t.done) timers.push(setTimeout(next, 700));
+      return;
+    }
     render();
     const nb = $('next-btn');
     if (nb) nb.focus({ preventScroll: true });
@@ -1042,7 +1053,8 @@
 
     $('ex-share').replaceChildren(SEED
       ? h('span', { class: 'share-note' }, `Zestaw wspólny: ${SEED} — wszyscy z tym linkiem dostają te same pytania.`)
-      : h('button', { type: 'button', class: 'btn ghost small', title: 'Link, po którym cała klasa dostanie te same pytania w tej samej kolejności', onclick: shareLink }, '🔗 Link dla klasy'));
+      : h('button', { type: 'button', class: 'btn ghost small', title: 'Link, po którym cała klasa dostanie te same pytania w tej samej kolejności', onclick: shareLink }, '🔗 Link dla klasy'),
+    state.test ? null : h('button', { type: 'button', class: 'btn ghost small', title: '10 pytań bez podpowiedzi; wynik i błędy na końcu', onclick: () => startTest() }, '📝 Sprawdzian (10 pytań)'));
     const sess = state.session;
     $('ex-score').textContent = sess.total ? `Ta sesja: ${sess.ok}/${sess.total} · seria ${sess.streak}` : 'Ta sesja: —';
 
@@ -1104,6 +1116,27 @@
     const fb = $('ex-feedback');
     fb.replaceChildren();
     fb.hidden = !state.answered;
+    if (state.test) {
+      const t = state.test;
+      $('ex-score').textContent = t.done ? `Sprawdzian: ${t.ok}/${t.n}` : `Sprawdzian: pytanie ${Math.min(t.log.length + (state.answered ? 0 : 1), t.n)} z ${t.n}`;
+      if (state.answered && !t.done) {
+        fb.className = 'quiz-feedback';
+        fb.append(h('div', { class: 'qf-head' }, h('b', {}, 'Odpowiedź zapisana — następne pytanie…')));
+        return;
+      }
+      if (t.done) {
+        const pct = Math.round((100 * t.ok) / t.n);
+        fb.className = 'quiz-feedback ' + (pct >= 50 ? 'ok' : 'bad');
+        fb.append(h('div', { class: 'qf-head' }, h('b', {}, `Wynik sprawdzianu: ${t.ok}/${t.n} (${pct}%)`)),
+          t.log.some((x) => !x.ok) ? h('p', {}, 'Błędne odpowiedzi:') : h('p', {}, 'Wszystko dobrze — gratulacje!'),
+          h('ol', { class: 'test-log' }, t.log.map((x, i) => (x.ok ? null : h('li', { value: i + 1 },
+            h('span', {}, x.prompt), ' — ', x.given ? h('span', { class: 'no' }, x.given) : null, x.given ? ' → ' : '', h('b', {}, x.correct))))),
+          h('div', { class: 'controls tight' },
+            h('button', { type: 'button', class: 'btn', id: 'next-btn', onclick: () => startTest() }, 'Nowy sprawdzian'),
+            h('button', { type: 'button', class: 'btn ghost', onclick: () => { state.test = null; next(); } }, 'Wróć do ćwiczenia')));
+        return;
+      }
+    }
     if (state.answered) {
       const ok = state.ok;
       fb.className = 'quiz-feedback ' + (ok ? 'ok' : 'bad');
@@ -1113,6 +1146,12 @@
       q.explain(fb);
       fb.append(h('div', { class: 'controls tight' }, h('button', { type: 'button', class: 'btn', id: 'next-btn', onclick: next }, 'Dalej → (Enter)')));
     }
+  }
+
+  function startTest() {
+    state.test = { n: 10, ok: 0, log: [], done: false };
+    state.session = { ok: 0, total: 0, streak: 0 };
+    next();
   }
 
   function shareLink() {
@@ -1131,6 +1170,7 @@
       const b = e.target.closest('button[data-value]');
       if (!b) return;
       state.level = +b.dataset.value;
+      state.test = null;
       state.session = { ok: 0, total: 0, streak: 0 };
       next();
     });
@@ -1177,7 +1217,7 @@
         e.preventDefault(); state.q.play();
       } else if (e.key === 'Enter' && !state.answered && state.q.input === 'piano' && state.sel.size && !e.target.closest('button')) {
         e.preventDefault(); answer();
-      } else if (e.key === 'Enter' && state.answered && !e.target.closest('button')) {
+      } else if (e.key === 'Enter' && state.answered && !(state.test) && !e.target.closest('button')) {
         e.preventDefault(); next();
       }
     });
