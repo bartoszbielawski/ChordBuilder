@@ -378,6 +378,107 @@
       });
   }
 
+  /* ---------- Analiza: symbol akordu → akord, akordy → tonacja ---------- */
+
+  // Dodatkowe zapisy symboli (oprócz tych z CHORD_TYPES).
+  const SYMBOL_ALIASES = {
+    '': 'maj', M: 'maj', maj: 'maj', major: 'maj', m: 'min', min: 'min', '-': 'min', mi: 'min',
+    dim: 'dim', '°': 'dim', o: 'dim', aug: 'aug', '+': 'aug', '#5': 'aug',
+    M7: 'maj7', 'Δ': 'maj7', 'Δ7': 'maj7', 'ma7': 'maj7', 'm7': 'm7', 'min7': 'm7', '-7': 'm7',
+    'ø': 'm7b5', 'ø7': 'm7b5', 'm7b5': 'm7b5', 'm7♭5': 'm7b5', '-7b5': 'm7b5',
+    dim7: 'dim7', '°7': 'dim7', o7: 'dim7', 'mmaj7': 'mMaj7', 'm(maj7)': 'mMaj7', 'mM7': 'mMaj7',
+    '7#5': 'aug7', '7♯5': 'aug7', 'aug7': 'aug7', '+7': 'aug7', sus: 'sus4', '7sus': '7sus4',
+    add9: 'add9', 'madd9': 'madd9', 'm(add9)': 'madd9', '6/9': '69', '69': '69', '7b9': '7b9', '7♭9': '7b9', '7#9': '7s9', '7♯9': '7s9',
+  };
+
+  /**
+   * „F#m7”, „Bb”, „Hm” (notacja H), „C/E” → { chord, bass } lub null.
+   * W notacji H: H = B, B = B♭ (także „Hes” nie jest obsługiwane — używaj ♭/b).
+   */
+  function parseChordSymbol(str, notation) {
+    const m = /^\s*([A-Ha-h])(#|♯|b|♭|is|es|s)?(.*?)(?:\/([A-Ha-h])(#|♯|b|♭)?)?\s*$/.exec(str);
+    if (!m) return null;
+    const toNote = (L, acc) => {
+      L = L.toUpperCase();
+      let a = !acc ? 0 : /#|♯|is/.test(acc) ? 1 : -1;
+      let letter;
+      if (L === 'H') { if (notation !== 'H') return null; letter = 6; }
+      else if (L === 'B' && notation === 'H') { letter = 6; a -= 1; }
+      else letter = LETTERS.indexOf(L);
+      return makeNote(letter, a);
+    };
+    const root = toNote(m[1], m[2]);
+    if (!root) return null;
+    let suf = m[3].trim().replace(/^\(|\)$/g, (x) => x);
+    let typeId = SYMBOL_ALIASES[suf];
+    if (typeId === undefined) {
+      const t = CHORD_TYPES.find((c) => c.symbol === suf || c.id === suf || c.symbol.replace(/♭/g, 'b').replace(/♯/g, '#') === suf);
+      typeId = t ? t.id : undefined;
+    }
+    if (typeId === undefined) return null;
+    const bass = m[4] ? toNote(m[4], m[5]) : null;
+    if (m[4] && !bass) return null;
+    return { chord: buildChord(root, typeId), bass };
+  }
+
+  /**
+   * Możliwe tonacje dla listy akordów: dur, moll (naturalny + harmoniczny dla V/vii°).
+   * Zwraca listę od najlepszej: { tonic, mode: 'major'|'minor', fit, total, analysis[] }.
+   * analysis[i]: { roman, inKey, note } — note: wyjaśnienie dla akordu spoza tonacji.
+   */
+  function analyzeKey(chords) {
+    if (!chords.length) return [];
+    const out = [];
+    const tonics = 'C G D A E B F# C# F Bb Eb Ab Db Gb Cb'.split(' ');
+    for (const t of tonics) {
+      for (const mode of ['major', 'minor']) {
+        const majorTonic = parseNote(t);
+        const tonic = mode === 'major' ? majorTonic : transpose(majorTonic, parseInterval('6'));
+        const scales = mode === 'major' ? [buildScale(tonic, 'major')] : [buildScale(tonic, 'minor'), buildScale(tonic, 'harmonicMinor')];
+        // Przynależność z uwzględnieniem pisowni (A♭ ≠ G♯); pryma przepisana na pisownię skali.
+        const respelled = (c, sc) => {
+          const sn = sc.notes.find((n) => n.note.pc === c.root.pc);
+          return sn ? buildChord(sn.note, c.type.id) : c;
+        };
+        const fitsSpelled = (c, sc) => respelled(c, sc).notes.every((n) => sc.notes.some((x) => x.note.letter === n.note.letter && x.note.acc === n.note.acc));
+        const inScale = (c) => scales.some((sc) => fitsSpelled(c, sc));
+        const parallel = buildScale(tonic, mode === 'major' ? 'minor' : 'major');
+        let fit = 0;
+        const analysis = chords.map((c) => {
+          const home = scales.find((sc) => sc.notes.some((n) => n.note.pc === c.root.pc));
+          const iv = intervalBetween(tonic, home ? respelled(c, home).root : c.root);
+          // pisownia względem toniki (np. A♯ w B♭-dur traktujemy jak B♭)
+          const roman = romanFor(iv.deg, iv.diff, c.type);
+          if (inScale(c)) { fit++; return { roman, inKey: true }; }
+          let note = 'spoza tonacji';
+          if (fitsSpelled(c, parallel)) note = `zapożyczony z ${mode === 'major' ? 'molowej' : 'durowej'} jednoimiennej`;
+          else if (['7', 'maj'].includes(c.type.id)) {
+            const target = transpose(c.root, parseInterval('4'));
+            const tc = scales[0].notes.findIndex((n) => n.note.pc === target.pc);
+            if (tc > 0) note = `dominanta wtrącona do stopnia ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][tc]}`;
+          }
+          return { roman, inKey: false, note };
+        });
+        let score = fit * 10;
+        const isTonic = (c) => c.root.pc === tonic.pc && (mode === 'major' ? !c.type.intervals.some((i) => i.semi === 3) : c.type.intervals.some((i) => i.deg === 3 && i.semi === 3));
+        if (isTonic(chords[0])) score += 6;
+        if (isTonic(chords[chords.length - 1])) score += 7;
+        if (chords.some(isTonic)) score += 2;
+        else score -= 6;
+        // V → I na końcu wzmacnia tonację
+        const n = chords.length;
+        if (n >= 2 && isTonic(chords[n - 1]) && mod(chords[n - 2].root.pc - tonic.pc, 12) === 7) score += 3;
+        // tonacje z mniejszą liczbą znaków lekko premiowane (enharmonia: Gb vs F#)
+        score -= Math.abs(buildScale(mode === 'major' ? tonic : majorTonic, 'major').notes.reduce((a, x) => a + x.note.acc, 0)) * 0.05;
+        out.push({ tonic, mode, fit, total: n, score, analysis });
+      }
+    }
+    // Usuń enharmoniczne duplikaty (F♯-dur / G♭-dur) — zostaw lepszy wynik.
+    out.sort((a, b) => b.score - a.score);
+    const seen = new Set();
+    return out.filter((k) => { const key = k.mode + k.tonic.pc; if (seen.has(key)) return false; seen.add(key); return true; });
+  }
+
   /* ---------- Rozpoznawanie akordu ---------- */
 
   /**
@@ -656,7 +757,7 @@
   global.Theory = {
     staffStep, intervalOf, invertInterval, consonance, enharmonicIntervals,
     keySignature, alterationsVsMajor, smoothVoicing, voiceMoves, secondaryDominant,
-    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords,
+    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey,
     LETTERS, SCALES, CHORD_TYPES, CHORD_GROUPS, TUNINGS,
     mod, makeNote, parseNote, noteKey, noteName,
     parseInterval, describeInterval, intervalBetween, transpose,

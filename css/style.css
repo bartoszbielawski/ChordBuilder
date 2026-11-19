@@ -540,3 +540,10 @@ kbd {
 .seq-keys { display: flex; flex-wrap: wrap; gap: 6px; }
 .seq-key { min-width: 64px; justify-content: center; }
 .quiz-seq > .btn { justify-self: start; }
+.an-result { margin-top: 14px; display: grid; gap: 12px; }
+.an-result:empty { display: none; }
+.an-key { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.an-big { font-size: 24px; font-weight: 700; color: var(--accent); }
+.an-chords { display: flex; flex-wrap: wrap; gap: 8px; }
+.an-card { min-width: 92px; }
+.an-card.outside { border-style: dashed; }

@@ -135,6 +135,17 @@
       <div class="controls tight prog-tools" id="prog-tools"></div>
     </section>
 
+    <section class="card" id="analysis-section">
+      <h2>Analiza: w jakiej tonacji są te akordy?</h2>
+      <div class="controls">
+        <label class="field grow"><span>Akordy (oddzielone spacjami, np. z piosenki)</span>
+          <input type="text" id="an-input" class="text-input" placeholder="np. G D Em C   lub   Dm7 G7 Cmaj7   lub   Am F C G" autocomplete="off" spellcheck="false"></label>
+        <button type="button" class="btn" id="an-play">▶ Zagraj</button>
+      </div>
+      <div id="an-result" class="an-result" aria-live="polite"></div>
+      <p class="hint">Strona sprawdza wszystkie tonacje dur i moll: w której mieści się najwięcej akordów (premiując tonikę na początku i końcu oraz V–I), a potem opisuje akordy cyframi rzymskimi. Akordy spoza tonacji są oznaczone — często to akordy zapożyczone lub dominanty wtrącone. Symbole: C, Cm, C7, Cmaj7, Cm7, Cm7b5, Cdim, Caug, Csus4, C/E; w notacji A H C także H i B = B♭.</p>
+    </section>
+
     <section class="card" id="chord-section">
       <h2><span class="step">3</span> Budowa akordu</h2>
       <div class="controls">

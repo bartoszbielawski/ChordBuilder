@@ -278,6 +278,36 @@
         'tonika,supertonika,medianta,subdominanta,dominanta,submedianta,dźwięk prowadzący');
       eq(T.degreeName(T.parseInterval('b7')), 'subtonika');
     }],
+    ['Parsowanie symboli akordów', (T, eq) => {
+      const sym = (x, nt) => { const r = T.parseChordSymbol(x, nt); return r ? T.chordSymbol(r.chord) + (r.bass ? '/' + T.noteName(r.bass) : '') : null; };
+      eq(sym('F#m7'), 'F♯m7');
+      eq(sym('Bb'), 'B♭');
+      eq(sym('Ebmaj7'), 'E♭maj7');
+      eq(sym('C/E'), 'C/E');
+      eq(sym('Bdim'), 'B°');
+      eq(sym('Am7b5'), 'Am7♭5');
+      eq(sym('Hm', 'H'), 'Bm');
+      eq(sym('B', 'H'), 'B♭');
+      eq(sym('Hm'), null);
+      eq(sym('Xyz'), null);
+    }],
+    ['Rozpoznawanie tonacji z akordów', (T, eq) => {
+      const key = (s, nt) => {
+        const cs = s.split(' ').map((x) => T.parseChordSymbol(x, nt).chord);
+        const k = T.analyzeKey(cs)[0];
+        return T.noteName(k.tonic) + (k.mode === 'major' ? '-dur' : '-moll') + ' ' + k.analysis.map((a) => a.roman).join(' ');
+      };
+      eq(key('G D Em C'), 'G-dur I V vi IV');
+      eq(key('Am F C G'), 'A-moll i ♭VI ♭III ♭VII');
+      eq(key('Dm7 G7 Cmaj7'), 'C-dur ii7 V7 Imaj7');
+      eq(key('Am Dm E7 Am'), 'A-moll i iv V7 i');
+      eq(key('C A7 Dm G7 C'), 'C-dur I VI7 ii V7 I');
+      eq(key('C Am Dm G7 C E7 Am Fm C'), 'C-dur I vi ii V7 I III7 vi iv I');
+      eq(key('Bb F Gm Eb'), 'B♭-dur I V vi IV');
+      eq(key('A# F Gm D#'), 'B♭-dur I V vi IV');
+      const k = T.analyzeKey(['C', 'Fm', 'C'].map((x) => T.parseChordSymbol(x).chord))[0];
+      eq(k.analysis[1].note, 'zapożyczony z molowej jednoimiennej');
+    }],
     ['Dominanty wtrącone', (T, eq) => {
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('D'))), 'A7');
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('Bb'))), 'F7');

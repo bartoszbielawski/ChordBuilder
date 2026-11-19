@@ -185,6 +185,7 @@
     renderPiano(sc, voiced, rec);
     renderGuitar(sc, chord, voiced, rec);
     renderRecognize(sc, rec);
+    renderAnalysis();
     saveHash();
   }
 
@@ -703,6 +704,54 @@
     $('prog-tools').replaceChildren(...tools.filter(Boolean));
   }
 
+  /* ---------- Analiza tonacji z akordów ---------- */
+
+  function analysisChords() {
+    const tokens = $('an-input').value.split(/[\s,|]+/).filter(Boolean);
+    const parsed = tokens.map((t) => ({ t, r: T.parseChordSymbol(t, state.notation) }));
+    return { parsed, chords: parsed.filter((p) => p.r).map((p) => p.r.chord), bad: parsed.filter((p) => !p.r).map((p) => p.t) };
+  }
+
+  function renderAnalysis() {
+    const box = $('an-result');
+    const { chords, bad } = analysisChords();
+    if (!$('an-input').value.trim()) { box.replaceChildren(); return; }
+    const parts = [];
+    if (bad.length) parts.push(h('p', { class: 'fit out' }, `Nie rozpoznaję: ${bad.join(', ')}`));
+    if (!chords.length) { box.replaceChildren(...parts); return; }
+    const keys = T.analyzeKey(chords);
+    const best = keys[0];
+    const keyName = (k) => k.mode === 'major' ? `${nn(k.tonic)}-dur` : `${nn(k.tonic).toLowerCase()}-moll`;
+    parts.push(h('div', { class: 'an-key' },
+      h('span', { class: 'an-big' }, keyName(best)),
+      h('span', { class: 'muted' }, `${best.fit} z ${best.total} akordów należy do tonacji`),
+      h('button', { type: 'button', class: 'btn small ghost', onclick: () => {
+        state.tonic = T.noteKey(best.tonic); state.scale = best.mode; selectFirstChord(); render();
+        $('scale-section').scrollIntoView({ behavior: 'smooth' });
+      } }, 'Ustaw tę tonację'),
+      h('button', { type: 'button', class: 'btn small ghost', onclick: () => {
+        stopProg(false);
+        state.tonic = T.noteKey(best.tonic); state.scale = best.mode;
+        state.custom = chords.map((c) => T.noteKey(c.root) + '.' + c.type.id); state.prog = 'custom'; render();
+        $('prog-section').scrollIntoView({ behavior: 'smooth' });
+      } }, 'Zrób z tego progresję')));
+    parts.push(h('div', { class: 'an-chords' }, chords.map((c, i) => {
+      const a = best.analysis[i];
+      return h('button', {
+        type: 'button', class: 'chord-card an-card' + (a.inKey ? '' : ' outside'), title: a.inKey ? 'w tonacji' : a.note,
+        onclick: () => { selectChord(c.root, c.type.id); Sound.play(pianoMidis(c, T.inversion(c, 0))); },
+      },
+      h('span', { class: 'roman' }, a.roman),
+      h('span', { class: 'sym' }, T.chordSymbol(c, state.notation)),
+      a.inKey ? null : h('span', { class: 'qual out' }, a.note));
+    })));
+    const alts = keys.slice(1, 4).filter((k) => k.score >= best.score - 12);
+    if (alts.length) {
+      parts.push(h('p', { class: 'hint' }, 'Inne możliwości: ', alts.flatMap((k, i) => [i ? ', ' : '', h('b', {}, keyName(k)), ` (${k.analysis.map((a) => a.roman).join(' ')})`])));
+    }
+    box.replaceChildren(...parts);
+  }
+
   /* ---------- Rozpoznawanie akordu (tryb „wklikaj”) ---------- */
 
   function inputMidis() {
@@ -983,6 +1032,16 @@
       Sound.play(pianoMidis(c, T.inversion(c, state.inv)), 'arp');
     });
     window.addEventListener('hashchange', () => { loadHash(); render(); });
+    $('an-input').addEventListener('input', renderAnalysis);
+    $('an-play').addEventListener('click', () => {
+      const { chords } = analysisChords();
+      let prev = null;
+      chords.forEach((c, i) => {
+        const v = T.smoothVoicing(c, prev);
+        prev = v.midis;
+        setTimeout(() => Sound.play([36 + c.root.pc, ...v.midis], 'chord', 'piano', 1.3), i * 1000);
+      });
+    });
     $('midi-btn').addEventListener('click', () => {
       const held = new Set();
       window.Common.connectMidi({
