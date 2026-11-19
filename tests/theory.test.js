@@ -352,6 +352,17 @@
       eq(sh('Bb', 'maj', [-1, 1, 3, 3, 3, 1]), 'A');
       eq(sh('A', 'min', [-1, 0, 2, 2, 1, 0]), 'A');
     }],
+    ['Harmonizacja melodii', (T, eq, ok) => {
+      const sc = T.buildScale(T.parseNote('C'), 'major');
+      const hz = (degs) => T.harmonize(sc, degs).choice.map((d) => d.roman).join(' ');
+      // 3 2 1 → I V I ; 1 2 3 4 3 2 1
+      eq(hz([2, 1, 0]), 'I V I');
+      const r = T.harmonize(sc, [0, 1, 2, 3, 2, 1, 0]);
+      eq(r.choice[0].roman, 'I'); eq(r.choice[6].roman, 'I'); eq(r.choice[5].roman, 'V');
+      ok(r.choice.every((d, i) => d.chord.notes.some((n) => n.note.pc === sc.notes[[0, 1, 2, 3, 2, 1, 0][i]].note.pc)), 'akord zawiera nutę melodii');
+      const am = T.buildScale(T.parseNote('A'), 'minor');
+      eq(T.harmonize(am, [0, 1, 0]).choice.map((d) => T.chordSymbol(d.chord)).join(' '), 'Am E Am');
+    }],
     ['Dominanty wtrącone', (T, eq) => {
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('D'))), 'A7');
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('Bb'))), 'F7');

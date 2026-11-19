@@ -419,6 +419,55 @@
     return null;
   }
 
+  /**
+   * Harmonizacja melodii trójdźwiękami diatonicznymi (skale 7-dźwiękowe).
+   * degrees — indeksy stopni melodii (0–6). Zwraca { options[i]: [{degree, chord, roman}], choice[i] }.
+   * Wybór: programowanie dynamiczne — I na początku i końcu, V przed końcowym I,
+   * naturalne ruchy basu (kwarta w górę, sekunda w górę, tercja w dół).
+   */
+  function harmonize(sc, degrees) {
+    let dia = diatonicChords(sc, 3);
+    // W molu dominanta durowa (z harmonicznej), jak w praktyce.
+    if (sc.scale.id === 'minor') {
+      const hm = diatonicChords(buildScale(sc.tonic, 'harmonicMinor'), 3);
+      dia = dia.map((d) => (d.degree === 4 ? hm[4] : d));
+    }
+    const options = degrees.map((k) => dia.filter((d) => d.chord.notes.some((n) => n.note.pc === sc.notes[k].note.pc)));
+    const move = (a, b) => {
+      if (a === b) return 1.2;
+      const up = mod(b - a, 7);
+      return { 3: 0, 1: 0.6, 5: 0.6, 4: 0.9, 2: 1.4, 6: 1.6 }[up];
+    };
+    const self = (d, i, n) => {
+      let c = { 0: 0, 3: 0.2, 4: 0.1, 5: 0.4, 1: 0.5, 2: 0.9, 6: 1.5 }[d.degree];
+      if ((i === 0 || i === n - 1) && d.degree !== 0) c += 3;
+      if (i === n - 2 && n > 2 && d.degree !== 4) c += 1.2;
+      return c;
+    };
+    const n = degrees.length;
+    if (!n) return { options, choice: [] };
+    let cost = options[0].map((d) => self(d, 0, n));
+    const back = [];
+    for (let i = 1; i < n; i++) {
+      const nc = [], bk = [];
+      options[i].forEach((d) => {
+        let best = Infinity, arg = 0;
+        options[i - 1].forEach((p, j) => { const c = cost[j] + move(p.degree, d.degree); if (c < best) { best = c; arg = j; } });
+        nc.push(best + self(d, i, n));
+        bk.push(arg);
+      });
+      cost = nc;
+      back.push(bk);
+    }
+    let k = cost.indexOf(Math.min(...cost));
+    const choice = new Array(n);
+    for (let i = n - 1; i >= 0; i--) {
+      choice[i] = options[i][k];
+      if (i > 0) k = back[i - 1][k];
+    }
+    return { options, choice };
+  }
+
   /* ---------- Analiza: symbol akordu → akord, akordy → tonacja ---------- */
 
   // Dodatkowe zapisy symboli (oprócz tych z CHORD_TYPES).
@@ -826,7 +875,7 @@
   global.Theory = {
     staffStep, intervalOf, invertInterval, consonance, enharmonicIntervals,
     keySignature, alterationsVsMajor, smoothVoicing, voiceMoves, secondaryDominant,
-    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels, cagedShape,
+    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels, cagedShape, harmonize,
     LETTERS, SCALES, CHORD_TYPES, CHORD_GROUPS, TUNINGS,
     mod, makeNote, parseNote, noteKey, noteName,
     parseInterval, describeInterval, intervalBetween, transpose,

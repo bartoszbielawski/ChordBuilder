@@ -574,3 +574,7 @@ kbd {
 .quiz-prompt .rh-g.big { font-size: 32px; }
 .an-tr { max-width: 340px; }
 .tag.caged { background: var(--accent-soft); color: var(--accent); }
+.harm-alts { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 10px 0; }
+.harm-col { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.harm-note { font-size: 12px; color: var(--muted); font-weight: 600; }
+.harm-col .chip { font-size: 12.5px; padding: 3px 8px; }

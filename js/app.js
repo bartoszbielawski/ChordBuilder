@@ -17,7 +17,7 @@
     notation: 'intl', labels: 'note',
     tuning: 'standard', showAll: true, showScale: false, voicing: 0,
     pianoNames: true, fbNames: true,
-    prog: 'pop', custom: [], bpm: 90, beats: 4, loop: true, smooth: true, scalePos: -1,
+    prog: 'pop', custom: [], bpm: 90, beats: 4, loop: true, smooth: true, scalePos: -1, melody: [], harmPick: {},
   };
 
   // Tryb „wklikaj akord”: dźwięki wybrane na pianinie albo na gryfie.
@@ -49,6 +49,7 @@
     if (p.get('i')) state.inv = Math.max(0, Math.min(3, +p.get('i') || 0));
     if (p.get('n') === '4') state.size = 4;
     if (p.get('p') && (p.get('p') === 'custom' || T.PROGRESSIONS.some((x) => x.id === p.get('p')))) state.prog = p.get('p');
+    if (/^[1-7]{1,32}$/.test(p.get('m') || '')) state.melody = [...p.get('m')].map((d) => +d - 1);
     if (p.get('pc')) {
       state.custom = p.get('pc').split(',').filter((k) => {
         const [r, t] = k.split('.');
@@ -59,6 +60,7 @@
   function saveHash() {
     const p = new URLSearchParams({ t: state.tonic, s: state.scale, r: state.root, c: state.type, i: state.inv, n: state.size, p: state.prog });
     if (state.custom.length) p.set('pc', state.custom.join(','));
+    if (state.melody.length) p.set('m', state.melody.map((k) => k + 1).join(''));
     history.replaceState(null, '', '#' + p.toString());
   }
 
@@ -186,6 +188,7 @@
     renderGuitar(sc, chord, voiced, rec);
     renderRecognize(sc, rec);
     renderAnalysis();
+    renderHarmonization(sc);
     saveHash();
   }
 
@@ -784,6 +787,68 @@
     box.replaceChildren(...parts);
   }
 
+  /* ---------- Harmonizacja melodii ---------- */
+
+  function harmonization(sc) {
+    const res = T.harmonize(sc, state.melody);
+    const choice = res.choice.map((d, i) => {
+      const k = state.harmPick[i];
+      return (k != null && res.options[i].find((o) => o.degree === k)) || d;
+    });
+    return { ...res, choice };
+  }
+
+  function harmMidi(sc, k) {
+    const start = 60 + sc.tonic.pc - (sc.tonic.pc > 6 ? 12 : 0);
+    return start + sc.notes[k].iv.semi;
+  }
+
+  function renderHarmonization(sc) {
+    const ok7 = sc.notes.length === 7;
+    $('harm-section').querySelectorAll('button').forEach((b) => { b.disabled = !ok7; });
+    if (!ok7) {
+      $('harm-keys').replaceChildren(h('p', { class: 'muted' }, 'Harmonizacja działa dla skal siedmiodźwiękowych — wybierz np. durową lub molową w sekcji 1.'));
+      $('harm-staff').replaceChildren(); $('harm-alts').replaceChildren();
+      return;
+    }
+    $('harm-keys').replaceChildren(h('span', { class: 'hint', style: 'margin:0' }, 'Dodaj nutę:'), ...sc.notes.map((n, k) => h('button', {
+      type: 'button', class: 'btn small ghost', title: T.degreeName(n.iv),
+      onclick: () => { if (state.melody.length < 32) { state.melody.push(k); Sound.play([harmMidi(sc, k)]); render(); } },
+    }, `${k + 1} · ${nn(n.note)}`)));
+    if (!state.melody.length) {
+      $('harm-staff').replaceChildren(h('p', { class: 'muted' }, 'Melodia jest pusta — dodaj nuty przyciskami powyżej albo wczytaj przykład.'));
+      $('harm-alts').replaceChildren();
+      return;
+    }
+    const hz = harmonization(sc);
+    I.renderMelody($('harm-staff'), state.melody.map((k) => [{ midi: harmMidi(sc, k), note: sc.notes[k].note, role: null }]), {
+      keySig: T.keySignature(sc.tonic, sc.scale.id), gap: 40, clef: 'treble',
+      labels: hz.choice.map((d) => T.chordSymbol(d.chord, state.notation)),
+      onColumn: (i) => Sound.play([harmMidi(sc, state.melody[i]), 48 + hz.choice[i].chord.root.pc, ...T.smoothVoicing(hz.choice[i].chord, null, 55).midis], 'chord', 'piano', 1.4),
+    });
+    $('harm-alts').replaceChildren(...state.melody.map((k, i) => h('div', { class: 'harm-col' },
+      h('span', { class: 'harm-note' }, `${i + 1}. ${nn(sc.notes[k].note)}`),
+      hz.options[i].map((o) => h('button', {
+        type: 'button', class: 'chip' + (o === hz.choice[i] || o.degree === hz.choice[i].degree ? ' active' : ''), title: o.chord.type.name,
+        onclick: () => { state.harmPick[i] = o.degree; render(); },
+      }, h('b', {}, o.roman + ' '), T.chordSymbol(o.chord, state.notation))))));
+  }
+
+  function playHarmonization() {
+    const sc = currentScale();
+    if (!state.melody.length || sc.notes.length !== 7) return;
+    const hz = harmonization(sc);
+    let prev = null;
+    state.melody.forEach((k, i) => {
+      const v = T.smoothVoicing(hz.choice[i].chord, prev, 55);
+      prev = v.midis;
+      setTimeout(() => {
+        Sound.play([36 + hz.choice[i].chord.root.pc, ...v.midis], 'chord', 'piano', 0.9);
+        Sound.play([harmMidi(sc, k) + 12], 'chord', 'piano', 0.8);
+      }, i * 650);
+    });
+  }
+
   /* ---------- Rozpoznawanie akordu (tryb „wklikaj”) ---------- */
 
   function inputMidis() {
@@ -1060,7 +1125,7 @@
       state.inv = +b.dataset.value; state.voicing = 0; render();
     });
     $('tonic').addEventListener('change', (e) => { state.tonic = e.target.value; selectFirstChord(); render(); });
-    $('scale').addEventListener('change', (e) => { state.scale = e.target.value; state.scalePos = -1; selectFirstChord(); render(); });
+    $('scale').addEventListener('change', (e) => { state.scale = e.target.value; state.scalePos = -1; state.harmPick = {}; selectFirstChord(); render(); });
     $('chord-root').addEventListener('change', (e) => { state.root = e.target.value; state.voicing = 0; render(); });
     $('chord-type').addEventListener('change', (e) => { state.type = e.target.value; state.inv = 0; state.voicing = 0; render(); });
     $('tuning').addEventListener('change', (e) => { state.tuning = e.target.value; state.voicing = 0; state.scalePos = -1; clearInput(); savePrefs(); render(); });
@@ -1091,6 +1156,27 @@
     });
     window.addEventListener('hashchange', () => { loadHash(); render(); });
     $('an-input').addEventListener('input', renderAnalysis);
+    $('harm-play').addEventListener('click', playHarmonization);
+    $('harm-undo').addEventListener('click', () => { state.melody.pop(); delete state.harmPick[state.melody.length]; render(); });
+    $('harm-clear').addEventListener('click', () => { state.melody = []; state.harmPick = {}; render(); });
+    $('harm-example').addEventListener('click', () => {
+      // Beethoven, IX symfonia — temat „Ody do radości” (domena publiczna), stopnie skali durowej.
+      if (currentScale().notes.length !== 7) return;
+      state.melody = [2, 2, 3, 4, 4, 3, 2, 1, 0, 0, 1, 2, 2, 1, 1];
+      state.harmPick = {};
+      render();
+      playHarmonization();
+    });
+    $('harm-toprog').addEventListener('click', () => {
+      const sc = currentScale();
+      if (!state.melody.length || sc.notes.length !== 7) return;
+      const hz = harmonization(sc);
+      stopProg(false);
+      state.custom = hz.choice.map((d) => T.noteKey(d.chord.root) + '.' + d.chord.type.id);
+      state.prog = 'custom';
+      render();
+      $('prog-section').scrollIntoView({ behavior: 'smooth' });
+    });
     $('an-play').addEventListener('click', () => {
       const { chords } = analysisChords();
       let prev = null;
