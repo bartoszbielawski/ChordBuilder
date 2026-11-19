@@ -77,9 +77,10 @@ i ćwiczenia rytmiczne (18 rodzajów ćwiczeń).
 
 ## Stan prac — gdzie skończyliśmy (listopad 2026)
 
-Zrobione ostatnio: ćwiczenia rytmiczne (wartości, metrum taktu, dyktando
-rytmiczne ze słuchu), także w karcie ćwiczeń do druku. Do sprawdzenia: dział
-Rytm i nowe ćwiczenia na stronie na żywo.
+Ostatnio dodane: ćwiczenia rytmiczne, bas cyfrowany przy przewrotach,
+transpozycja w analizie harmonicznej, unikanie i oznaczanie kwint/oktaw
+równoległych w prowadzeniu głosów, ukulele i gitara basowa. Wszystko sprawdzone
+w przeglądarce i wypchnięte.
 
 Dalsze pomysły (malejąco wg wartości dla nauki):
 
