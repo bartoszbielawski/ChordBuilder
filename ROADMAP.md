@@ -70,11 +70,11 @@ i najtańszych w realizacji.
 
 Zrobione do wersji 2.0: rozpoznawanie akordów, koło kwintowe, progresje i kadencje,
 testy, porównanie modusów, akordy zapożyczone i dominanty wtrącone, kształcenie
-słuchu i quizy, ćwiczenia na instrumentach, karta ćwiczeń do druku, słowniczek, MIDI.
+słuchu i quizy, ćwiczenia na instrumentach, karta ćwiczeń do druku, słowniczek, MIDI, dyktando melodyczne, stopnie
+skali i progresje ze słuchu.
 
 Co jeszcze miałoby sens (malejąco wg wartości dla nauki):
 
 1. **3.1 / 3.2 Pozycje skal i CAGED** — dla nauczycieli gitary.
 2. **3.4 Inne instrumenty** (ukulele, bas) — wymaga uogólnienia gryfu i chwytów na 4 struny.
-3. **Dyktando melodyczne** — zapisz usłyszaną krótką melodię (wymaga wprowadzania nut).
-4. **4.3 Lepsze brzmienie** (próbki zamiast syntezatora) i **5.1 wersja angielska**.
+3. **4.3 Lepsze brzmienie** (próbki zamiast syntezatora) i **5.1 wersja angielska**.

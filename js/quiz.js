@@ -16,7 +16,7 @@
   const prefs = C.loadPrefs();
   const state = {
     notation: prefs.notation === 'H' ? 'H' : 'intl',
-    ex: null, level: 1, opts: {}, q: null, answered: null, ok: false, sel: new Set(), picked: null,
+    ex: null, level: 1, opts: {}, q: null, answered: null, ok: false, sel: new Set(), seq: [], picked: null,
     session: { ok: 0, total: 0, streak: 0 },
   };
   const stats = C.loadJSON(STATS_KEY, {});
@@ -102,6 +102,24 @@
     return `${sig.count}${sig.type === 'sharp' ? '♯' : '♭'} (${sig.notes.map(nn).join(', ')})`;
   }
 
+
+  /** Ustalenie tonacji: kadencja I–IV–V7–I (lub i–iv–V7–i). Zwraca czas trwania w s. */
+  function playCadence(tonic, minor, tempo = 0.62) {
+    const tm = 48 + tonic.pc;
+    const iv = (sym) => T.transpose(tonic, T.parseInterval(sym));
+    const chords = [T.buildChord(tonic, minor ? 'min' : 'maj'), T.buildChord(iv('4'), minor ? 'min' : 'maj'),
+      T.buildChord(iv('5'), '7'), T.buildChord(tonic, minor ? 'min' : 'maj')];
+    let prev = null;
+    timers.forEach(clearTimeout);
+    timers = chords.map((c, i) => {
+      const v = T.smoothVoicing(c, prev, 64);
+      prev = v.midis;
+      return setTimeout(() => Sound.play([tm - 12 + T.mod(c.root.pc - tonic.pc, 12), ...v.midis], 'chord', 'piano', tempo + 0.3), i * tempo * 1000);
+    });
+    return chords.length * tempo;
+  }
+  const DEG_LABEL = { '1': '1', '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', 'b3': '♭3', 'b6': '♭6', 'b7': '♭7' };
+  const ROMAN_DEG = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
   const ROOTS_EASY = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
   const ROOTS_MED = [...ROOTS_EASY, 'Bb', 'Eb', 'F#', 'Ab', 'Db'];
   const ROOTS_ALL = [...ROOTS_MED, 'C#', 'Gb', 'G#', 'D#', 'A#'];
@@ -199,6 +217,114 @@
               keySig: T.keySignature(tonic, id), gap: 30, labels: [...sc.notes.map((n) => ivInfo(n.iv.sym).symbol), '8'],
             });
             box.append(h('p', {}, `${nn(tonic)} ${sc.scale.name.toLowerCase()}. ${sc.scale.mood}`), st);
+          },
+        };
+      },
+    },
+    {
+      id: 'ear-degree', group: 'Słuch', title: 'Stopnie skali ze słuchu',
+      desc: 'Najpierw kadencja ustala tonację, potem jeden dźwięk — który to stopień?',
+      levels: ['1, 3, 5 (dźwięki toniki)', 'wszystkie stopnie dur', 'dur i moll'],
+      make(level) {
+        const minor = level === 2 && Math.random() < 0.5;
+        const sc = T.buildScale(T.parseNote(pick(['C', 'D', 'Eb', 'F', 'G', 'A', 'Bb'])), minor ? 'minor' : 'major');
+        const idxs = level === 0 ? [0, 2, 4] : [0, 1, 2, 3, 4, 5, 6];
+        const i = weighted(this.id, idxs, (x) => (minor ? 'm' : 'M') + x);
+        const tm = 60 + sc.tonic.pc - (sc.tonic.pc > 6 ? 12 : 0);
+        const target = tm + sc.notes[i].iv.semi + (Math.random() < 0.3 && i < 4 ? 12 : 0);
+        const lbl = (k) => DEG_LABEL[sc.notes[k].iv.sym] || sc.notes[k].iv.sym;
+        const play = () => {
+          const t = playCadence(sc.tonic, minor);
+          timers.push(setTimeout(() => Sound.play([target], 'chord', 'piano', 1.6), (t + 0.4) * 1000));
+        };
+        return {
+          prompt: `Tonacja ${minor ? nn(sc.tonic).toLowerCase() + '-moll' : nn(sc.tonic) + '-dur'} — który stopień zabrzmiał po kadencji?`,
+          answers: idxs.map((k) => ({ key: String(k), label: `${lbl(k)} — ${T.degreeName(sc.notes[k].iv)}` })),
+          correct: String(i), item: (minor ? 'm' : 'M') + i, play,
+          explain: (box) => {
+            const st = staffBox();
+            I.renderMelody(st, [[{ midi: tm, note: sc.tonic, role: 'root' }], [{ midi: target, note: sc.notes[i].note, role: 'third' }]], {
+              keySig: T.keySignature(sc.tonic, minor ? 'minor' : 'major'), labels: ['1', lbl(i)], onColumn: (c) => Sound.play([c ? target : tm]),
+            });
+            const tips = ['tonika — punkt spoczynku, nic nie „ciągnie” dalej', 'supertonika — chce zejść do toniki', 'medianta — stabilna, „kolor” trybu (dur/moll)',
+              'subdominanta — ciąży w dół do tercji', 'dominanta — stabilna, ale otwarta', 'submedianta — ciąży w dół do kwinty', 'dźwięk prowadzący — silnie ciągnie w górę do toniki'];
+            box.append(h('p', {}, `To ${nn(sc.notes[i].note)}: ${lbl(i)} stopień (${tips[i]}).`), st,
+              h('p', { class: 'muted' }, 'Wskazówka: zaśpiewaj w myślach drogę od usłyszanego dźwięku do toniki — liczba kroków podpowie stopień.'));
+          },
+        };
+      },
+    },
+    {
+      id: 'ear-progression', group: 'Słuch', title: 'Progresje ze słuchu',
+      desc: 'Usłyszysz cztery akordy — rozpoznaj progresję.',
+      levels: ['3 popularne progresje', '+ kadencje i progresje molowe', 'wszystkie (także jazzowe)'],
+      sets: [['pop', 'doowop', 'cadence'], ['pop', 'doowop', 'cadence', 'sensitive', 'mixo', 'deceptive', 'minorPop', 'andalusian'],
+        ['pop', 'doowop', 'cadence', 'sensitive', 'mixo', 'deceptive', 'plagal', 'half', 'minorPop', 'andalusian', 'minorCadence', 'epic', '251', 'turnaround']],
+      make(level) {
+        const set = this.sets[level].filter((id) => T.PROGRESSIONS.some((p) => p.id === id));
+        const id = weighted(this.id, set);
+        const prog = T.PROGRESSIONS.find((p) => p.id === id);
+        const tonic = T.parseNote(pick(['C', 'D', 'E', 'F', 'G', 'A']));
+        const chords = prog.steps.map((st) => T.buildChord(T.transpose(tonic, st.iv), st.type));
+        const play = () => {
+          let prev = null;
+          timers.forEach(clearTimeout);
+          timers = chords.map((c, i) => {
+            const v = T.smoothVoicing(c, prev, 64);
+            prev = v.midis;
+            return setTimeout(() => Sound.play([36 + c.root.pc, ...v.midis], 'chord', 'piano', 1.2), i * 950);
+          });
+        };
+        return {
+          prompt: 'Jaka to progresja? (słuchaj, gdzie bas się porusza i czy akordy są durowe czy molowe)',
+          answers: set.map((k) => ({ key: k, label: T.PROGRESSIONS.find((p) => p.id === k).name })), wide: true,
+          correct: id, item: id, play,
+          explain: (box) => {
+            box.append(h('p', {}, `${prog.name} — w tonacji ${nn(tonic)}: ${chords.map((c) => T.chordSymbol(c, state.notation)).join(' – ')}. ${prog.desc}`),
+              h('p', {}, h('a', { href: `./#t=${encodeURIComponent(T.noteKey(tonic))}&s=${chords[0].type.id === 'min' ? 'minor' : 'major'}&p=${id}` }, 'Otwórz tę progresję na stronie głównej →')));
+          },
+        };
+      },
+    },
+    {
+      id: 'dictation', group: 'Słuch', title: 'Dyktando melodyczne',
+      desc: 'Usłyszysz krótką melodię — zapisz ją stopniami skali.',
+      levels: ['3 dźwięki, stopnie 1–5, krokami', '4 dźwięki, cała skala', '5 dźwięków ze skokami'],
+      make(level) {
+        const sc = T.buildScale(T.parseNote(pick(['C', 'D', 'F', 'G', 'Bb', 'A', 'Eb'])), 'major');
+        const len = [3, 4, 5][level];
+        const top = level === 0 ? 4 : 7; // indeksy 0..top
+        let mel = [0];
+        // Melodia zaczyna się od toniki; kolejne dźwięki krokami (poziom 0–1) lub z krótkimi skokami.
+        for (let i = 1; i < len; i++) {
+          const prev = mel[i - 1];
+          const steps = level === 2 ? [-4, -3, -2, -1, 1, 2, 3, 4] : level === 1 ? [-2, -1, 1, 2] : [-1, 1];
+          const opts = steps.map((d) => prev + d).filter((x) => x >= 0 && x <= top);
+          mel.push(pick(opts));
+        }
+        const tm = 60 + sc.tonic.pc - (sc.tonic.pc > 6 ? 12 : 0);
+        const midiAt = (k) => tm + (k === 7 ? 12 : sc.notes[k].iv.semi);
+        const choices = Array.from({ length: top === 7 ? 8 : top + 1 }, (_, k) => ({ key: k, label: k === 7 ? '8 (1↑)' : String(k + 1) }));
+        const sounds = Object.fromEntries(choices.map((c) => [c.key, midiAt(c.key)]));
+        const play = () => {
+          const t = playCadence(sc.tonic, false, 0.5);
+          timers.push(...mel.map((k, i) => setTimeout(() => Sound.play([midiAt(k)], 'chord', 'piano', 0.9), (t + 0.5 + i * 0.7) * 1000)));
+        };
+        const noteOf = (k) => (k === 7 ? sc.tonic : sc.notes[k].note);
+        return {
+          input: 'seq', length: len, choices, sounds, correctSeq: mel, answers: [], item: 'len' + len,
+          prompt: `Tonacja ${nn(sc.tonic)}-dur (kadencja, potem melodia od toniki). Wpisz kolejne stopnie.`,
+          correctLabel: mel.map((k) => (k === 7 ? '8' : k + 1)).join(' – '),
+          check: (seq) => seq.length === mel.length && seq.every((k, i) => k === mel[i]),
+          play,
+          explain: (box) => {
+            const st = staffBox();
+            I.renderMelody(st, mel.map((k) => [{ midi: midiAt(k), note: noteOf(k), role: k === 0 || k === 7 ? 'root' : null }]), {
+              keySig: T.keySignature(sc.tonic, 'major'), labels: mel.map((k) => (k === 7 ? '8' : String(k + 1))), gap: 34,
+              onColumn: (i) => Sound.play([midiAt(mel[i])]),
+            });
+            box.append(h('p', {}, `Melodia: ${mel.map((k) => nn(noteOf(k))).join(' – ')} (stopnie ${mel.map((k) => (k === 7 ? 8 : k + 1)).join('–')}).`), st,
+              h('button', { type: 'button', class: 'btn small ghost', onclick: () => seq(mel.map(midiAt), 0.6, 0.9) }, '▶ Melodia jeszcze raz'));
           },
         };
       },
@@ -626,9 +752,20 @@
     state.q = q;
     state.answered = null;
     state.sel = new Set();
+    state.seq = [];
     state.picked = null;
     render();
     if (q.play && (ex.group === 'Słuch')) q.play();
+  }
+
+  function seqPush(k) {
+    const q = state.q;
+    if (state.answered || !q || q.input !== 'seq') return;
+    state.seq.push(k);
+    const sc = q.sounds && q.sounds[k];
+    if (sc != null) Sound.play([sc], 'chord', 'piano', 0.8);
+    if (state.seq.length >= q.length) answer(state.seq.slice());
+    else render();
   }
 
   function answer(key) {
@@ -680,7 +817,7 @@
         h('button', { type: 'button', class: 'btn' + (ex.group === 'Słuch' ? '' : ' ghost'), onclick: () => q.play() }, ex.group === 'Słuch' ? '▶ Odtwórz ponownie (spacja)' : '▶ Posłuchaj')));
     }
 
-    if (q.input) {
+    if (q.input && q.renderInput) {
       const ibox = h('div', { class: 'quiz-instrument' });
       q.renderInput(ibox, {
         sel: state.sel, picked: state.picked, answered: !!state.answered,
@@ -697,6 +834,21 @@
         h('button', { type: 'button', class: 'btn', disabled: !!state.answered || !state.sel.size, onclick: () => answer() }, '✓ Sprawdź (Enter)'),
         h('button', { type: 'button', class: 'btn ghost', disabled: !!state.answered || !state.sel.size, onclick: () => { state.sel.clear(); render(); } }, 'Wyczyść'));
       $('ex-answers').className = 'quiz-answers inline';
+    } else if (q.input === 'seq') {
+      const done = !!state.answered;
+      const slots = h('div', { class: 'seq-slots' }, Array.from({ length: q.length }, (_, i) => {
+        const v = state.seq[i];
+        let cls = 'seq-slot' + (v != null ? ' filled' : '') + (i === state.seq.length && !done ? ' next' : '');
+        if (done && v != null) cls += v === q.correctSeq[i] ? ' ok' : ' bad';
+        return h('span', { class: cls }, v != null ? q.choices.find((c) => c.key === v).label : '');
+      }));
+      $('ex-answers').className = 'quiz-seq';
+      $('ex-answers').replaceChildren(slots,
+        h('div', { class: 'seq-keys' }, q.choices.map((c, i) => h('button', {
+          type: 'button', class: 'quiz-answer seq-key', disabled: done,
+          onclick: () => seqPush(c.key),
+        }, h('kbd', {}, String(i + 1)), h('span', {}, c.label))),
+        h('button', { type: 'button', class: 'btn ghost', disabled: done || !state.seq.length, onclick: () => { state.seq.pop(); render(); } }, '⌫ Cofnij')));
     } else if (q.input) {
       $('ex-answers').replaceChildren();
     } else
@@ -765,7 +917,12 @@
     });
     document.addEventListener('keydown', (e) => {
       if (!state.ex || !state.q || e.target.closest('select, input, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (/^[1-9]$/.test(e.key) && !state.answered && !state.q.input) {
+      if (/^[1-9]$/.test(e.key) && !state.answered && state.q.input === 'seq') {
+        const c = state.q.choices[+e.key - 1];
+        if (c) { e.preventDefault(); seqPush(c.key); }
+      } else if (e.key === 'Backspace' && !state.answered && state.q.input === 'seq' && state.seq.length) {
+        e.preventDefault(); state.seq.pop(); render();
+      } else if (/^[1-9]$/.test(e.key) && !state.answered && !state.q.input) {
         const a = state.q.answers[+e.key - 1];
         if (a) { e.preventDefault(); answer(a.key); }
       } else if (e.key === ' ' && state.q.play && !e.target.closest('button')) {

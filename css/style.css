@@ -530,3 +530,13 @@ kbd {
 .gl-letter dd { margin: 2px 0 0; line-height: 1.55; }
 .gl-links { display: inline-flex; flex-wrap: wrap; gap: 4px 12px; margin-left: 8px; font-size: 13.5px; }
 .midi-status { margin: 0; }
+.quiz-seq { display: grid; gap: 12px; }
+.seq-slots { display: flex; flex-wrap: wrap; gap: 8px; }
+.seq-slot { display: inline-grid; place-items: center; min-width: 52px; height: 44px; padding: 0 8px; border-radius: 10px; border: 2px dashed var(--border); font: 700 18px "JetBrains Mono", monospace; }
+.seq-slot.filled { border-style: solid; }
+.seq-slot.next { border-color: var(--accent); }
+.seq-slot.ok { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 15%, transparent); }
+.seq-slot.bad { border-color: var(--no); background: color-mix(in srgb, var(--no) 14%, transparent); }
+.seq-keys { display: flex; flex-wrap: wrap; gap: 6px; }
+.seq-key { min-width: 64px; justify-content: center; }
+.quiz-seq > .btn { justify-self: start; }
