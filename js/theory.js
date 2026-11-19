@@ -399,6 +399,26 @@
     return chords.map((c) => buildChord(transpose(c.root, shift), c.type.id));
   }
 
+  /**
+   * Kształt CAGED chwytu w stroju standardowym — po położeniu prym na strunach
+   * (indeksy strun: 0 = E6 … 5 = E1). Zwraca 'C'|'A'|'G'|'E'|'D' lub null.
+   */
+  function cagedShape(voicing, chord, tuning) {
+    if (!tuning || tuning.id !== 'standard') return null;
+    const third = chord.notes.find((n) => n.iv.deg === 3);
+    if (!third) return null;
+    const rootAt = (s) => (voicing.frets[s] >= 0 && mod(tuning.midi[s] + voicing.frets[s], 12) === chord.root.pc ? voicing.frets[s] : null);
+    const f = [0, 1, 2, 3, 4, 5].map(rootAt);
+    const low = voicing.frets.findIndex((x) => x >= 0);
+    // Bas = pryma na najniższej strunie, a druga pryma w położeniu charakterystycznym dla kształtu.
+    if (f[0] != null && low === 0 && f[2] === f[0] + 2) return 'E';
+    if (f[0] != null && low === 0 && f[3] === f[0] - 3) return 'G';
+    if (f[1] != null && low === 1 && f[3] === f[1] + 2) return 'A';
+    if (f[1] != null && low === 1 && f[4] === f[1] - 2) return 'C';
+    if (f[2] != null && low === 2 && f[4] === f[2] + 3) return 'D';
+    return null;
+  }
+
   /* ---------- Analiza: symbol akordu → akord, akordy → tonacja ---------- */
 
   // Dodatkowe zapisy symboli (oprócz tych z CHORD_TYPES).
@@ -806,7 +826,7 @@
   global.Theory = {
     staffStep, intervalOf, invertInterval, consonance, enharmonicIntervals,
     keySignature, alterationsVsMajor, smoothVoicing, voiceMoves, secondaryDominant,
-    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels,
+    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels, cagedShape,
     LETTERS, SCALES, CHORD_TYPES, CHORD_GROUPS, TUNINGS,
     mod, makeNote, parseNote, noteKey, noteName,
     parseInterval, describeInterval, intervalBetween, transpose,

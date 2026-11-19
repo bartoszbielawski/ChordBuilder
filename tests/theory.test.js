@@ -340,6 +340,18 @@
         ok(T.findVoicings(c, c.root.pc, T.tuningById('bass')).every((v) => v.frets.length === 4), `bas ${r}${t}`);
       }
     }],
+    ['Kształty CAGED', (T, eq) => {
+      const std = T.TUNINGS[0];
+      const sh = (r, t, frets) => T.cagedShape({ frets }, T.buildChord(T.parseNote(r), t), std);
+      eq(sh('C', 'maj', [-1, 3, 2, 0, 1, 0]), 'C');
+      eq(sh('A', 'maj', [-1, 0, 2, 2, 2, 0]), 'A');
+      eq(sh('G', 'maj', [3, 2, 0, 0, 0, 3]), 'G');
+      eq(sh('E', 'maj', [0, 2, 2, 1, 0, 0]), 'E');
+      eq(sh('D', 'maj', [-1, -1, 0, 2, 3, 2]), 'D');
+      eq(sh('F', 'maj', [1, 3, 3, 2, 1, 1]), 'E');
+      eq(sh('Bb', 'maj', [-1, 1, 3, 3, 3, 1]), 'A');
+      eq(sh('A', 'min', [-1, 0, 2, 2, 1, 0]), 'A');
+    }],
     ['Dominanty wtrącone', (T, eq) => {
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('D'))), 'A7');
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('Bb'))), 'F7');

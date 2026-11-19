@@ -75,6 +75,8 @@ kroku budowania), więc działa od razu na GitHub Pages.
 - **Pianino:** akord w wybranym przewrocie, dźwięki skali zaznaczone kropkami.
 - **Gitara, ukulele i gitara basowa:** gryf do 15. progu, kilka strojów (także ukulele GCEA i bas EADG), automatycznie wyszukiwane
   grywalne chwyty z diagramami (bas zgodny z przewrotem).
+- **System CAGED:** przy chwytach gitarowych oznaczenie kształtu (C, A, G, E, D),
+  z którego otwartego chwytu powstał dany chwyt.
 - **Pozycje skali na gryfie:** skala w oknie 5 progów od wybranego stopnia
   na 6. strunie (np. G-dur w pozycji od 3. progu), z toniką i stopniami.
 - **Koło kwintowe:** tonacje durowe i równoległe molowe ze znakami przykluczowymi;

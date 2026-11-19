@@ -1034,7 +1034,8 @@
         type: 'button', class: 'voicing' + (i === state.voicing ? ' active' : ''),
         title: v.complete ? 'Wszystkie dźwięki akordu' : 'Bez dźwięków opcjonalnych (np. kwinty)',
         onclick: () => { state.voicing = i; render(); playVoicing(v, tuning); },
-      }, I.renderChordDiagram(v, roleAt, labelAt), v.complete ? null : h('span', { class: 'tag' }, 'bez ' + missingNames(chord, v, tuning)));
+      }, I.renderChordDiagram(v, roleAt, labelAt), v.complete ? null : h('span', { class: 'tag' }, 'bez ' + missingNames(chord, v, tuning)),
+      T.cagedShape(v, chord, tuning) ? h('span', { class: 'tag caged', title: 'System CAGED: ten chwyt to przesunięty kształt otwartego akordu ' + T.cagedShape(v, chord, tuning) }, 'kształt ' + T.cagedShape(v, chord, tuning)) : null);
     }));
   }
 
