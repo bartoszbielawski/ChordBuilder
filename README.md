@@ -121,7 +121,8 @@ kroku budowania), więc działa od razu na GitHub Pages.
   odpowiadać, grając.
 - **Nazwy wszystkich klawiszy i pozycji na gryfie** (można wyłączyć).
 - **Dźwięk:** odtwarzanie akordu, arpeggia, pojedynczych klawiszy i strun
-  (Web Audio, bez plików z próbkami).
+  (Web Audio, bez plików z próbkami: pianino z nieharmonicznymi składowymi,
+  gitara w syntezie Karplusa–Stronga, osobny dźwięk metronomu).
 - **Etykiety** na instrumentach: nazwy dźwięków / interwały / półtony.
 - **Link do stanu:** aktualny wybór zapisuje się w adresie URL (`#t=F&s=major&r=Bb&c=maj7…`),
   więc można go wysłać komuś innemu.

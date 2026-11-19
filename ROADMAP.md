@@ -84,4 +84,5 @@ obcymi, polskie nazwy tonacji, tabela tonacji, nowe progresje (ciąg kwintowy, b
 
 Dalsze pomysły (malejąco wg wartości dla nauki):
 
-1. **4.3 Lepsze brzmienie** (próbki zamiast syntezatora) i **5.1 wersja angielska**.
+1. **4.3 Próbki instrumentów** (syntezator już ulepszony: pianino z nieharmonicznymi składowymi,
+   gitara Karplusa–Stronga, klik metronomu) i **5.1 wersja angielska**.
