@@ -7,6 +7,10 @@ półtonów) oraz jak akord wygląda na **pianinie** i **gitarze**.
 Oprócz strony głównej są działy do nauki teorii: **Interwały**,
 **Modusy**, **Ćwiczenia** (kształcenie słuchu i quizy) oraz **Słowniczek**.
 
+**Wersja angielska:** przełącznik PL / EN w nagłówku każdej strony (albo `?lang=en`
+w adresie) — tłumaczy cały interfejs, ćwiczenia, słowniczek i nazwy z teorii
+(interwały, skale, akordy, progresje).
+
 Strona jest w pełni statyczna (HTML + CSS + JavaScript, bez frameworków i bez
 kroku budowania), więc działa od razu na GitHub Pages.
 
@@ -191,6 +195,7 @@ a potem wyrejestrować w narzędziach deweloperskich (Application → Service Wo
 | `learn.html`, `js/learn.js` | ścieżka nauki (lekcje i postęp) |
 | `rhythm.html`, `js/rhythm.js`, `js/rhythm-core.js` | dział „Rytm” i wspólna logika rytmu |
 | `js/common.js` | wspólne pomocnicze funkcje podstron |
+| `js/i18n.js`, `js/i18n-en.js` | wersja angielska: silnik tłumaczenia (dane teorii po id + tłumaczenie DOM na żywo) i słownik |
 | `sheet.html`, `js/sheet.js`, `css/sheet.css` | ściąga do druku |
 | `css/style.css` | wygląd (tokeny kolorów, tryb ciemny, wersja mobilna) |
 | `js/theory.js` | teoria muzyki: dźwięki, interwały, skale, akordy, znaki przykluczowe, prowadzenie głosów, wyszukiwanie chwytów gitarowych |
@@ -212,3 +217,10 @@ W `js/theory.js` skale i akordy są zapisane jako listy interwałów:
 
 Wystarczy dopisać nową pozycję — pisownia dźwięków, nazwy interwałów,
 pianino, gryf i chwyty wyliczą się automatycznie.
+
+### Jak dodać tekst w wersji angielskiej
+
+Teksty interfejsu tłumaczy `js/i18n.js` na podstawie słownika `js/i18n-en.js`:
+`text` — pojedyncze teksty (z `{0}`, `{1}` jako fragmentami zmiennymi), `blocks` — całe
+akapity statycznego HTML ze znacznikami, `data` — nazwy i opisy z teorii po `id`,
+`glossary` — hasła słowniczka. Nowy tekst po polsku wystarczy dopisać do `text`.

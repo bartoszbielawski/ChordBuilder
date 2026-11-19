@@ -62,7 +62,7 @@
         h('div', { class: 'lesson-links' },
           links.map(([l, href]) => h('a', { href }, l + ' →')),
           exs.map((id, k) => h('a', { href: `quiz.html#ex=${id}&lv=0`, class: 'lesson-ex' + (st[k].done ? ' ok' : '') },
-            `${st[k].done ? '✓' : '✎'} ${exTitle(id)} · ${st[k].text}`)))));
+            `${st[k].done ? '✓' : '✎'} `, h('span', {}, exTitle(id)), ' · ', h('span', {}, st[k].text))))));
   }));
   const withEx = LESSONS.filter((l) => l[3].length).length;
   $('progress-text').textContent = `Zaliczone lekcje: ${doneCount} z ${withEx} (z ćwiczeniami). Lekcja jest zaliczona, gdy w każdym jej ćwiczeniu masz co najmniej 10 odpowiedzi i 80% poprawnych.`;

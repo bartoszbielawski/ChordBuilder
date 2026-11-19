@@ -19,6 +19,15 @@
 
   const mod = (n, m) => ((n % m) + m) % m;
 
+  /* ---------- Język nazw (pl / en) ---------- */
+  let LANG = 'pl';
+  const EN_DEG = ['unison', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'octave', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth'];
+  const EN_Q = { czysta: 'perfect', 'mała': 'minor', wielka: 'major', 'zwiększona': 'augmented', zmniejszona: 'diminished',
+    'podwójnie zwiększona': 'doubly augmented', 'podwójnie zmniejszona': 'doubly diminished', '?': '?' };
+  /** Ustawia język nazw zwracanych przez funkcje teorii ('pl' lub 'en'). */
+  function setLang(l) { LANG = l === 'en' ? 'en' : 'pl'; }
+  const tr = (pl, en) => (LANG === 'en' ? en : pl);
+
   /* ---------- Dźwięki ---------- */
 
   function makeNote(letter, acc) {
@@ -98,10 +107,13 @@
     const accSym = diff > 0 ? '♯'.repeat(diff) : '♭'.repeat(-diff);
     // Dla interwałów czystych/wielkich symbol bez znaku; dla małych „♭”.
     const symbol = (deg === 1 ? '1' : accSym + deg);
-    let name = (DEGREE_NAMES[deg - 1] || deg + '.') + ' ' + quality;
-    if (mod(semi, 12) === 6 && deg <= 7) name += ' (tryton)';
+    let name = LANG === 'en'
+      ? `${EN_Q[quality]} ${EN_DEG[deg - 1] || deg + 'th'}`
+      : (DEGREE_NAMES[deg - 1] || deg + '.') + ' ' + quality;
+    if (mod(semi, 12) === 6 && deg <= 7) name += tr(' (tryton)', ' (tritone)');
     const plQ = { czysta: 'cz', 'mała': 'm', wielka: 'w', 'zwiększona': 'zw', zmniejszona: 'zmn',
       'podwójnie zwiększona': '2zw', 'podwójnie zmniejszona': '2zmn' }[quality] || '?';
+    if (LANG === 'en') return { deg, semi, diff, quality: EN_Q[quality], abbr: abbr + deg, pl: abbr + deg, symbol, name };
     return { deg, semi, diff, quality, abbr: abbr + deg, pl: deg + plQ, symbol, name };
   }
 
@@ -364,8 +376,9 @@
   /** Tradycyjne nazwy stopni skali (dla skal siedmiodźwiękowych). */
   function degreeName(iv) {
     const sd = mod(iv.deg - 1, 7);
-    if (sd === 6) return iv.semi === 11 ? 'dźwięk prowadzący' : 'subtonika';
-    return ['tonika', 'supertonika', 'medianta', 'subdominanta', 'dominanta', 'submedianta'][sd];
+    if (sd === 6) return iv.semi === 11 ? tr('dźwięk prowadzący', 'leading tone') : tr('subtonika', 'subtonic');
+    return (LANG === 'en' ? ['tonic', 'supertonic', 'mediant', 'subdominant', 'dominant', 'submediant']
+      : ['tonika', 'supertonika', 'medianta', 'subdominanta', 'dominanta', 'submedianta'])[sd];
   }
 
   /**
@@ -593,12 +606,12 @@
           // pisownia względem toniki (np. A♯ w B♭-dur traktujemy jak B♭)
           const roman = romanFor(iv.deg, iv.diff, c.type);
           if (inScale(c)) { fit++; return { roman, inKey: true }; }
-          let note = 'spoza tonacji';
-          if (fitsSpelled(c, parallel)) note = `zapożyczony z ${mode === 'major' ? 'molowej' : 'durowej'} jednoimiennej`;
+          let note = tr('spoza tonacji', 'outside the key');
+          if (fitsSpelled(c, parallel)) note = tr(`zapożyczony z ${mode === 'major' ? 'molowej' : 'durowej'} jednoimiennej`, `borrowed from the parallel ${mode === 'major' ? 'minor' : 'major'}`);
           else if (['7', 'maj'].includes(c.type.id)) {
             const target = transpose(c.root, parseInterval('4'));
             const tc = scales[0].notes.findIndex((n) => n.note.pc === target.pc);
-            if (tc > 0) note = `dominanta wtrącona do stopnia ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][tc]}`;
+            if (tc > 0) note = tr(`dominanta wtrącona do stopnia ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][tc]}`, `secondary dominant of ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][tc]}`);
           }
           return { roman, inKey: false, note };
         });
@@ -778,12 +791,12 @@
   function consonance(info) {
     const sd = mod(info.deg - 1, 7) + 1;
     if (!['P', 'M', 'm'].includes(info.abbr.replace(/\d+$/, ''))) {
-      return { id: 'dis', name: 'dysonans', why: 'Interwały zwiększone i zmniejszone traktuje się jako dysonanse — nawet gdy brzmią jak konsonans (np. sekunda zwiększona = 3 półtony).' };
+      return { id: 'dis', name: tr('dysonans', 'dissonance'), why: tr('Interwały zwiększone i zmniejszone traktuje się jako dysonanse — nawet gdy brzmią jak konsonans (np. sekunda zwiększona = 3 półtony).', 'Augmented and diminished intervals count as dissonances — even when they sound consonant (e.g. an augmented second = 3 semitones).') };
     }
-    if (sd === 1 || sd === 5) return { id: 'perfect', name: 'konsonans doskonały', why: 'Pryma, oktawa i kwinta czysta — brzmią „pusto” i stabilnie; dźwięki niemal się zlewają.' };
-    if (sd === 4) return { id: 'fourth', name: 'konsonans doskonały*', why: 'Kwarta czysta: sama brzmi zgodnie, ale w harmonii klasycznej nad basem traktuje się ją jak dysonans, który wymaga rozwiązania (np. w akordzie sus4).' };
-    if (sd === 3 || sd === 6) return { id: 'imperfect', name: 'konsonans niedoskonały', why: 'Tercje i seksty — brzmią ciepło i zgodnie; to z nich budujemy akordy.' };
-    return { id: 'dis', name: 'dysonans', why: 'Sekundy i septymy brzmią napięciowo i „chcą” się rozwiązać do konsonansu.' };
+    if (sd === 1 || sd === 5) return { id: 'perfect', name: tr('konsonans doskonały', 'perfect consonance'), why: tr('Pryma, oktawa i kwinta czysta — brzmią „pusto” i stabilnie; dźwięki niemal się zlewają.', 'Unison, octave and perfect fifth sound “open” and stable; the notes almost blend.') };
+    if (sd === 4) return { id: 'fourth', name: tr('konsonans doskonały*', 'perfect consonance*'), why: tr('Kwarta czysta: sama brzmi zgodnie, ale w harmonii klasycznej nad basem traktuje się ją jak dysonans, który wymaga rozwiązania (np. w akordzie sus4).', 'Perfect fourth: consonant on its own, but in classical harmony a fourth above the bass is treated as a dissonance that needs to resolve (e.g. in a sus4 chord).') };
+    if (sd === 3 || sd === 6) return { id: 'imperfect', name: tr('konsonans niedoskonały', 'imperfect consonance'), why: tr('Tercje i seksty — brzmią ciepło i zgodnie; to z nich budujemy akordy.', 'Thirds and sixths sound warm and consonant; chords are built from them.') };
+    return { id: 'dis', name: tr('dysonans', 'dissonance'), why: tr('Sekundy i septymy brzmią napięciowo i „chcą” się rozwiązać do konsonansu.', 'Seconds and sevenths sound tense and “want” to resolve to a consonance.') };
   }
 
   /** Enharmoniczne odpowiedniki: te same półtony, inny stopień (np. 6 pt = A4 lub d5). */
@@ -803,7 +816,8 @@
   // Interwały do tabel i ćwiczeń (proste + najczęstsze złożone).
   const INTERVALS = '1 b2 2 b3 3 4 #4 b5 5 #5 b6 6 b7 7 8 b9 9 #9 b10 10 11 #11 12 b13 13'.split(' ').map((sym) => {
     const iv = parseInterval(sym);
-    return { ...iv, info: describeInterval(iv.deg, iv.semi) };
+    // info liczone przy odczycie — nazwy w bieżącym języku (pl/en).
+    return { ...iv, get info() { return describeInterval(iv.deg, iv.semi); } };
   });
 
   /* ---------- Znaki przykluczowe ---------- */
@@ -926,6 +940,7 @@
   }
 
   global.Theory = {
+    setLang, getLang: () => LANG,
     staffStep, intervalOf, invertInterval, consonance, enharmonicIntervals,
     keySignature, alterationsVsMajor, smoothVoicing, voiceMoves, secondaryDominant,
     MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels, cagedShape, harmonize, harmonizeGroups, nonChordTone, polishNoteName, polishKeyName,

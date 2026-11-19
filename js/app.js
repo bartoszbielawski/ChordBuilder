@@ -297,7 +297,7 @@
       rows.push(['Znaki przykluczowe', sig.count
         ? `${sig.count}${sig.type === 'sharp' ? '♯' : '♭'} — ${sig.notes.map(nn).join(', ')}` + (sig.theoretical ? ' (tonacja teoretyczna — w praktyce zapisuje się ją enharmonicznie)' : '')
         : 'brak']);
-      if (sc.scale.id !== 'major') rows.push(['Tonacja macierzysta', `te same znaki co ${parentName}` + (['harmonicMinor', 'melodicMinor', 'phrygianDominant', 'blues', 'minorPentatonic', 'majorPentatonic'].includes(sc.scale.id) ? '; pozostałe zmiany jako znaki przygodne przy nutach' : '')]);
+      if (sc.scale.id !== 'major') rows.push(['Tonacja macierzysta', h('span', {}, `te same znaki co ${parentName}`, ['harmonicMinor', 'melodicMinor', 'phrygianDominant', 'blues', 'minorPentatonic', 'majorPentatonic'].includes(sc.scale.id) ? '; pozostałe zmiany jako znaki przygodne przy nutach' : '')]);
     } else {
       rows.push(['Znaki przykluczowe', 'skala spoza systemu dur–moll — zapisuje się ją znakami przygodnymi']);
     }
@@ -356,10 +356,10 @@
     const minorThird = sc.notes[2].iv.semi === 3;
     const par = `${nn(sc.tonic)} ${minorThird ? 'durowej' : 'molowej'}`;
     $('borrowed-summary').textContent = `Akordy zapożyczone z równoległej ${minorThird ? 'durowej' : 'molowej'} (${list.length})`;
-    $('borrowed-hint').textContent = (minorThird
+    $('borrowed-hint').replaceChildren((minorThird
       ? `Akordy ze skali ${par} (ta sama tonika), których nie ma w bieżącej skali. W molu najczęściej pożycza się durową dominantę V i tonikę I na zakończenie (tercja pikardyjska).`
       : `Akordy ze skali ${par} (ta sama tonika), których nie ma w bieżącej skali — tzw. mieszanie trybów. Najczęstsze: iv (molowa subdominanta), ♭VI i ♭VII (rock, muzyka filmowa), ♭III. Dodają „ciemny” odcień bez zmiany tonacji.`)
-      + ' Kliknij akord, aby zobaczyć jego budowę.';
+      , ' ', 'Kliknij akord, aby zobaczyć jego budowę.');
     $('borrowed').replaceChildren(...list.map((d) => h('button', {
       type: 'button', class: 'chip' + (isActive(d.chord) ? ' active' : ''), title: d.chord.type.name,
       onclick: () => selectChord(d.chord.root, d.chord.type.id),
@@ -393,7 +393,7 @@
           },
         }, '▶'),
         h('span', { class: 'muted small-text' }, foreign.length
-          ? `spoza skali: ${foreign.map((n) => nn(n.note)).join(', ')}` + (leading && foreign.includes(leading) ? ` (${nn(leading.note)} prowadzi do ${nn(d.chord.root)})` : '')
+          ? [`spoza skali: ${foreign.map((n) => nn(n.note)).join(', ')}`, leading && foreign.includes(leading) ? ` (${nn(leading.note)} prowadzi do ${nn(d.chord.root)})` : '']
           : 'wszystkie dźwięki w skali (to zwykła dominanta)'));
     }));
   }
@@ -412,9 +412,9 @@
     const voiced = T.inversion(chord, state.inv);
     $('chord-symbol').textContent = T.chordSymbol(chord, state.notation);
     const bass = voiced[0];
-    $('chord-name').textContent = `${nn(chord.root)} — akord ${chord.type.name}` +
-      (state.inv > 0 ? ` · ${['', 'I', 'II', 'III'][state.inv]} przewrót (bas: ${nn(bass.note)})` : '') +
-      (T.figuredBass(chord, state.inv) ? ` · oznaczenie cyfrowe: ${T.figuredBass(chord, state.inv)}` : '');
+    $('chord-name').replaceChildren(`${nn(chord.root)} — akord ${chord.type.name}`,
+      state.inv > 0 ? ` · ${['', 'I', 'II', 'III'][state.inv]} przewrót (bas: ${nn(bass.note)})` : '',
+      T.figuredBass(chord, state.inv) ? ` · oznaczenie cyfrowe: ${T.figuredBass(chord, state.inv)}` : '');
 
     const outside = chord.notes.filter((n) => !sc.pcs.has(n.note.pc));
     const fit = $('chord-fit');
@@ -691,9 +691,9 @@
 
     const steps = progSteps(sc);
     const p = T.PROGRESSIONS.find((x) => x.id === state.prog);
-    $('prog-desc').textContent = state.prog === 'custom'
-      ? 'Twoja progresja. Wybierz akord (np. w „Akordach w skali” lub w sekcji 3) i dodaj go przyciskiem poniżej. Oznaczenia rzymskie liczone są od toniki ' + nn(sc.tonic) + '.'
-      : p.desc + ` W tonacji ${nn(sc.tonic)} — zmień tonikę w sekcji 1 lub na kole kwintowym, aby przetransponować.`;
+    $('prog-desc').replaceChildren(...(state.prog === 'custom'
+      ? ['Twoja progresja. Wybierz akord (np. w „Akordach w skali” lub w sekcji 3) i dodaj go przyciskiem poniżej. Oznaczenia rzymskie liczone są od toniki', ' ', nn(sc.tonic) + '.']
+      : [p.desc, ' ', `W tonacji ${nn(sc.tonic)} — zmień tonikę w sekcji 1 lub na kole kwintowym, aby przetransponować.`]));
 
     const outside = (c) => c.notes.some((n) => !sc.pcs.has(n.note.pc));
     const vls = state.smooth && steps.length ? voiceLeading(steps) : null;

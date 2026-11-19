@@ -371,6 +371,19 @@
       eq(r.choice.map((d) => d.roman).join(' '), 'I I I I I I');
       eq(r.nct, [null, 'przejściowy', null, 'przejściowy', null, null]);
     }],
+    ['Nazwy po angielsku (setLang)', (T, eq) => {
+      T.setLang('en');
+      try {
+        eq(T.describeInterval(3, 4).name, 'major third');
+        eq(T.describeInterval(4, 6).name, 'augmented fourth (tritone)');
+        eq(T.describeInterval(8, 12).name, 'perfect octave');
+        eq(T.describeInterval(9, 13).name, 'minor ninth');
+        eq(T.degreeName(T.parseInterval('7')), 'leading tone');
+        eq(T.consonance(T.describeInterval(5, 7)).name, 'perfect consonance');
+        eq(T.INTERVALS.find((x) => x.sym === 'b3').info.name, 'minor third');
+      } finally { T.setLang('pl'); }
+      eq(T.describeInterval(3, 4).name, 'tercja wielka');
+    }],
     ['Polskie nazwy tonacji', (T, eq) => {
       const k = (n, m) => T.polishKeyName(T.parseNote(n), m);
       eq(k('Eb', 'major'), 'Es-dur'); eq(k('Ab', 'major'), 'As-dur'); eq(k('Bb', 'major'), 'B-dur');

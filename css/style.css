@@ -597,3 +597,4 @@ kbd {
 .lesson-links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13.5px; }
 .lesson-ex { color: var(--muted); }
 .lesson-ex.ok { color: var(--ok); font-weight: 600; }
+#lang-switch button { min-width: 38px; }

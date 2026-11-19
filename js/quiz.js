@@ -352,11 +352,13 @@
         const opts = shuffle([...new Set([n, n * 2, n / 2, n + 1, n - 1, n + 2].filter((x) => Number.isInteger(x) && x >= 1))]).slice(0, 5);
         if (!opts.includes(n)) opts[0] = n;
         return {
-          prompt: h('span', {}, 'Ile ', h('b', {}, R.valueName(b) + ' '), h('span', { class: 'rh-g' }, R.glyph(b)), ' trwa tyle, co ', h('b', {}, R.valueName(a) + ' '), h('span', { class: 'rh-g' }, R.glyph(a)), '?'),
+          prompt: window.I18N && window.I18N.lang === 'en'
+            ? h('span', {}, 'How many ', h('b', {}, R.valueName(b) + 's '), h('span', { class: 'rh-g' }, R.glyph(b)), ' make one ', h('b', {}, R.valueName(a) + ' '), h('span', { class: 'rh-g' }, R.glyph(a)), '?')
+            : h('span', {}, 'Ile ', h('b', {}, R.valueName(b) + ' '), h('span', { class: 'rh-g' }, R.glyph(b)), ' trwa tyle, co ', h('b', {}, R.valueName(a) + ' '), h('span', { class: 'rh-g' }, R.glyph(a)), '?'),
           answers: opts.sort((x, y) => x - y).map((x) => ({ key: String(x), label: String(x) })),
           correct: String(n), item: a.v + (a.rest ? 'r' : '') + '/' + b.v,
-          explain: (box) => box.append(h('p', {}, `${cap(R.valueName(a))} = ${R.units(a)} szesnastek, ${R.valueName(b)} = ${R.units(b)} → ${R.units(a)} : ${R.units(b)} = ${n}.` +
-            (a.v.endsWith('.') ? ' Kropka wydłuża wartość o połowę.' : '') + (a.rest ? ' Pauza trwa tyle samo co nuta o tej wartości.' : ''))),
+          explain: (box) => box.append(h('p', {}, `${cap(R.valueName(a))} = ${R.units(a)} szesnastek, ${R.valueName(b)} = ${R.units(b)} → ${R.units(a)} : ${R.units(b)} = ${n}.`,
+            a.v.endsWith('.') ? ' ' : '', a.v.endsWith('.') ? 'Kropka wydłuża wartość o połowę.' : '', a.rest ? ' ' : '', a.rest ? 'Pauza trwa tyle samo co nuta o tej wartości.' : '')),
         };
       },
     },
@@ -378,8 +380,8 @@
           play: () => { stopRhythm(); stopRhythm = R.playRhythm(bar, meter, 80, { countIn: false }); },
           explain: (box) => {
             const total = bar.reduce((s2, e) => s2 + R.units(e), 0);
-            box.append(h('p', {}, `${bar.map((e) => R.valueName(e)).join(' + ')} = ${String(total / 4).replace('.', ',')} ćwierćnuty → ${id}` +
-              (id === '3/8' ? ' (3 ósemki).' : ` (${meter.beats} ${meter.unit === 4 ? 'ćwierćnuty' : 'ósemki'}).`)),
+            box.append(h('p', {}, `${bar.map((e) => R.valueName(e)).join(' + ')} = ${String(total / 4).replace('.', ',')} ćwierćnuty → ${id}`, ' ',
+              id === '3/8' ? '(3 ósemki).' : `(${meter.beats} ${meter.unit === 4 ? 'ćwierćnuty' : 'ósemki'}).`),
             h('p', { class: 'muted' }, 'Uwaga: takt 3/4 i 6/8 trwa tyle samo, ale inaczej się go akcentuje (3 × ćwierćnuta vs 2 × ćwierćnuta z kropką).'));
           },
         };
@@ -459,7 +461,7 @@
           explain: (box) => {
             const steps = sc.notes.map((x, i) => (i + 1 < 7 ? sc.notes[i + 1].iv.semi : 12) - x.iv.semi);
             const alts = T.alterationsVsMajor(sc.scale).map((d) => d.symbol);
-            box.append(h('p', {}, `${nn(sc.tonic)} ${sc.scale.name.toLowerCase()}: odległości ${steps.join(' ')}` + (alts.length ? `; względem durowej: ${alts.join(', ')}.` : ' — wzór skali durowej.')),
+            box.append(h('p', {}, `${nn(sc.tonic)} ${sc.scale.name.toLowerCase()}: odległości ${steps.join(' ')}`, alts.length ? `; względem durowej: ${alts.join(', ')}.` : ' — wzór skali durowej.'),
               h('p', { class: 'muted' }, sc.scale.mood || ''));
           },
         };
@@ -661,7 +663,7 @@
             const d = ivInfo(sym);
             const majTop = T.transpose(low, T.parseInterval(String(iv.deg)));
             box.append(h('p', {}, `${nn(low)} → ${nn(top)}: liczymy litery (${iv.deg}) i półtony (${iv.semi}) → ${d.name} (${d.pl}).`),
-              h('p', { class: 'muted' }, `W skali ${nn(low)}-dur ${iv.deg}. stopień to ${nn(majTop)}` +
+              h('p', { class: 'muted' }, `W skali ${nn(low)}-dur ${iv.deg}. stopień to ${nn(majTop)}`,
                 (majTop.pc === top.pc && majTop.acc === top.acc ? ', więc interwał jest wielki/czysty.' : `; ${nn(top)} jest ${top.pc === T.mod(majTop.pc - 1, 12) ? 'o półton niżej' : top.pc === T.mod(majTop.pc + 1, 12) ? 'o półton wyżej' : 'o cały ton niżej'} → ${d.quality}.`)));
           },
         };
@@ -738,8 +740,8 @@
           explain: (box) => {
             const st = staffBox();
             I.renderMelody(st, [notes], { gap: 60, labels: [sym(chord)] });
-            box.append(h('p', {}, `${sym(chord)} — ${chord.type.name}. Ułożone tercjami od prymy: ${chord.notes.map((n) => nn(n.note)).join(' – ')}` +
-              (inv ? `; w basie ${nn(T.inversion(chord, inv)[0].note)} (${['', 'I', 'II', 'III'][inv]} przewrót).` : '.')), st);
+            box.append(h('p', {}, `${sym(chord)} — ${chord.type.name}. Ułożone tercjami od prymy: ${chord.notes.map((n) => nn(n.note)).join(' – ')}`,
+              inv ? `; w basie ${nn(T.inversion(chord, inv)[0].note)} (${['', 'I', 'II', 'III'][inv]} przewrót).` : '.'), st);
           },
         };
       },

@@ -31,7 +31,8 @@
   function valueName(el) {
     const v = byId(el.v);
     const base = el.rest ? v.restName : v.name;
-    return el.v.endsWith('.') ? base + ' z kropką' : base;
+    if (!el.v.endsWith('.')) return base;
+    return global.I18N && global.I18N.lang === 'en' ? 'dotted ' + base : base + ' z kropką';
   }
 
   // Metrum: beats — liczba miar, unit — wartość miary (w szesnastkach), accents — siła miar.
@@ -109,4 +110,5 @@
   }
 
   global.Rhythm = { VALUES, DOTTED, METERS, meterById, barUnits, glyph, units, valueName, playRhythm, randomBar };
+  if (global.I18N) global.I18N.patchRhythm(global.Rhythm); // wersja angielska
 })(window);

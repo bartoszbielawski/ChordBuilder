@@ -57,7 +57,7 @@ i najtańszych w realizacji.
 
 | # | Funkcja | Opis | Nakład |
 |---|---|---|---|
-| 5.1 | **Wersja angielska** | Przełącznik PL/EN (teksty w jednym słowniku). | S |
+| 5.1 | ~~**Wersja angielska**~~ ✓ | Przełącznik PL/EN (teksty w jednym słowniku). | S |
 | 5.2 | ~~**PWA / offline**~~ ✓ | Manifest + service worker: instalacja na telefonie, działanie bez sieci. | S |
 | 5.3 | ~~**Eksport**~~ ✓ | Zapis diagramu chwytu / klawiatury jako PNG lub SVG, wydruk „ściągi” akordów tonacji. | S |
 | 5.4 | ~~**Pięciolinia**~~ ✓ | Akord zapisany nutami (np. biblioteka VexFlow). | M |
@@ -80,9 +80,10 @@ i ćwiczenia rytmiczne (18 rodzajów ćwiczeń).
 Ostatnio dodane: ćwiczenia rytmiczne, bas cyfrowany, transpozycja, unikanie kwint
 i oktaw równoległych, ukulele i bas, kształty CAGED, harmonizacja melodii z dźwiękami
 obcymi, polskie nazwy tonacji, tabela tonacji, nowe progresje (ciąg kwintowy, backdoor),
-ścieżka nauki (15 lekcji), 22 rodzaje ćwiczeń, słowniczek (66 haseł).
+ścieżka nauki (15 lekcji), 22 rodzaje ćwiczeń, słowniczek (66 haseł), ulepszony syntezator,
+wersja angielska (przełącznik PL/EN).
 
 Dalsze pomysły (malejąco wg wartości dla nauki):
 
 1. **4.3 Próbki instrumentów** (syntezator już ulepszony: pianino z nieharmonicznymi składowymi,
-   gitara Karplusa–Stronga, klik metronomu) i **5.1 wersja angielska**.
+   gitara Karplusa–Stronga, klik metronomu) — wymaga pobrania nagrań i sprawdzenia licencji.

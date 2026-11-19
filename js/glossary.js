@@ -76,13 +76,17 @@
     ['ciąg kwintowy (progresja po kole)', 'Następstwo akordów, w którym bas schodzi o kwintę (wznosi się o kwartę), np. vi–ii–V–I. Jedna z najsilniejszych progresji w muzyce tonalnej.', [['Progresja', './#t=C&s=major&p=circle']]],
   ];
 
+  // Wersja angielska: hasła i definicje ze słownika i18n-en.js.
+  const G = window.I18N && window.I18N.lang === 'en' && window.I18N_EN && window.I18N_EN.glossary;
+  if (G) for (const t of TERMS) if (G[t[0]]) [t[0], t[1]] = G[t[0]];
+
   const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l');
 
   function render() {
     const q = norm($('search').value.trim());
     const list = TERMS.filter(([t, d, , syn]) => !q || norm(t).includes(q) || norm(d).includes(q) || (syn || []).some((s) => norm(s).includes(q)))
-      .sort((a, b) => a[0].localeCompare(b[0], 'pl'));
-    $('count').textContent = `${list.length} z ${TERMS.length}`;
+      .sort((a, b) => a[0].localeCompare(b[0], G ? 'en' : 'pl'));
+    $('count').textContent = `${list.length} ${window.I18N && window.I18N.lang === 'en' ? 'of' : 'z'} ${TERMS.length}`;
     const groups = new Map();
     for (const item of list) {
       const L = item[0][0].toUpperCase();
