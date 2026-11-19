@@ -318,6 +318,14 @@
       const tr2 = T.transposeChords([c('C', 'maj'), c('G', 'maj')], T.parseNote('C'), T.parseNote('F#'));
       eq(tr2.map((x) => T.chordSymbol(x)).join(' '), 'F♯ C♯');
     }],
+    ['Kwinty i oktawy równoległe', (T, eq) => {
+      eq(T.parallels([48, 55, 64], [50, 57, 65]).map((p) => p.kind).join(','), 'kwinty');
+      eq(T.parallels([48, 60, 64], [50, 62, 65]).map((p) => p.kind).join(','), 'oktawy');
+      eq(T.parallels([48, 55, 64], [43, 55, 62]).length, 0);
+      eq(T.parallels([48, 55], [55, 62]).map((p) => p.kind).join(','), 'kwinty');
+      eq(T.parallels([48, 55], [47, 54]).length, 1);
+      eq(T.parallels([48, 55], [50, 55]).length, 0);
+    }],
     ['Dominanty wtrącone', (T, eq) => {
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('D'))), 'A7');
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('Bb'))), 'F7');

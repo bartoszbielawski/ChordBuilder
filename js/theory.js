@@ -726,7 +726,7 @@
    * ruchów głosów. prev — wysokości MIDI poprzedniego akordu (lub null).
    * Zwraca { midis[], notes[] (pozycje akordu w tej samej kolejności), inv }.
    */
-  function smoothVoicing(chord, prev, center = 62) {
+  function smoothVoicing(chord, prev, center = 62, penalty = null) {
     let best = null;
     for (let inv = 0; inv < chord.notes.length; inv++) {
       const voiced = inversion(chord, inv);
@@ -745,6 +745,7 @@
         } else {
           cost = Math.abs(avg - center) + inv * 0.5;
         }
+        if (penalty) cost += penalty(midis);
         if (!best || cost < best.cost) best = { cost, midis, notes: voiced, inv };
       }
     }
@@ -768,6 +769,26 @@
     });
   }
 
+  /**
+   * Kwinty i oktawy równoległe między dwoma współbrzmieniami (głosy od dołu,
+   * równa liczba). Zwraca [{ kind: 'kwinty'|'oktawy', lo, hi }] — indeksy głosów.
+   */
+  function parallels(prev, next) {
+    if (!prev || prev.length !== next.length) return [];
+    const a = [...prev].sort((x, y) => x - y), b = [...next].sort((x, y) => x - y);
+    const out = [];
+    for (let i = 0; i < a.length; i++) {
+      for (let j = i + 1; j < a.length; j++) {
+        const i1 = mod(a[j] - a[i], 12), i2 = mod(b[j] - b[i], 12);
+        const mi = b[i] - a[i], mj = b[j] - a[j];
+        if (!mi || !mj || Math.sign(mi) !== Math.sign(mj)) continue; // ruch równoległy tylko gdy oba głosy idą w tę samą stronę
+        if (i1 === 7 && i2 === 7) out.push({ kind: 'kwinty', lo: i, hi: j });
+        else if (i1 === 0 && i2 === 0) out.push({ kind: 'oktawy', lo: i, hi: j });
+      }
+    }
+    return out;
+  }
+
   /* ---------- Dominanty wtrącone ---------- */
 
   /** V7 (dominanta septymowa) dla akordu na danym dźwięku: kwinta wyżej. */
@@ -778,7 +799,7 @@
   global.Theory = {
     staffStep, intervalOf, invertInterval, consonance, enharmonicIntervals,
     keySignature, alterationsVsMajor, smoothVoicing, voiceMoves, secondaryDominant,
-    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords,
+    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels,
     LETTERS, SCALES, CHORD_TYPES, CHORD_GROUPS, TUNINGS,
     mod, makeNote, parseNote, noteKey, noteName,
     parseInterval, describeInterval, intervalBetween, transpose,

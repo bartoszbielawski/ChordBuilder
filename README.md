@@ -86,7 +86,8 @@ kroku budowania), więc działa od razu na GitHub Pages.
   akordu na pianinie i gryfie. Własne progresje: dodawanie, usuwanie, kopiowanie
   gotowego schematu do edycji, zapis w adresie URL. **Płynne prowadzenie głosów:**
   każdy akord w przewrocie najbliższym poprzedniemu, zapis całej progresji na
-  pięciolinii i opis ruchu głosów (wspólne dźwięki, np. „E→F G→A”).
+  pięciolinii i opis ruchu głosów (wspólne dźwięki, np. „E→F G→A”); układy
+  unikają kwint i oktaw równoległych, a gdy się nie da — strona je oznacza.
 - **Analiza harmoniczna:** wpisz akordy (np. z piosenki: „G D Em C”), a strona
   znajdzie tonację, opisze akordy cyframi rzymskimi i wskaże akordy spoza tonacji
   (zapożyczone, dominanty wtrącone); jednym kliknięciem zrobisz z nich progresję

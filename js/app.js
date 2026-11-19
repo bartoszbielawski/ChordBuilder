@@ -607,12 +607,28 @@
   function voiceLeading(steps) {
     const out = [];
     let prev = null;
+    let prevBass = null;
     for (const st of steps) {
-      const v = T.smoothVoicing(st.chord, prev);
+      const bass = 36 + st.chord.root.pc;
+      const pb = prevBass, pv = prev;
+      // Kara za kwinty/oktawy równoległe (z basem) — wybierz poprawny układ, jeśli istnieje.
+      const v = T.smoothVoicing(st.chord, prev, 62, pv ? (m) => 8 * T.parallels([pb, ...pv], [bass, ...m]).length : null);
+      prevBass = bass;
       out.push(v);
       prev = v.midis;
     }
     return out;
+  }
+
+  /** Ostrzeżenie o kwintach/oktawach równoległych (z basem grającym prymę, jak przy odtwarzaniu). */
+  function parallelWarning(c1, v1, c2, v2) {
+    const bass = (c) => 36 + c.root.pc;
+    const p = T.parallels([bass(c1), ...v1.midis], [bass(c2), ...v2.midis]);
+    if (!p.length) return null;
+    const voice = (k, n) => (k === 0 ? 'bas' : k === n - 1 ? 'sopran' : `głos ${k + 1}`);
+    const n = v1.midis.length + 1;
+    return h('span', { class: 'qual out', title: 'W harmonii klasycznej unika się kwint i oktaw równoległych — głosy tracą samodzielność.' },
+      '⚠ ' + [...new Set(p.map((x) => `${x.kind} równoległe (${voice(x.lo, n)}–${voice(x.hi, n)})`))].join(', '));
   }
 
   function movesText(prev, cur) {
@@ -680,7 +696,8 @@
       h('span', { class: 'sym' }, T.chordSymbol(st.chord, state.notation)),
       h('span', { class: 'notes' }, st.chord.notes.map((n) => nn(n.note)).join(' · ')),
       outside(st.chord) ? h('span', { class: 'qual out' }, 'spoza skali ' + sc.scale.name.toLowerCase()) : null,
-      vls && i > 0 ? h('span', { class: 'moves', title: 'Ruch głosów względem poprzedniego akordu' }, movesText(vls[i - 1], vls[i])) : null);
+      vls && i > 0 ? h('span', { class: 'moves', title: 'Ruch głosów względem poprzedniego akordu' }, movesText(vls[i - 1], vls[i])) : null,
+      vls && i > 0 ? parallelWarning(steps[i - 1].chord, vls[i - 1], st.chord, vls[i]) : null);
       if (state.prog === 'custom') {
         card.append(h('button', {
           type: 'button', class: 'remove', title: 'Usuń z progresji', 'aria-label': 'Usuń z progresji',
