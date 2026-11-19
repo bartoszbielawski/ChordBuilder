@@ -406,7 +406,8 @@
     $('chord-symbol').textContent = T.chordSymbol(chord, state.notation);
     const bass = voiced[0];
     $('chord-name').textContent = `${nn(chord.root)} — akord ${chord.type.name}` +
-      (state.inv > 0 ? ` · ${['', 'I', 'II', 'III'][state.inv]} przewrót (bas: ${nn(bass.note)})` : '');
+      (state.inv > 0 ? ` · ${['', 'I', 'II', 'III'][state.inv]} przewrót (bas: ${nn(bass.note)})` : '') +
+      (T.figuredBass(chord, state.inv) ? ` · oznaczenie cyfrowe: ${T.figuredBass(chord, state.inv)}` : '');
 
     const outside = chord.notes.filter((n) => !sc.pcs.has(n.note.pc));
     const fit = $('chord-fit');
@@ -746,6 +747,20 @@
       a.inKey ? null : h('span', { class: 'qual out' }, a.note));
     })));
     const alts = keys.slice(1, 4).filter((k) => k.score >= best.score - 12);
+    // Transpozycja do innej tonacji (ten sam tryb).
+    const tKeys = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+    const trSel = h('select', { 'aria-label': 'Transponuj do tonacji', onchange: (e) => {
+      if (!e.target.value) return;
+      let to = T.parseNote(e.target.value);
+      if (best.mode === 'minor') to = T.transpose(to, T.parseInterval('6'));
+      const out = T.transposeChords(chords, best.tonic, to);
+      $('an-input').value = out.map((c) => T.chordSymbol(c, state.notation).replace(/♯/g, '#').replace(/♭/g, 'b')).join(' ');
+      renderAnalysis();
+    } }, new Option('— wybierz —', ''), ...tKeys.map((k) => {
+      const t = best.mode === 'major' ? T.parseNote(k) : T.transpose(T.parseNote(k), T.parseInterval('6'));
+      return new Option(best.mode === 'major' ? `${nn(t)}-dur` : `${nn(t).toLowerCase()}-moll`, k);
+    }));
+    parts.push(h('label', { class: 'field an-tr' }, h('span', {}, 'Transponuj do tonacji (cyfry rzymskie zostają te same)'), trSel));
     if (alts.length) {
       parts.push(h('p', { class: 'hint' }, 'Inne możliwości: ', alts.flatMap((k, i) => [i ? ', ' : '', h('b', {}, keyName(k)), ` (${k.analysis.map((a) => a.roman).join(' ')})`])));
     }

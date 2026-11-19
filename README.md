@@ -63,7 +63,8 @@ kroku budowania), więc działa od razu na GitHub Pages.
   prowadzącym i odsłuchem rozwiązania.
 - **Wszystkie akordy pasujące do skali:** lista akordów zbudowanych wyłącznie
   z dźwięków wybranej skali (sus, 6, add9, 9, 13…).
-- **Konstruktor akordów:** dowolna pryma + 30 typów akordów, przewroty.
+- **Konstruktor akordów:** dowolna pryma + 30 typów akordów, przewroty
+  z oznaczeniem cyfrowym (bas cyfrowany: 6, 6/4, 6/5, 4/3, 2).
   Dla każdego dźwięku: stopień, pełna polska nazwa interwału (np. „septyma mała”),
   skrót (m7), liczba półtonów od prymy oraz informacja, czy należy do skali.
 - **Budowa krok po kroku:** stos interwałów między kolejnymi dźwiękami
@@ -88,7 +89,8 @@ kroku budowania), więc działa od razu na GitHub Pages.
   pięciolinii i opis ruchu głosów (wspólne dźwięki, np. „E→F G→A”).
 - **Analiza harmoniczna:** wpisz akordy (np. z piosenki: „G D Em C”), a strona
   znajdzie tonację, opisze akordy cyframi rzymskimi i wskaże akordy spoza tonacji
-  (zapożyczone, dominanty wtrącone); jednym kliknięciem zrobisz z nich progresję.
+  (zapożyczone, dominanty wtrącone); jednym kliknięciem zrobisz z nich progresję
+  albo przetransponujesz je do innej tonacji.
 - **Rozpoznawanie akordu („✎ Wklikaj akord”):** wybierz dźwięki na pianinie
   albo na gryfie, a strona poda nazwę akordu (z przewrotem, np. C/E, wariantem
   bez kwinty lub akordem z obcym basem), interwały od basu i pozwoli przejść

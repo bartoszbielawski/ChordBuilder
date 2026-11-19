@@ -378,6 +378,27 @@
       });
   }
 
+  /**
+   * Oznaczenie cyfrowe (bas cyfrowany) przewrotu: trójdźwięk 5/3, 6, 6/4;
+   * akord septymowy 7, 6/5, 4/3, 2. Dla innych akordów — null.
+   */
+  function figuredBass(chord, inv) {
+    const n = chord.notes.length;
+    const has7 = chord.notes.some((x) => x.iv.deg === 7);
+    const tertian = chord.notes.every((x) => [1, 3, 5, 7].includes(x.iv.deg));
+    if (!tertian) return null;
+    if (n === 3 && !has7) return ['5/3', '6', '6/4'][inv] || null;
+    if (n === 4 && has7) return ['7', '6/5', '4/3', '2'][inv] || null;
+    return null;
+  }
+
+  /** Transpozycja listy akordów o interwał między tonikami (z poprawną pisownią). */
+  function transposeChords(chords, fromTonic, toTonic) {
+    const iv = intervalBetween(fromTonic, toTonic);
+    const shift = { deg: iv.deg, semi: mod(toTonic.pc - fromTonic.pc, 12) };
+    return chords.map((c) => buildChord(transpose(c.root, shift), c.type.id));
+  }
+
   /* ---------- Analiza: symbol akordu → akord, akordy → tonacja ---------- */
 
   // Dodatkowe zapisy symboli (oprócz tych z CHORD_TYPES).
@@ -757,7 +778,7 @@
   global.Theory = {
     staffStep, intervalOf, invertInterval, consonance, enharmonicIntervals,
     keySignature, alterationsVsMajor, smoothVoicing, voiceMoves, secondaryDominant,
-    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey,
+    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords,
     LETTERS, SCALES, CHORD_TYPES, CHORD_GROUPS, TUNINGS,
     mod, makeNote, parseNote, noteKey, noteName,
     parseInterval, describeInterval, intervalBetween, transpose,

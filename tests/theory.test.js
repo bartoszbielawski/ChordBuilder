@@ -308,6 +308,16 @@
       const k = T.analyzeKey(['C', 'Fm', 'C'].map((x) => T.parseChordSymbol(x).chord))[0];
       eq(k.analysis[1].note, 'zapożyczony z molowej jednoimiennej');
     }],
+    ['Bas cyfrowany i transpozycja', (T, eq) => {
+      const c = (r, t) => T.buildChord(T.parseNote(r), t);
+      eq([0, 1, 2].map((i) => T.figuredBass(c('C', 'maj'), i)).join(' '), '5/3 6 6/4');
+      eq([0, 1, 2, 3].map((i) => T.figuredBass(c('G', '7'), i)).join(' '), '7 6/5 4/3 2');
+      eq(T.figuredBass(c('C', 'sus4'), 0), null);
+      const tr = T.transposeChords([c('C', 'maj'), c('A', 'min'), c('F', 'maj'), c('G', '7')], T.parseNote('C'), T.parseNote('Eb'));
+      eq(tr.map((x) => T.chordSymbol(x)).join(' '), 'E♭ Cm A♭ B♭7');
+      const tr2 = T.transposeChords([c('C', 'maj'), c('G', 'maj')], T.parseNote('C'), T.parseNote('F#'));
+      eq(tr2.map((x) => T.chordSymbol(x)).join(' '), 'F♯ C♯');
+    }],
     ['Dominanty wtrącone', (T, eq) => {
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('D'))), 'A7');
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('Bb'))), 'F7');

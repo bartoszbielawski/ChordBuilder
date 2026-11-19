@@ -572,3 +572,4 @@ kbd {
 .rh-fill > div { height: 100%; background: var(--accent); transition: width .2s; }
 .quiz-answers.rhythm .quiz-answer span, .quiz-prompt .rh-g { font-family: "Noto Music", "Apple Symbols", "Segoe UI Symbol", serif; font-size: 26px; letter-spacing: 2px; }
 .quiz-prompt .rh-g.big { font-size: 32px; }
+.an-tr { max-width: 340px; }
