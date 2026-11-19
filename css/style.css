@@ -598,3 +598,12 @@ kbd {
 .lesson-ex { color: var(--muted); }
 .lesson-ex.ok { color: var(--ok); font-weight: 600; }
 #lang-switch button { min-width: 38px; }
+
+/* ---------- Tryb prezentacji i link dla klasy ---------- */
+.present-btn { font: inherit; font-size: 14px; padding: 6px 12px; border-radius: 999px; border: 1px dashed var(--border); background: transparent; color: var(--muted); cursor: pointer; }
+.present-btn:hover { border-color: var(--accent); color: var(--text); }
+html.present body { zoom: 1.35; }
+html.present .site-footer, html.present .settings .field:first-child { display: none; }
+@media (max-width: 760px) { .present-btn { display: none; } html.present body { zoom: 1; } }
+.share-note { font-size: 13px; color: var(--muted); }
+.share-note a { word-break: break-all; }

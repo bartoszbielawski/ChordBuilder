@@ -47,6 +47,30 @@
     host.prepend(wrap);
   }
   document.addEventListener('DOMContentLoaded', addSwitch);
+
+  /* ---------- Tryb prezentacji (projektor w klasie): powiększenie całej strony ---------- */
+  let present = false;
+  try { present = sessionStorage.getItem('chordbuilder.present') === '1'; } catch (e) { /* ignoruj */ }
+  if (present) document.documentElement.classList.add('present');
+  document.addEventListener('DOMContentLoaded', () => {
+    const nav = document.querySelector('.site-nav');
+    if (!nav || document.getElementById('present-btn')) return;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.id = 'present-btn';
+    b.className = 'present-btn';
+    const label = () => (document.documentElement.classList.contains('present')
+      ? (lang === 'en' ? '⛶ Exit presentation' : '⛶ Zwykły widok')
+      : (lang === 'en' ? '⛶ Presentation' : '⛶ Tryb prezentacji'));
+    b.title = lang === 'en' ? 'Larger view for a projector in class' : 'Powiększony widok na projektor w klasie';
+    b.textContent = label();
+    b.addEventListener('click', () => {
+      const on = document.documentElement.classList.toggle('present');
+      try { sessionStorage.setItem('chordbuilder.present', on ? '1' : '0'); } catch (e) { /* ignoruj */ }
+      b.textContent = label();
+    });
+    nav.append(b);
+  });
   if (lang !== 'en') return;
 
   document.documentElement.lang = 'en';

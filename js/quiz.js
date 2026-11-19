@@ -12,6 +12,19 @@
   const { h, pick, shuffle, midiOf, noteOfMidi, octaveName } = C;
   const $ = (id) => document.getElementById(id);
 
+  // Wspólny zestaw dla klasy: ?seed=… — te same pytania w tej samej kolejności u wszystkich.
+  const SEED = (new URLSearchParams(location.search).get('seed') || '').replace(/[^\w-]/g, '').slice(0, 16);
+  if (SEED) {
+    let a = 0;
+    for (const ch of SEED) a = (Math.imul(a ^ ch.charCodeAt(0), 2654435761) + 0x9e3779b9) >>> 0;
+    Math.random = () => { // mulberry32
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
   const STATS_KEY = 'chordbuilder.quiz';
   const prefs = C.loadPrefs();
   const state = {
@@ -40,6 +53,7 @@
   }
   /** Losowanie z wagą: elementy z błędami pojawiają się częściej. */
   function weighted(id, list, keyOf = (x) => String(x)) {
+    if (SEED) return list[Math.floor(Math.random() * list.length)]; // zestaw wspólny: bez dopasowania do ucznia
     const items = exStats(id).items;
     const w = list.map((x) => {
       const it = items[keyOf(x)];
@@ -1026,6 +1040,9 @@
         return sel;
       })())));
 
+    $('ex-share').replaceChildren(SEED
+      ? h('span', { class: 'share-note' }, `Zestaw wspólny: ${SEED} — wszyscy z tym linkiem dostają te same pytania.`)
+      : h('button', { type: 'button', class: 'btn ghost small', title: 'Link, po którym cała klasa dostanie te same pytania w tej samej kolejności', onclick: shareLink }, '🔗 Link dla klasy'));
     const sess = state.session;
     $('ex-score').textContent = sess.total ? `Ta sesja: ${sess.ok}/${sess.total} · seria ${sess.streak}` : 'Ta sesja: —';
 
@@ -1096,6 +1113,16 @@
       q.explain(fb);
       fb.append(h('div', { class: 'controls tight' }, h('button', { type: 'button', class: 'btn', id: 'next-btn', onclick: next }, 'Dalej → (Enter)')));
     }
+  }
+
+  function shareLink() {
+    const code = Math.random().toString(36).slice(2, 8);
+    const u = new URL(location.href);
+    u.search = '?seed=' + code;
+    u.hash = new URLSearchParams({ ex: state.ex, lv: state.level }).toString();
+    const url = u.toString();
+    const done = () => { $('ex-share').replaceChildren(h('span', { class: 'share-note' }, 'Skopiowano link: ', h('a', { href: url }, url))); };
+    if (navigator.clipboard) navigator.clipboard.writeText(url).then(done, done); else done();
   }
 
   function bind() {

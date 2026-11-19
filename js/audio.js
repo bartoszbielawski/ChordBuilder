@@ -7,6 +7,8 @@
 (function (global) {
   'use strict';
   let ctx = null, master = null;
+  // Własne źródło szumu — niezależne od podmienionego Math.random (wspólne zestawy ćwiczeń).
+  const rand = Math.random.bind(Math);
   const pluckCache = new Map();
 
   function ensure() {
@@ -72,7 +74,7 @@
     const line = new Float32Array(N);
     // Pobudzenie: szum lekko wygładzony (miękkie szarpnięcie).
     let prev = 0;
-    for (let i = 0; i < N; i++) { const r = Math.random() * 2 - 1; prev = prev * 0.5 + r * 0.5; line[i] = prev; }
+    for (let i = 0; i < N; i++) { const r = rand() * 2 - 1; prev = prev * 0.5 + r * 0.5; line[i] = prev; }
     const damp = 0.996 - Math.max(0, midi - 52) * 0.0004;
     let idx = 0;
     for (let i = 0; i < len; i++) {
@@ -108,7 +110,7 @@
     const len = Math.floor(ctx.sampleRate * 0.03);
     const buf = ctx.createBuffer(1, len, ctx.sampleRate);
     const d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+    for (let i = 0; i < len; i++) d[i] = (rand() * 2 - 1) * Math.pow(1 - i / len, 3);
     const src = ctx.createBufferSource();
     src.buffer = buf;
     const bp = ctx.createBiquadFilter();

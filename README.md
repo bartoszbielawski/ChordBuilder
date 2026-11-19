@@ -49,6 +49,9 @@ kroku budowania), więc działa od razu na GitHub Pages.
 - **Słowniczek** (`glossary.html`): ponad 65 pojęć (akord, tryton, tonacja
   równoległa, kadencja, przewrót…) z krótkimi definicjami, wyszukiwarką
   i odnośnikami do miejsc na stronie, gdzie można je zobaczyć i usłyszeć.
+- **Dla klasy:** przycisk „🔗 Link dla klasy” w ćwiczeniu tworzy link (`?seed=…`), po którym
+  wszyscy uczniowie dostają te same pytania w tej samej kolejności; „⛶ Tryb prezentacji”
+  w menu powiększa każdą stronę na projektor.
 - **Karta ćwiczeń do druku** (`worksheet.html`) dla nauczycieli: wybierasz rodzaje
   zadań (czytanie nut, znaki przykluczowe, interwały i akordy z nut, budowa akordów,
   akordy w tonacji), poziom i liczbę — strona losuje zestaw z miejscem na odpowiedź
