@@ -77,12 +77,10 @@ i ćwiczenia rytmiczne (18 rodzajów ćwiczeń).
 
 ## Stan prac — gdzie skończyliśmy (listopad 2026)
 
-Ostatnio dodane: ćwiczenia rytmiczne, bas cyfrowany przy przewrotach,
-transpozycja w analizie harmonicznej, unikanie i oznaczanie kwint/oktaw
-równoległych w prowadzeniu głosów, ukulele i gitara basowa, kształty CAGED,
-ćwiczenia: przewroty ze słuchu i skala z nut (20 rodzajów), słowniczek (62 hasła),
-harmonizacja melodii, polskie nazwy tonacji, ćwiczenie „Pokrewieństwo tonacji”. Wszystko sprawdzone
-w przeglądarce i wypchnięte.
+Ostatnio dodane: ćwiczenia rytmiczne, bas cyfrowany, transpozycja, unikanie kwint
+i oktaw równoległych, ukulele i bas, kształty CAGED, harmonizacja melodii z dźwiękami
+obcymi, polskie nazwy tonacji, tabela tonacji, nowe progresje (ciąg kwintowy, backdoor),
+ścieżka nauki (15 lekcji), 22 rodzaje ćwiczeń, słowniczek (66 haseł).
 
 Dalsze pomysły (malejąco wg wartości dla nauki):
 
