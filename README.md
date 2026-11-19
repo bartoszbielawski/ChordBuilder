@@ -14,6 +14,10 @@ kroku budowania), więc działa od razu na GitHub Pages.
 
 ### Działy do nauki
 
+- **Ścieżka nauki** (`learn.html`): 15 lekcji w kolejności — od dźwięków i pięciolinii
+  przez interwały, skale, tonacje i akordy do harmonizacji i modusów; każda z krótkim
+  opisem, odnośnikami do działów i ćwiczeń oraz postępem liczonym z wyników ćwiczeń.
+
 - **Interwały** (`intervals.html`): kalkulator — dwa dźwięki (lub dźwięk +
   interwał) → nazwa (np. „seksta mała”, skróty 6m / m6), liczba półtonów i tonów,
   konsonans/dysonans z wyjaśnieniem, przewrót (reguła 9 i 12), interwały złożone,
@@ -183,6 +187,8 @@ a potem wyrejestrować w narzędziach deweloperskich (Application → Service Wo
 | `quiz.html`, `js/quiz.js` | dział „Ćwiczenia” (generatory pytań, statystyki) |
 | `worksheet.html`, `js/worksheet.js` | karta ćwiczeń do druku z kluczem odpowiedzi |
 | `glossary.html`, `js/glossary.js` | słowniczek pojęć |
+| `learn.html`, `js/learn.js` | ścieżka nauki (lekcje i postęp) |
+| `rhythm.html`, `js/rhythm.js`, `js/rhythm-core.js` | dział „Rytm” i wspólna logika rytmu |
 | `js/common.js` | wspólne pomocnicze funkcje podstron |
 | `sheet.html`, `js/sheet.js`, `css/sheet.css` | ściąga do druku |
 | `css/style.css` | wygląd (tokeny kolorów, tryb ciemny, wersja mobilna) |

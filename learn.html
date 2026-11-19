@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ścieżka nauki — ChordBuilder</title>
+  <meta name="description" content="Ścieżka nauki teorii muzyki krok po kroku: od pięciolinii i interwałów do harmonii i modusów, z ćwiczeniami i postępem.">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#c2410c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Music&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div>
+        <h1>ChordBuilder</h1>
+        <p class="tagline">Ścieżka nauki — teoria muzyki krok po kroku.</p>
+        <nav class="site-nav" aria-label="Działy">
+          <a href="learn.html" aria-current="page">Ścieżka nauki</a>
+          <a href="./">Akordy i skale</a>
+          <a href="intervals.html">Interwały</a>
+          <a href="modes.html">Modusy</a>
+          <a href="rhythm.html">Rytm</a>
+          <a href="quiz.html">Ćwiczenia</a>
+          <a href="glossary.html">Słowniczek</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <h2>Ścieżka nauki</h2>
+      <p class="hint">Proponowana kolejność nauki teorii muzyki — od dźwięków i pięciolinii do harmonii i modusów. Każda lekcja prowadzi do odpowiedniego miejsca na stronie i do ćwiczeń; postęp liczy się z wyników ćwiczeń zapisanych w tej przeglądarce.</p>
+      <div class="lesson-progress"><div id="progress-bar"></div></div>
+      <p class="hint" id="progress-text"></p>
+      <ol id="lessons" class="lessons"></ol>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>ChordBuilder · <a href="./">strona główna</a> · <a href="https://github.com/bartoszbielawski/ChordBuilder">kod na GitHubie</a></p>
+  </footer>
+
+  <script src="js/theory.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/rhythm-core.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/learn.js"></script>
+</body>
+</html>

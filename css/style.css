@@ -583,3 +583,17 @@ kbd {
 .chord-table tr.active-row td { background: var(--accent-soft); }
 .rh-glyphs .rh-g { min-width: 0; }
 @media (max-width: 600px) { .rh-tree .rh-g { font-size: 18px; } }
+
+/* ---------- Ścieżka nauki ---------- */
+.lesson-progress { height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; margin-top: 12px; }
+.lesson-progress > div { height: 100%; background: var(--ok); }
+.lessons { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 10px; }
+.lesson { display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; }
+.lesson.done { border-color: color-mix(in srgb, var(--ok) 50%, var(--border)); }
+.lesson-num { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; font-weight: 700; }
+.lesson.done .lesson-num { background: var(--ok); }
+.lesson h3 { margin: 4px 0 4px; color: var(--text); font-size: 16px; }
+.lesson p { margin: 0 0 8px; }
+.lesson-links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13.5px; }
+.lesson-ex { color: var(--muted); }
+.lesson-ex.ok { color: var(--ok); font-weight: 600; }
