@@ -51,7 +51,7 @@ kroku budowania), więc działa od razu na GitHub Pages.
   i odnośnikami do miejsc na stronie, gdzie można je zobaczyć i usłyszeć.
 - **Dla klasy:** przycisk „🔗 Link dla klasy” w ćwiczeniu tworzy link (`?seed=…`), po którym
   wszyscy uczniowie dostają te same pytania w tej samej kolejności; „📝 Sprawdzian” to 10 pytań
-  bez podpowiedzi z wynikiem i listą błędów na końcu; „⛶ Tryb prezentacji”
+  bez podpowiedzi z wynikiem, listą błędów i przyciskiem „Kopiuj wynik” (do wysłania nauczycielowi); „⛶ Tryb prezentacji”
   w menu powiększa każdą stronę na projektor.
 - **Karta ćwiczeń do druku** (`worksheet.html`) dla nauczycieli: wybierasz rodzaje
   zadań (czytanie nut, znaki przykluczowe, interwały i akordy z nut, budowa akordów,

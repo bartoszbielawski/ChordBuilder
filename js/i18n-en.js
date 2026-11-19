@@ -373,7 +373,7 @@
     '📝 Sprawdzian (10 pytań)': '📝 Test (10 questions)', '10 pytań bez podpowiedzi; wynik i błędy na końcu': '10 questions without hints; score and mistakes at the end',
     'Sprawdzian: {0}/{1}': 'Test: {0}/{1}', 'Sprawdzian: pytanie {0} z {1}': 'Test: question {0} of {1}', 'Odpowiedź zapisana — następne pytanie…': 'Answer saved — next question…',
     'Wynik sprawdzianu: {0}/{1} ({2}%)': 'Test score: {0}/{1} ({2}%)', 'Błędne odpowiedzi:': 'Wrong answers:', 'Wszystko dobrze — gratulacje!': 'All correct — congratulations!',
-    'Nowy sprawdzian': 'New test', 'Wróć do ćwiczenia': 'Back to the exercise',
+    'Nowy sprawdzian': 'New test', '📋 Kopiuj wynik': '📋 Copy result', 'Wróć do ćwiczenia': 'Back to the exercise',
     '{0} molowej': '{0} minor', '{0} durowej': '{0} major', 'Tempo:': 'Tempo:', 'ćwierćnut/min': 'quarter notes/min',
     'Rodzaj (jakość)': 'Quality', '— policz półtony i porównaj z wzorcem:': '— count the semitones and compare with the pattern:',
     'Pryma, kwarta, kwinta i oktawa są': 'Unisons, fourths, fifths and octaves are', 'czyste': 'perfect', '; sekundy, tercje, seksty i septymy —': '; seconds, thirds, sixths and sevenths are',

@@ -1133,6 +1133,7 @@
             h('span', {}, x.prompt), ' — ', x.given ? h('span', { class: 'no' }, x.given) : null, x.given ? ' → ' : '', h('b', {}, x.correct))))),
           h('div', { class: 'controls tight' },
             h('button', { type: 'button', class: 'btn', id: 'next-btn', onclick: () => startTest() }, 'Nowy sprawdzian'),
+            h('button', { type: 'button', class: 'btn ghost', onclick: (e) => copyResult(e.currentTarget) }, '📋 Kopiuj wynik'),
             h('button', { type: 'button', class: 'btn ghost', onclick: () => { state.test = null; next(); } }, 'Wróć do ćwiczenia')));
         return;
       }
@@ -1146,6 +1147,20 @@
       q.explain(fb);
       fb.append(h('div', { class: 'controls tight' }, h('button', { type: 'button', class: 'btn', id: 'next-btn', onclick: next }, 'Dalej → (Enter)')));
     }
+  }
+
+  /** Tekst wyniku do wysłania nauczycielowi. */
+  function copyResult(btn) {
+    const t = state.test, ex = exById(state.ex);
+    const en = window.I18N && window.I18N.lang === 'en';
+    const lvl = (en ? ['Easy', 'Medium', 'Hard'] : ['Łatwy', 'Średni', 'Trudny'])[state.level];
+    const title = window.I18N ? window.I18N.t(ex.title) : ex.title;
+    const text = (en ? `ChordBuilder — test: ${title} (${lvl})` : `ChordBuilder — sprawdzian: ${title} (${lvl})`) +
+      (SEED ? (en ? `, class set ${SEED}` : `, zestaw ${SEED}`) : '') +
+      `\n${en ? 'Score' : 'Wynik'}: ${t.ok}/${t.n} (${Math.round((100 * t.ok) / t.n)}%) · ${new Date().toLocaleString(en ? 'en-GB' : 'pl-PL')}`;
+    const done = () => { btn.textContent = en ? '✓ Copied' : '✓ Skopiowano'; };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, () => prompt('', text));
+    else prompt('', text);
   }
 
   function startTest() {
