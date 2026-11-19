@@ -534,6 +534,13 @@
     return mode === 'major' ? n.charAt(0).toUpperCase() + n.slice(1) + '-dur' : n + '-moll';
   }
 
+  /** Skale od prymy akordu, które zawierają wszystkie jego dźwięki (teoria akord–skala). */
+  function chordScales(chord) {
+    return SCALES.filter((sc) => sc.intervals.length >= 6)
+      .map((sc) => buildScale(chord.root, sc.id))
+      .filter((sc) => [...chord.pcs].every((pc) => sc.pcs.has(pc)));
+  }
+
   /* ---------- Analiza: symbol akordu → akord, akordy → tonacja ---------- */
 
   // Dodatkowe zapisy symboli (oprócz tych z CHORD_TYPES).
@@ -943,7 +950,7 @@
     setLang, getLang: () => LANG,
     staffStep, intervalOf, invertInterval, consonance, enharmonicIntervals,
     keySignature, alterationsVsMajor, smoothVoicing, voiceMoves, secondaryDominant,
-    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels, cagedShape, harmonize, harmonizeGroups, nonChordTone, polishNoteName, polishKeyName,
+    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels, cagedShape, harmonize, harmonizeGroups, nonChordTone, polishNoteName, polishKeyName, chordScales,
     LETTERS, SCALES, CHORD_TYPES, CHORD_GROUPS, TUNINGS,
     mod, makeNote, parseNote, noteKey, noteName,
     parseInterval, describeInterval, intervalBetween, transpose,

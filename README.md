@@ -81,6 +81,8 @@ kroku budowania), więc działa od razu na GitHub Pages.
   z oznaczeniem cyfrowym (bas cyfrowany: 6, 6/4, 6/5, 4/3, 2).
   Dla każdego dźwięku: stopień, pełna polska nazwa interwału (np. „septyma mała”),
   skrót (m7), liczba półtonów od prymy oraz informacja, czy należy do skali.
+- **Skale pasujące do akordu** (teoria akord–skala, do improwizacji): np. Dm7 → D dorycka,
+  eolska, frygijska; Cmaj7 → C jońska, lidyjska.
 - **Budowa krok po kroku:** stos interwałów między kolejnymi dźwiękami
   (np. C +4 tercja wielka → E +3 tercja mała → G).
 - **Poprawna pisownia enharmoniczna:** F-dur ma B♭, nie A♯; C♯-dur ma E♯ i B♯.

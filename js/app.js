@@ -423,6 +423,11 @@
       ? `Spoza skali ${nn(sc.tonic)} ${sc.scale.name.toLowerCase()}: ${outside.map((n) => nn(n.note)).join(', ')}`
       : `Wszystkie dźwięki należą do skali ${nn(sc.tonic)} ${sc.scale.name.toLowerCase()}`;
 
+    // Teoria akord–skala: skale od prymy, które zawierają wszystkie dźwięki akordu.
+    const cs = T.chordScales(chord);
+    $('chord-scales').replaceChildren(h('span', { class: 'lbl' }, 'Skale pasujące do akordu (do improwizacji): '),
+      ...(cs.length ? cs.flatMap((x, i) => [i ? ', ' : '', h('a', { href: `#t=${encodeURIComponent(T.noteKey(chord.root))}&s=${x.scale.id}`, title: x.scale.mood || '' }, `${nn(chord.root)} ${x.scale.name.toLowerCase()}`)])
+        : [h('span', { class: 'muted' }, 'brak wśród skal na stronie')]));
     $('chord-tbody').replaceChildren(...chord.notes.map((n) => h('tr', {},
       h('td', {}, h('span', { class: 'pill role-' + n.role }, nn(n.note))),
       h('td', { class: 'mono' }, n.info.symbol),

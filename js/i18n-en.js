@@ -382,6 +382,7 @@
     'Saksofon tenorowy B (nona wielka)': 'B♭ tenor saxophone (major ninth)', 'Saksofon barytonowy Es (oktawa + seksta)': 'E♭ baritone saxophone (octave + sixth)',
     'Waltornia F, rożek angielski': 'F horn, cor anglais', 'Flet altowy G': 'Alto flute in G', 'Gitara (zapis oktawę wyżej)': 'Guitar (written an octave higher)',
     'Melodia z akordami jako plik MIDI': 'The melody with chords as a MIDI file',
+    'Skale pasujące do akordu (do improwizacji):': 'Scales that fit the chord (for improvisation):', 'brak wśród skal na stronie': 'none among the scales on this site',
     'Nowy sprawdzian': 'New test', '📋 Kopiuj wynik': '📋 Copy result', 'Wróć do ćwiczenia': 'Back to the exercise',
     '{0} molowej': '{0} minor', '{0} durowej': '{0} major', 'Tempo:': 'Tempo:', 'ćwierćnut/min': 'quarter notes/min',
     'Rodzaj (jakość)': 'Quality', '— policz półtony i porównaj z wzorcem:': '— count the semitones and compare with the pattern:',

@@ -384,6 +384,14 @@
       } finally { T.setLang('pl'); }
       eq(T.describeInterval(3, 4).name, 'tercja wielka');
     }],
+    ['Skale pasujące do akordu', (T, eq) => {
+      const cs = (r, t) => T.chordScales(T.buildChord(T.parseNote(r), t)).map((s) => s.scale.id).join(' ');
+      eq(cs('D', 'm7'), 'minor dorian phrygian blues');
+      eq(cs('C', 'maj7'), 'major lydian');
+      eq(cs('G', '7'), 'mixolydian phrygianDominant');
+      eq(cs('B', 'm7b5'), 'locrian blues');
+      eq(cs('C', 'aug7'), 'phrygianDominant wholeTone');
+    }],
     ['Polskie nazwy tonacji', (T, eq) => {
       const k = (n, m) => T.polishKeyName(T.parseNote(n), m);
       eq(k('Eb', 'major'), 'Es-dur'); eq(k('Ab', 'major'), 'As-dur'); eq(k('Bb', 'major'), 'B-dur');
