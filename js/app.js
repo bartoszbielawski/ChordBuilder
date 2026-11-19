@@ -1228,6 +1228,24 @@
       render();
       playHarmonization();
     });
+    $('harm-midi').addEventListener('click', () => {
+      const sc = currentScale();
+      if (!state.melody.length || sc.notes.length !== 7) return;
+      const hz = harmonization(sc);
+      const g = state.harmGroup;
+      const events = [];
+      let prev = null;
+      state.melody.forEach((k, i) => {
+        events.push({ at: i, dur: 1, notes: [harmMidi(sc, k) + 12] });
+        if (i % g === 0) {
+          const v = T.smoothVoicing(hz.choice[i].chord, prev, 55);
+          prev = v.midis;
+          const len = Math.min(g, state.melody.length - i);
+          events.push({ at: i, dur: len, notes: [36 + hz.choice[i].chord.root.pc, ...v.midis] });
+        }
+      });
+      window.Common.saveFile(window.Common.midiEvents(events, state.bpm), 'harmonizacja-' + T.noteKey(sc.tonic).replace('#', 's') + '.mid', 'audio/midi');
+    });
     $('harm-toprog').addEventListener('click', () => {
       const sc = currentScale();
       if (!state.melody.length || sc.notes.length !== 7) return;

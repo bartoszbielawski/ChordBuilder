@@ -88,7 +88,6 @@
     'ChordBuilder · statyczna strona bez zależności, gotowa na GitHub Pages · Plan rozwoju': 'ChordBuilder · a static site with no dependencies, ready for GitHub Pages · <a href="ROADMAP.md">Roadmap (in Polish)</a>',
     '1 Kalkulator interwałów': '<span class="step">1</span> Interval calculator',
     '2 Wszystkie interwały od dźwięku': '<span class="step">2</span> All intervals from a note',
-    '3 Jak nazwać interwał — krok po kroku': '<span class="step">3</span> How to name an interval — step by step',
     'Skróty: cz — czysta, m — mała, w — wielka, zw — zwiększona, zmn — zmniejszona; w nawiasie skrót międzynarodowy (P, m, M, A, d). Kliknij wiersz, aby pokazać interwał w kalkulatorze.':
       'Abbreviations: <b>P</b> — perfect, <b>m</b> — minor, <b>M</b> — major, <b>A</b> — augmented, <b>d</b> — diminished. Click a row to show the interval in the calculator.',
     'Liczba (wielkość) — policz nazwy literowe od dolnego do górnego dźwięku, wliczając oba. C→E: C, D, E = 3 → tercja. Znaki chromatyczne nie zmieniają liczby: C→E♭ i C→E♯ to też tercje.':
@@ -374,6 +373,15 @@
     'Sprawdzian: {0}/{1}': 'Test: {0}/{1}', 'Sprawdzian: pytanie {0} z {1}': 'Test: question {0} of {1}', 'Odpowiedź zapisana — następne pytanie…': 'Answer saved — next question…',
     'Wynik sprawdzianu: {0}/{1} ({2}%)': 'Test score: {0}/{1} ({2}%)', 'Błędne odpowiedzi:': 'Wrong answers:', 'Wszystko dobrze — gratulacje!': 'All correct — congratulations!',
     '⬇ Plik MIDI': '⬇ MIDI file', 'Plik do otwarcia w programie do nut lub DAW (MuseScore, GarageBand…)': 'A file to open in notation software or a DAW (MuseScore, GarageBand…)',
+    'Instrumenty transponujące': 'Transposing instruments',
+    'Na instrumentach transponujących nuty zapisuje się inaczej, niż brzmią. Klarnet B: zapisane C brzmi jak B♭ — sekundę wielką niżej, więc nuty pisze się o sekundę wielką wyżej niż brzmienie.': 'Transposing instruments read notes that differ from how they sound. B♭ clarinet: a written C sounds as B♭ — a major second lower, so parts are written a major second higher than concert pitch.',
+    'Instrument': 'Instrument', 'Tonacja (brzmienie)': 'Key (concert pitch)', 'Brzmi': 'Sounds', 'Zapis dla instrumentu': 'Written for the instrument', 'Przesunięcie zapisu': 'Written transposition',
+    '{0} w górę ({1} półtonów)': '{0} up ({1} semitones)', 'Reguła znaków': 'Key signature change', 'bez zmiany': 'no change',
+    'Brzmienie (dźwięki rzeczywiste)': 'Concert pitch (actual sound)', 'Zapis w nutach instrumentu': 'Written in the instrument’s part',
+    'Klarnet B, trąbka B, saksofon sopranowy': 'B♭ clarinet, B♭ trumpet, soprano saxophone', 'Klarnet A': 'A clarinet', 'Saksofon altowy Es': 'E♭ alto saxophone',
+    'Saksofon tenorowy B (nona wielka)': 'B♭ tenor saxophone (major ninth)', 'Saksofon barytonowy Es (oktawa + seksta)': 'E♭ baritone saxophone (octave + sixth)',
+    'Waltornia F, rożek angielski': 'F horn, cor anglais', 'Flet altowy G': 'Alto flute in G', 'Gitara (zapis oktawę wyżej)': 'Guitar (written an octave higher)',
+    'Melodia z akordami jako plik MIDI': 'The melody with chords as a MIDI file',
     'Nowy sprawdzian': 'New test', '📋 Kopiuj wynik': '📋 Copy result', 'Wróć do ćwiczenia': 'Back to the exercise',
     '{0} molowej': '{0} minor', '{0} durowej': '{0} major', 'Tempo:': 'Tempo:', 'ćwierćnut/min': 'quarter notes/min',
     'Rodzaj (jakość)': 'Quality', '— policz półtony i porównaj z wzorcem:': '— count the semitones and compare with the pattern:',
@@ -505,6 +513,11 @@
       'Tips: the 12th fret has the same name as the open string (an octave higher). The note at the 5th fret equals the next (thinner) open string — except on the G string, where you use the 4th fret. Grey dots show the same note on other strings.',
   });
 })(window);
+
+Object.assign(window.I18N_EN.blocks, {
+  '4 Jak nazwać interwał — krok po kroku': '<span class="step">4</span> How to name an interval — step by step',
+  '3 Instrumenty transponujące': '<span class="step">3</span> Transposing instruments',
+});
 
 // Podmiana nazw i opisów w danych teorii — przed skryptami stron.
 if (window.I18N && window.I18N.lang === 'en') window.I18N.applyData();

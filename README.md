@@ -27,7 +27,8 @@ kroku budowania), więc działa od razu na GitHub Pages.
   konsonans/dysonans z wyjaśnieniem, przewrót (reguła 9 i 12), interwały złożone,
   odpowiedniki enharmoniczne; zapis nutowy, klawiatura z policzonymi półtonami,
   odsłuch melodyczny i harmoniczny. Tabela wszystkich interwałów od wybranego
-  dźwięku i zasady nazywania krok po kroku.
+  dźwięku, instrumenty transponujące (klarnet B, saksofony, waltornia F…: brzmienie
+  a zapis, zmiana tonacji) i zasady nazywania krok po kroku.
 - **Modusy** (`modes.html`): siedem modusów od wspólnej toniki — od lidyjskiego
   (najjaśniejszego) do lokryckiego, z dźwiękami obniżanymi kolejno wg koła kwintowego,
   dźwiękiem charakterystycznym i akordem tonicznym; odsłuch na tle burdonu toniki.
@@ -126,7 +127,7 @@ kroku budowania), więc działa od razu na GitHub Pages.
   „Dodaj do ekranu głównego”, na komputerze ikona instalacji w pasku adresu.
 - **Klawiatura komputera jako pianino** (A W S E D F T G Y H U J K = C4…C5, Z/X — oktawa):
   na stronie głównej i w ćwiczeniach na klawiaturze.
-- **Eksport progresji do pliku MIDI** — do otwarcia w MuseScore, GarageBand i innych programach.
+- **Eksport do pliku MIDI** (progresje i harmonizacja melodii) — do otwarcia w MuseScore, GarageBand i innych programach.
 - **Klawiatura MIDI** (Chrome, Edge, Firefox): zagraj akord na podłączonym
   instrumencie — strona go rozpozna; w ćwiczeniach na klawiaturze można
   odpowiadać, grając.

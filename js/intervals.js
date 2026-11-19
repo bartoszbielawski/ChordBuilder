@@ -82,6 +82,7 @@
     renderResult(r);
     renderVisual(r);
     renderTable();
+    renderTransposing();
     saveHash();
   }
 
@@ -192,6 +193,53 @@
     }));
   }
 
+  /* ---------- Instrumenty transponujące ---------- */
+  // [id, nazwa, interwał zapisu względem brzmienia (w górę), oktawa dodatkowa w zapisie]
+  const INSTR = [
+    ['bb', 'Klarnet B, trąbka B, saksofon sopranowy', '2'],
+    ['a', 'Klarnet A', 'b3'],
+    ['eb', 'Saksofon altowy Es', '6', 0],
+    ['bbTen', 'Saksofon tenorowy B (nona wielka)', '9'],
+    ['ebBar', 'Saksofon barytonowy Es (oktawa + seksta)', '13'],
+    ['f', 'Waltornia F, rożek angielski', '5'],
+    ['g', 'Flet altowy G', '4'],
+    ['guitar', 'Gitara (zapis oktawę wyżej)', '8'],
+  ];
+  const TR_KEYS = ['C', 'G', 'D', 'A', 'E', 'F', 'Bb', 'Eb', 'Ab'];
+  const trState = { instr: 'bb', key: 'F' };
+
+  function renderTransposing() {
+    fill($('tr-instr'), INSTR.map(([id, name]) => [id, name]), trState.instr);
+    fill($('tr-key'), TR_KEYS.map((k) => [k, nn(T.parseNote(k)) + (window.I18N && window.I18N.lang === 'en' ? ' major' : '-dur')]), trState.key);
+    const [, , ivSym] = INSTR.find((x) => x[0] === trState.instr);
+    const iv = T.parseInterval(ivSym);
+    const concert = T.parseNote(trState.key);
+    const written = T.transpose(concert, iv);
+    const sigC = T.keySignature(concert, 'major');
+    const sigW = T.keySignature(written, 'major');
+    const desc = T.describeInterval(iv.deg, iv.semi);
+    const sigTxt = (k) => (k.count ? `${k.count}${k.type === 'sharp' ? '♯' : '♭'}` : '0');
+    // Gama brzmiąca i zapisana na pięciolinii (zapis od C4/D4, by mieścił się na pięciolinii).
+    const scale = (tonic, sig) => {
+      const sc = T.buildScale(tonic, 'major');
+      const start = 60 + tonic.pc - (tonic.pc > 7 ? 12 : 0);
+      const ms = sc.notes.map((n) => start + n.iv.semi);
+      const box = h('div', { class: 'melody-wrap' });
+      I.renderMelody(box, sc.notes.map((n, i) => [{ midi: ms[i], note: n.note, role: i === 0 ? 'root' : null }]), { keySig: sig, gap: 30 });
+      return box;
+    };
+    const kname = (n) => (window.I18N && window.I18N.lang === 'en' ? `${nn(n)} major` : `${nn(n)}-dur`);
+    $('tr-result').replaceChildren(
+      h('dl', { class: 'info-dl' },
+        h('dt', {}, 'Brzmi'), h('dd', {}, `${kname(concert)} (${sigTxt(sigC)})`),
+        h('dt', {}, 'Zapis dla instrumentu'), h('dd', {}, h('b', {}, `${kname(written)} (${sigTxt(sigW)})`)),
+        h('dt', {}, 'Przesunięcie zapisu'), h('dd', {}, `${desc.name} w górę (${iv.semi} półtonów)`),
+        h('dt', {}, 'Reguła znaków'), h('dd', {}, `${sigW.count === sigC.count && sigW.type === sigC.type ? 'bez zmiany' : `${sigTxt(sigC)} → ${sigTxt(sigW)}`}`)),
+      h('div', { class: 'tr-staves' },
+        h('div', {}, h('p', { class: 'hint' }, 'Brzmienie (dźwięki rzeczywiste)'), scale(concert, sigC)),
+        h('div', {}, h('p', { class: 'hint' }, 'Zapis w nutach instrumentu'), scale(written, sigW))));
+  }
+
   function play(mode) {
     const r = analyze();
     if (mode === 'harm') Sound.play([r.am, r.bm], 'chord', 'piano', 2);
@@ -210,6 +258,8 @@
     $('high-oct').addEventListener('change', (e) => { state.hi.oct = +e.target.value; render(); });
     $('swap').addEventListener('click', () => { [state.lo, state.hi] = [state.hi, state.lo]; render(); });
     $('build-iv').addEventListener('change', (e) => { if (e.target.value) { buildFromLow(e.target.value); render(); play('mel'); } });
+    $('tr-instr').addEventListener('change', (e) => { trState.instr = e.target.value; render(); });
+    $('tr-key').addEventListener('change', (e) => { trState.key = e.target.value; render(); });
     $('table-root').addEventListener('change', (e) => { state.tableRoot = e.target.value; render(); });
     $('play-mel').addEventListener('click', () => play('mel'));
     $('play-harm').addEventListener('click', () => play('harm'));

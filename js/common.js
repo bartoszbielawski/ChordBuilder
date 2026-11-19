@@ -159,6 +159,28 @@
     return new Uint8Array([...head, ...trk, ...ev]);
   }
 
+  /**
+   * Plik MIDI (typ 0) z listy zdarzeń { at, dur, notes[] } w ćwierćnutach (np. melodia + akordy).
+   */
+  function midiEvents(events, bpm = 90) {
+    const PPQ = 480;
+    const vlq = (n) => { const b = [n & 0x7f]; while ((n >>= 7)) b.unshift((n & 0x7f) | 0x80); return b; };
+    const raw = [];
+    for (const e of events) for (const m of e.notes) {
+      raw.push({ t: Math.round(e.at * PPQ), on: true, m });
+      raw.push({ t: Math.round((e.at + e.dur) * PPQ), on: false, m });
+    }
+    raw.sort((a, b) => a.t - b.t || (a.on === b.on ? 0 : a.on ? 1 : -1));
+    const us = Math.round(60000000 / bpm);
+    const ev = [0x00, 0xff, 0x51, 0x03, (us >> 16) & 0xff, (us >> 8) & 0xff, us & 0xff, 0x00, 0xc0, 0x00];
+    let last = 0;
+    for (const r of raw) { ev.push(...vlq(r.t - last), r.on ? 0x90 : 0x80, r.m & 0x7f, r.on ? 80 : 0); last = r.t; }
+    ev.push(0x00, 0xff, 0x2f, 0x00);
+    const n = ev.length;
+    return new Uint8Array([0x4d, 0x54, 0x68, 0x64, 0, 0, 0, 6, 0, 0, 0, 1, (PPQ >> 8) & 0xff, PPQ & 0xff,
+      0x4d, 0x54, 0x72, 0x6b, (n >>> 24) & 0xff, (n >>> 16) & 0xff, (n >>> 8) & 0xff, n & 0xff, ...ev]);
+  }
+
   /** Pobranie danych jako plik (inicjowane kliknięciem użytkownika). */
   function saveFile(bytes, name, type) {
     const url = URL.createObjectURL(new Blob([bytes], { type }));
@@ -181,6 +203,6 @@
 
   global.Common = {
     h, loadPrefs, savePref, loadJSON, saveJSON, seg, NOTE_KEYS, DEFAULT_SPELLING,
-    noteOfMidi, midiOf, octaveName, registerSW, pick, shuffle, connectMidi, computerPiano, midiFile, saveFile,
+    noteOfMidi, midiOf, octaveName, registerSW, pick, shuffle, connectMidi, computerPiano, midiFile, midiEvents, saveFile,
   };
 })(window);
