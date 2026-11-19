@@ -83,6 +83,7 @@ kroku budowania), więc działa od razu na GitHub Pages.
 - **Koło kwintowe:** tonacje durowe i równoległe molowe ze znakami przykluczowymi;
   zaznacza wybraną tonację i jej akordy (I, IV, V, ii, iii, vi, vii°), kliknięcie
   zmienia tonację. Dla trybów (np. doryckiego) pokazuje tonację macierzystą.
+  Tabela wszystkich 15 tonacji durowych i równoległych molowych ze znakami.
 - **Progresje akordów:** 19 gotowych schematów (pop, kanon, andaluzyjska, ii–V–I,
   12-taktowy blues, kadencje: doskonała, plagalna, zawieszona, zwodnicza,
   z tercją pikardyjską…) w wybranej tonacji, z oznaczeniami rzymskimi,

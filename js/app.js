@@ -180,6 +180,7 @@
     renderSelects(chord, sc);
     renderScale(sc);
     renderCircle(sc);
+    renderKeysTable();
     renderProgression(sc);
     renderDiatonic(sc, chord);
     renderFitting(sc, chord);
@@ -542,6 +543,24 @@
         type: 'button', class: 'chip' + (isActive(d.chord) ? ' active' : ''),
         onclick: () => selectChord(d.chord.root, d.chord.type.id),
       }, h('b', {}, d.roman + ' '), T.chordSymbol(d.chord, state.notation)))));
+  }
+
+  function renderKeysTable() {
+    const keys = ['Cb', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F', 'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#'];
+    $('keys-table').replaceChildren(...keys.map((k) => {
+      const t = T.parseNote(k);
+      const sig = T.keySignature(t, 'major');
+      const rel = T.transpose(t, T.parseInterval('6'));
+      const st = h('div', { class: 'melody-wrap keys-staff' });
+      I.renderMelody(st, [], { keySig: sig, minWidth: 40 + sig.count * 9, scale: 0.55 });
+      const active = T.noteKey(t) === state.tonic && state.scale === 'major' || T.noteKey(rel) === state.tonic && state.scale === 'minor';
+      return h('tr', { class: 'clickable' + (active ? ' active-row' : ''), onclick: () => { state.tonic = k; state.scale = 'major'; selectFirstChord(); render(); } },
+        h('td', { class: 'mono' }, sig.count ? sig.count + (sig.type === 'sharp' ? '♯' : '♭') : '0'),
+        h('td', {}, h('b', {}, keyNm(t, 'major'))),
+        h('td', {}, keyNm(rel, 'minor')),
+        h('td', {}, sig.notes.map(nn).join(' ') || '—'),
+        h('td', {}, st));
+    }));
   }
 
   /* ---------- Progresje ---------- */
