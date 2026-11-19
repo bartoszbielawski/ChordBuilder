@@ -70,6 +70,10 @@
     ['wartości rytmiczne', 'Długości nut i pauz: cała nuta, półnuta, ćwierćnuta, ósemka, szesnastka — każda dwa razy krótsza od poprzedniej.', [['Rytm', 'rhythm.html'], ['Ćwiczenie', 'quiz.html#ex=rhythm-values&lv=0']]],
     ['transpozycja', 'Przeniesienie utworu lub progresji do innej tonacji o stały interwał — wszystkie relacje (cyfry rzymskie) zostają te same.', [['Analiza i transpozycja', './#t=C&s=major']]],
     ['dyktando', 'Ćwiczenie słuchowe: zapisanie usłyszanej melodii (dyktando melodyczne) lub rytmu (rytmiczne).', [['Dyktando melodyczne', 'quiz.html#ex=dictation&lv=0'], ['Dyktando rytmiczne', 'quiz.html#ex=rhythm-ear&lv=0']]],
+    ['dźwięki obce (akordowi)', 'Dźwięki melodii spoza akordu: przejściowy (łączy krokami dwa dźwięki akordu), pomocniczy (krok od dźwięku i powrót), a także opóźnienie, antycypacja i inne.', [['Harmonizacja melodii', './#t=C&s=major&m=334554321123322'], ['Ćwiczenie', 'quiz.html#ex=nct&lv=0']]],
+    ['harmonizacja', 'Dobranie akordów do melodii: każda (akcentowana) nuta melodii powinna należeć do akordu, a akordy tworzą sensowną progresję (np. kończą się kadencją).', [['Harmonizacja melodii', './#t=C&s=major&m=334554321123322']]],
+    ['CAGED', 'System nauki gry na gitarze: każdy akord da się zagrać w pięciu kształtach przeniesionych z otwartych chwytów C, A, G, E, D — razem pokrywają cały gryf.', [['Chwyty G-dur', './#t=G&s=major&r=G&c=maj']]],
+    ['ciąg kwintowy (progresja po kole)', 'Następstwo akordów, w którym bas schodzi o kwintę (wznosi się o kwartę), np. vi–ii–V–I. Jedna z najsilniejszych progresji w muzyce tonalnej.', [['Progresja', './#t=C&s=major&p=circle']]],
   ];
 
   const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l');

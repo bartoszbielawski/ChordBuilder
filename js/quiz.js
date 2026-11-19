@@ -510,6 +510,44 @@
       },
     },
     {
+      id: 'nct', group: 'Teoria', title: 'Dźwięki obce akordom',
+      desc: 'Fragment melodii nad akordem — jaki to dźwięk obcy?',
+      levels: ['przejściowy / pomocniczy', '+ dźwięk akordowy', '+ skokiem (inny obcy)'],
+      make(level) {
+        const sc = T.buildScale(T.parseNote(pick(['C', 'G', 'F', 'D', 'Bb'])), 'major');
+        const dia = T.diatonicChords(sc, 3).filter((d) => d.degree !== 6);
+        const kinds = [['przejściowy', 'pomocniczy'], ['przejściowy', 'pomocniczy', 'akordowy'], ['przejściowy', 'pomocniczy', 'akordowy', 'obcy']][level];
+        const want = weighted(this.id, kinds);
+        const inChord = (d, k) => d.chord.notes.some((n) => n.note.pc === sc.notes[T.mod(k, 7)].note.pc);
+        let d, a, x, b, good = false;
+        for (let t = 0; t < 300; t++) {
+          d = pick(dia);
+          a = pick([0, 1, 2, 3, 4, 5, 6].filter((k) => inChord(d, k)));
+          if (want === 'przejściowy') { const dir = pick([1, -1]); x = a + dir; b = a + 2 * dir; }
+          else if (want === 'pomocniczy') { x = a + pick([1, -1]); b = a; }
+          else if (want === 'akordowy') { x = a + pick([2, -2]); b = x + pick([1, -1, 2]); }
+          else { x = a + pick([3, -3, 4]); b = x + pick([1, -1]); }
+          const ok = (want === 'akordowy' ? inChord(d, x) : !inChord(d, x)) && inChord(d, b) && [a, x, b].every((k) => k >= 0 && k <= 9);
+          if (ok && (want !== 'obcy' || T.nonChordTone(a, x, b) === 'obcy')) { good = true; break; }
+        }
+        const tm = 60 + sc.tonic.pc - (sc.tonic.pc > 6 ? 12 : 0);
+        const midi = (k) => tm + sc.notes[T.mod(k, 7)].iv.semi + 12 * Math.floor(k / 7);
+        const note = (k) => sc.notes[T.mod(k, 7)].note;
+        const v = T.smoothVoicing(d.chord, null, 52);
+        const mel = [a, x, b];
+        return {
+          prompt: h('span', {}, `Akord `, h('b', {}, `${T.chordSymbol(d.chord, state.notation)} (${d.roman})`), `, melodia ${mel.map((k) => nn(note(k))).join(' – ')}. Czym jest środkowa nuta (${nn(note(x))})?`),
+          answers: kinds.map((k) => ({ key: k, label: { przejściowy: 'dźwięk przejściowy', pomocniczy: 'dźwięk pomocniczy', akordowy: 'dźwięk akordowy', obcy: 'inny dźwięk obcy (skokiem)' }[k] })),
+          correct: want, item: want, valid: good,
+          play: () => { timers.forEach(clearTimeout); Sound.play([36 + d.chord.root.pc, ...v.midis], 'chord', 'piano', 2.4); timers = mel.map((k, i) => setTimeout(() => Sound.play([midi(k) + 12], 'chord', 'piano', 0.7), i * 600)); },
+          show: (box) => { const st = staffBox(); I.renderMelody(st, mel.map((k, i) => [{ midi: midi(k) + 12, note: note(k), role: i === 1 ? 'ext' : null }]), { gap: 46, keySig: T.keySignature(sc.tonic, 'major'), labels: mel.map((k) => nn(note(k))) }); box.append(st); },
+          explain: (box) => box.append(h('p', {}, `Akord ${T.chordSymbol(d.chord, state.notation)}: ${d.chord.notes.map((n) => nn(n.note)).join(' – ')}. ` +
+            (want === 'akordowy' ? `${nn(note(x))} należy do akordu.` : want === 'przejściowy' ? `${nn(note(x))} łączy krokami dwa dźwięki akordu w jednym kierunku — to dźwięk przejściowy.`
+              : want === 'pomocniczy' ? `${nn(note(x))} odchodzi o sekundę od dźwięku akordu i wraca — to dźwięk pomocniczy (ozdobnik).` : `${nn(note(x))} nie należy do akordu i pojawia się skokiem — nie jest ani przejściowy, ani pomocniczy.`))),
+        };
+      },
+    },
+    {
       id: 'read-note', group: 'Nuty', title: 'Czytanie nut',
       desc: 'Nazwij nutę na pięciolinii.',
       levels: ['na pięciolinii', '+ linie dodane', 'szeroki zakres'],
