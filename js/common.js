@@ -114,6 +114,60 @@
     }).catch(() => { handlers.status('MIDI: brak zgody na dostęp.'); return false; });
   }
 
+  /**
+   * Klawiatura komputera jako pianino (układ jak w programach muzycznych):
+   * A W S E D F T G Y H U J K O L P ; → C4 … E5 (litery Z / X zmieniają oktawę).
+   * handler(midi) — wywoływany przy wciśnięciu; zwraca funkcję odpinającą.
+   */
+  const KEYMAP = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j: 11, k: 12, o: 13, l: 14, p: 15, ';': 16 };
+  function computerPiano(handler, base = 60) {
+    let shift = 0;
+    const onKey = (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+      const k = e.key.toLowerCase();
+      if (k === 'z') { shift = Math.max(-24, shift - 12); return; }
+      if (k === 'x') { shift = Math.min(24, shift + 12); return; }
+      if (!(k in KEYMAP)) return;
+      e.preventDefault();
+      handler(base + shift + KEYMAP[k]);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }
+
+  /**
+   * Plik MIDI (typ 0) z listy akordów: chords = [[midi, …], …], każdy trwa `beats` ćwierćnut.
+   * Zwraca Uint8Array do pobrania jako .mid.
+   */
+  function midiFile(chords, bpm = 90, beats = 4) {
+    const PPQ = 480;
+    const vlq = (n) => { const b = [n & 0x7f]; while ((n >>= 7)) b.unshift((n & 0x7f) | 0x80); return b; };
+    const ev = [];
+    const us = Math.round(60000000 / bpm);
+    ev.push(0x00, 0xff, 0x51, 0x03, (us >> 16) & 0xff, (us >> 8) & 0xff, us & 0xff); // tempo
+    ev.push(0x00, 0xc0, 0x00); // program: fortepian
+    const len = PPQ * beats;
+    for (const notes of chords) {
+      notes.forEach((m) => ev.push(0x00, 0x90, m & 0x7f, 80));
+      notes.forEach((m, i) => ev.push(...vlq(i === 0 ? len : 0), 0x80, m & 0x7f, 0));
+    }
+    ev.push(0x00, 0xff, 0x2f, 0x00); // koniec ścieżki
+    const head = [0x4d, 0x54, 0x68, 0x64, 0, 0, 0, 6, 0, 0, 0, 1, (PPQ >> 8) & 0xff, PPQ & 0xff];
+    const n = ev.length;
+    const trk = [0x4d, 0x54, 0x72, 0x6b, (n >>> 24) & 0xff, (n >>> 16) & 0xff, (n >>> 8) & 0xff, n & 0xff];
+    return new Uint8Array([...head, ...trk, ...ev]);
+  }
+
+  /** Pobranie danych jako plik (inicjowane kliknięciem użytkownika). */
+  function saveFile(bytes, name, type) {
+    const url = URL.createObjectURL(new Blob([bytes], { type }));
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
   /** Losowy element tablicy. */
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
   function shuffle(arr) {
@@ -127,6 +181,6 @@
 
   global.Common = {
     h, loadPrefs, savePref, loadJSON, saveJSON, seg, NOTE_KEYS, DEFAULT_SPELLING,
-    noteOfMidi, midiOf, octaveName, registerSW, pick, shuffle, connectMidi,
+    noteOfMidi, midiOf, octaveName, registerSW, pick, shuffle, connectMidi, computerPiano, midiFile, saveFile,
   };
 })(window);

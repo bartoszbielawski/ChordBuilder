@@ -1212,6 +1212,15 @@
         off: (m) => { held.delete(m); },
       }).then((ok) => { midiOn = ok; render(); });
     });
+    // Klawiatura komputera jako pianino w ćwiczeniach na klawiaturze (C3–H4 jak na ekranie).
+    C.computerPiano((m) => {
+      if (!state.q || state.q.input !== 'piano' || state.answered) return;
+      while (m < 48) m += 12;
+      while (m > 71) m -= 12;
+      Sound.play([m]);
+      if (state.sel.has(m)) state.sel.delete(m); else state.sel.add(m);
+      render();
+    }, 60);
     window.addEventListener('hashchange', () => {
       const before = state.ex + '/' + state.level;
       loadHash();

@@ -122,8 +122,8 @@
     'Gdzie je usłyszysz: dorycki — funk, jazz modalny, muzyka celtycka; miksolidyjski — rock, blues; frygijski — flamenco, metal; lidyjski — muzyka filmowa; eolski — większość „molowych” piosenek pop.':
       '<b>Where you’ll hear them:</b> Dorian — funk, modal jazz, Celtic music; Mixolydian — rock, blues; Phrygian — flamenco, metal; Lydian — film music; Aeolian — most “minor” pop songs.',
     'Wszystkie modusy od tej samej toniki (modusy równoległe).': 'All modes on the same tonic (parallel modes).',
-    'Klawisze: 1–9 wybierają odpowiedź, spacja odtwarza ponownie, Enter przechodzi dalej. Elementy, w których się mylisz, pojawiają się częściej.':
-      'Keys: <kbd>1</kbd>–<kbd>9</kbd> choose an answer, <kbd>space</kbd> replays, <kbd>Enter</kbd> moves on. Items you get wrong come back more often.',
+    'Klawisze: 1–9 wybierają odpowiedź, spacja odtwarza ponownie, Enter przechodzi dalej. Elementy, w których się mylisz, pojawiają się częściej. W ćwiczeniach na klawiaturze możesz grać literami A W S E D F T G Y H U J K (Z / X — zmiana oktawy).':
+      'Keys: <kbd>1</kbd>–<kbd>9</kbd> choose an answer, <kbd>space</kbd> replays, <kbd>Enter</kbd> moves on. Items you get wrong come back more often. In keyboard exercises you can play with the letters A W S E D F T G Y H U J K (Z / X — change octave).',
     'Wyniki zapisują się tylko w tej przeglądarce. Do ćwiczeń słuchowych włącz dźwięk. Dla nauczycieli: 🖨 karta ćwiczeń do druku z kluczem odpowiedzi.':
       'Results are saved only in this browser. Turn the sound on for ear training. For teachers: <a href="worksheet.html">🖨 printable worksheet with an answer key</a>.',
     '1 Wartości rytmiczne': '<span class="step">1</span> Note values',
@@ -249,7 +249,7 @@
     'Pianino': 'Piano', 'pryma': 'root', 'tercja': 'third', 'kwinta': 'fifth', 'septyma': 'seventh', 'inne (2/4/6/9/11/13)': 'other (2/4/6/9/11/13)', 'dźwięk skali': 'scale note',
     '✎ Wklikaj akord': '✎ Enter a chord', '✓ Zakończ wklikiwanie': '✓ Finish entering', 'nazwy wszystkich klawiszy': 'names of all keys', '🎹 Klawiatura MIDI': '🎹 MIDI keyboard',
     'Zagraj akord na podłączonej klawiaturze MIDI — strona go rozpozna': 'Play a chord on a connected MIDI keyboard — the page will recognise it',
-    'Akord w wybranym przewrocie, od C3. Kliknij klawisz, aby go usłyszeć; najedź na klawisz, aby zobaczyć dźwięk z oktawą.': 'The chord in the selected inversion, from C3. Click a key to hear it; hover over a key to see the note and octave.',
+    'Akord w wybranym przewrocie, od C3. Kliknij klawisz, aby go usłyszeć; najedź na klawisz, aby zobaczyć dźwięk z oktawą. Możesz też grać na klawiaturze komputera: A W S E D F T G Y H U J K = C4…C5 (Z / X — oktawa niżej / wyżej).': 'The chord in the selected inversion, from C3. Click a key to hear it; hover over a key to see the note and octave. You can also play with your computer keyboard: A W S E D F T G Y H U J K = C4…C5 (Z / X — octave down / up).',
     'Klawiatura fortepianu z zaznaczonymi dźwiękami akordu': 'Piano keyboard with the chord notes marked', 'Gryf gitary z zaznaczonymi dźwiękami': 'Guitar fretboard with notes marked',
     'Gryf instrumentu z zaznaczonymi dźwiękami': 'Fretboard with notes marked',
     'Gitara': 'Guitar', 'Ukulele': 'Ukulele', 'Gitara basowa': 'Bass guitar', 'Strój': 'Tuning', 'wszystkie dźwięki akordu': 'all chord notes', 'dźwięki skali': 'scale notes',
@@ -373,6 +373,7 @@
     '📝 Sprawdzian (10 pytań)': '📝 Test (10 questions)', '10 pytań bez podpowiedzi; wynik i błędy na końcu': '10 questions without hints; score and mistakes at the end',
     'Sprawdzian: {0}/{1}': 'Test: {0}/{1}', 'Sprawdzian: pytanie {0} z {1}': 'Test: question {0} of {1}', 'Odpowiedź zapisana — następne pytanie…': 'Answer saved — next question…',
     'Wynik sprawdzianu: {0}/{1} ({2}%)': 'Test score: {0}/{1} ({2}%)', 'Błędne odpowiedzi:': 'Wrong answers:', 'Wszystko dobrze — gratulacje!': 'All correct — congratulations!',
+    '⬇ Plik MIDI': '⬇ MIDI file', 'Plik do otwarcia w programie do nut lub DAW (MuseScore, GarageBand…)': 'A file to open in notation software or a DAW (MuseScore, GarageBand…)',
     'Nowy sprawdzian': 'New test', '📋 Kopiuj wynik': '📋 Copy result', 'Wróć do ćwiczenia': 'Back to the exercise',
     '{0} molowej': '{0} minor', '{0} durowej': '{0} major', 'Tempo:': 'Tempo:', 'ćwierćnut/min': 'quarter notes/min',
     'Rodzaj (jakość)': 'Quality', '— policz półtony i porównaj z wzorcem:': '— count the semitones and compare with the pattern:',

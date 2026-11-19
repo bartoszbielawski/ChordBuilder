@@ -746,6 +746,17 @@
         type: 'button', class: 'btn ghost small',
         onclick: () => { stopProg(false); state.custom = steps.map((s) => T.noteKey(s.chord.root) + '.' + s.chord.type.id); state.prog = 'custom'; render(); },
       }, 'Skopiuj jako własną (do edycji)')];
+    if (steps.length) {
+      tools.push(h('button', {
+        type: 'button', class: 'btn ghost small', title: 'Plik do otwarcia w programie do nut lub DAW (MuseScore, GarageBand…)',
+        onclick: () => {
+          const vls = state.smooth ? voiceLeading(steps) : null;
+          const chords = steps.map((st, i) => [36 + st.chord.root.pc, ...(vls ? vls[i].midis : pianoMidis(st.chord, T.inversion(st.chord, centeredInversion(st.chord))))]);
+          const name = (state.prog === 'custom' ? 'progresja' : state.prog) + '-' + T.noteKey(sc.tonic).replace('#', 's') + '.mid';
+          window.Common.saveFile(window.Common.midiFile(chords, state.bpm, state.beats), name, 'audio/midi');
+        },
+      }, '⬇ Plik MIDI'));
+    }
     $('prog-tools').replaceChildren(...tools.filter(Boolean));
   }
 
@@ -1197,6 +1208,13 @@
       Sound.play(pianoMidis(c, T.inversion(c, state.inv)), 'arp');
     });
     window.addEventListener('hashchange', () => { loadHash(); render(); });
+    // Klawiatura komputera jako pianino: gra dźwięk, w trybie „wklikaj” dodaje/usuwa go z akordu.
+    window.Common.computerPiano((m) => {
+      Sound.play([m]);
+      if (!input.on || input.source !== 'piano') return;
+      if (input.piano.has(m)) input.piano.delete(m); else input.piano.add(m);
+      render();
+    });
     $('an-input').addEventListener('input', renderAnalysis);
     $('harm-play').addEventListener('click', playHarmonization);
     $('harm-group').addEventListener('change', (e) => { state.harmGroup = +e.target.value; state.harmPick = {}; render(); });

@@ -124,6 +124,9 @@ kroku budowania), więc działa od razu na GitHub Pages.
   Wydruk A4 lub zapis jako PDF z okna drukowania.
 - **Działa offline i instaluje się jak aplikacja** (PWA) — na telefonie
   „Dodaj do ekranu głównego”, na komputerze ikona instalacji w pasku adresu.
+- **Klawiatura komputera jako pianino** (A W S E D F T G Y H U J K = C4…C5, Z/X — oktawa):
+  na stronie głównej i w ćwiczeniach na klawiaturze.
+- **Eksport progresji do pliku MIDI** — do otwarcia w MuseScore, GarageBand i innych programach.
 - **Klawiatura MIDI** (Chrome, Edge, Firefox): zagraj akord na podłączonym
   instrumencie — strona go rozpozna; w ćwiczeniach na klawiaturze można
   odpowiadać, grając.
