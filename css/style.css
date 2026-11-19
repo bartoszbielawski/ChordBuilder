@@ -615,3 +615,4 @@ html.present .site-footer, html.present .settings .field:first-child { display: 
 .tr-staves { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 8px 24px; }
 .tr-staves .hint { margin: 0 0 4px; }
 .chord-scales { font-size: 13px; margin-top: 4px; } .chord-scales .lbl { color: var(--muted); }
+.seq-key { min-width: 76px; }

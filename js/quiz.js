@@ -257,7 +257,7 @@
         };
         return {
           prompt: `Tonacja ${minor ? nn(sc.tonic).toLowerCase() + '-moll' : nn(sc.tonic) + '-dur'} — który stopień zabrzmiał po kadencji?`,
-          answers: idxs.map((k) => ({ key: String(k), label: `${lbl(k)} — ${T.degreeName(sc.notes[k].iv)}` })),
+          answers: idxs.map((k) => ({ key: String(k), label: `${lbl(k)} · ${T.solfege(sc.tonic, sc.notes[k].note)} — ${T.degreeName(sc.notes[k].iv)}` })),
           correct: String(i), item: (minor ? 'm' : 'M') + i, play,
           explain: (box) => {
             const st = staffBox();
@@ -322,7 +322,8 @@
         }
         const tm = 60 + sc.tonic.pc - (sc.tonic.pc > 6 ? 12 : 0);
         const midiAt = (k) => tm + (k === 7 ? 12 : sc.notes[k].iv.semi);
-        const choices = Array.from({ length: top === 7 ? 8 : top + 1 }, (_, k) => ({ key: k, label: k === 7 ? '8 (1↑)' : String(k + 1) }));
+        const SOL = ['do', 're', 'mi', 'fa', 'sol', 'la', 'si'];
+        const choices = Array.from({ length: top === 7 ? 8 : top + 1 }, (_, k) => ({ key: k, label: k === 7 ? '8 · do↑' : `${k + 1} · ${SOL[k]}` }));
         const sounds = Object.fromEntries(choices.map((c) => [c.key, midiAt(c.key)]));
         const play = () => {
           const t = playCadence(sc.tonic, false, 0.5);
