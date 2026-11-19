@@ -25,9 +25,10 @@ kroku budowania), więc działa od razu na GitHub Pages.
   dźwiękiem charakterystycznym i akordem tonicznym; odsłuch na tle burdonu toniki.
   Modusy względne jednej tonacji (te same dźwięki, inny początek) z zapisem nutowym
   i układem półtonów.
-- **Ćwiczenia** (`quiz.html`): 18 rodzajów ćwiczeń w 3 poziomach trudności —
+- **Ćwiczenia** (`quiz.html`): 20 rodzajów ćwiczeń w 3 poziomach trudności —
   ze słuchu: interwały, akordy, skale/modusy, stopnie skali na tle kadencji,
-  progresje akordów, dyktando melodyczne (zapis stopniami) i rytmiczne; rytm:
+  progresje akordów, przewroty, dyktando melodyczne (zapis stopniami) i rytmiczne;
+  skale z nut; rytm:
   wartości rytmiczne i metrum taktu; czytanie nut (klucz wiolinowy i basowy),
   znaki przykluczowe (dur i moll), nazywanie interwałów i akordów z nut, budowanie
   akordów z poprawną pisownią, akordy na stopniach tonacji, a na instrumentach:
@@ -37,7 +38,7 @@ kroku budowania), więc działa od razu na GitHub Pages.
 - **Rytm** (`rhythm.html`): wartości nut i pauz (drzewo podziału, odsłuch),
   kropka przy nucie, metrum proste, złożone i nieregularne z metronomem
   i akcentami, układanie taktu z kontrolą wypełnienia.
-- **Słowniczek** (`glossary.html`): ponad 50 pojęć (akord, tryton, tonacja
+- **Słowniczek** (`glossary.html`): ponad 60 pojęć (akord, tryton, tonacja
   równoległa, kadencja, przewrót…) z krótkimi definicjami, wyszukiwarką
   i odnośnikami do miejsc na stronie, gdzie można je zobaczyć i usłyszeć.
 - **Karta ćwiczeń do druku** (`worksheet.html`) dla nauczycieli: wybierasz rodzaje

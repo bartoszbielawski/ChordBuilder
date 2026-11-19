@@ -62,6 +62,14 @@
     ['trójdźwięk', 'Akord z trzech dźwięków ułożonych tercjami: durowy, molowy, zmniejszony, zwiększony.', [['Ćwiczenie ze słuchu', 'quiz.html#ex=ear-chord&lv=1']]],
     ['tryton', 'Interwał trzech całych tonów (6 półtonów): kwarta zwiększona lub kwinta zmniejszona. Dzieli oktawę na pół; najbardziej napięciowy interwał.', [['Tryton', 'intervals.html#lo=F4&hi=B4']]],
     ['znaki przykluczowe', 'Krzyżyki lub bemole zapisane na początku każdej pięciolinii; obowiązują w całym utworze i wyznaczają tonację. Kolejność krzyżyków: F C G D A E H, bemoli: H E A D G C F.', [['Ćwiczenie', 'quiz.html#ex=key-sig&lv=0'], ['Skala na pięciolinii', './#t=E&s=major']]],
+    ['bas cyfrowany (oznaczenia cyfrowe)', 'Liczby przy basie mówiące, jakie interwały brzmią nad nim: 6 — I przewrót, 6/4 — II przewrót; dla akordów septymowych 7, 6/5, 4/3, 2. Dawny zapis akompaniamentu (basso continuo), dziś podstawa nauki harmonii.', [['Przykład: G7 4/3', './#r=G&c=7&i=2'], ['Przewroty ze słuchu', 'quiz.html#ex=ear-inversion&lv=0']]],
+    ['kwinty i oktawy równoległe', 'Dwa głosy idące w tę samą stronę i tworzące kolejno dwie kwinty czyste (lub dwie oktawy). W harmonii klasycznej błąd — głosy tracą samodzielność; w rocku (power chordy) to celowy efekt.', [['Progresje z prowadzeniem głosów', './#t=C&s=major&p=andalusian']]],
+    ['metrum', 'Regularny układ akcentów w takcie, zapisany jak ułamek: górna liczba — ile miar, dolna — jaka wartość jest miarą (4/4, 3/4, 6/8). Metrum proste ma miary dzielone na 2, złożone (6/8, 9/8, 12/8) — na 3.', [['Rytm', 'rhythm.html'], ['Ćwiczenie', 'quiz.html#ex=rhythm-meter&lv=0']]],
+    ['takt', 'Odcinek utworu między kreskami taktowymi, mieszczący wartości rytmiczne o łącznej długości wyznaczonej przez metrum.', [['Ułóż takt', 'rhythm.html']]],
+    ['kropka przy nucie', 'Wydłuża nutę lub pauzę o połowę jej wartości: półnuta z kropką = 3 ćwierćnuty, ćwierćnuta z kropką = 3 ósemki.', [['Rytm', 'rhythm.html']]],
+    ['wartości rytmiczne', 'Długości nut i pauz: cała nuta, półnuta, ćwierćnuta, ósemka, szesnastka — każda dwa razy krótsza od poprzedniej.', [['Rytm', 'rhythm.html'], ['Ćwiczenie', 'quiz.html#ex=rhythm-values&lv=0']]],
+    ['transpozycja', 'Przeniesienie utworu lub progresji do innej tonacji o stały interwał — wszystkie relacje (cyfry rzymskie) zostają te same.', [['Analiza i transpozycja', './#t=C&s=major']]],
+    ['dyktando', 'Ćwiczenie słuchowe: zapisanie usłyszanej melodii (dyktando melodyczne) lub rytmu (rytmiczne).', [['Dyktando melodyczne', 'quiz.html#ex=dictation&lv=0'], ['Dyktando rytmiczne', 'quiz.html#ex=rhythm-ear&lv=0']]],
   ];
 
   const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l');

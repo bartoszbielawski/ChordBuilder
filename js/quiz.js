@@ -410,6 +410,59 @@
       },
     },
     {
+      id: 'ear-inversion', group: 'Słuch', title: 'Przewroty ze słuchu',
+      desc: 'Usłyszysz akord — który dźwięk jest w basie?',
+      levels: ['trójdźwięki durowe', 'dur i moll', '+ akordy septymowe (III przewrót)'],
+      make(level) {
+        const type = pick([['maj'], ['maj', 'min'], ['maj', 'min', '7', 'maj7', 'm7']][level]);
+        const chord = T.buildChord(T.parseNote(pick(ROOTS_MED)), type);
+        const n = Math.min(chord.notes.length, 4);
+        const inv = weighted(this.id, Array.from({ length: n }, (_, i) => i), (i) => n + ':' + i);
+        const notes = chordMidis(chord, inv, 55);
+        const ms = notes.map((x) => x.midi);
+        const names = ['postać zasadnicza (pryma w basie)', 'I przewrót (tercja w basie)', 'II przewrót (kwinta w basie)', 'III przewrót (septyma w basie)'];
+        return {
+          prompt: 'W jakiej postaci jest ten akord? (słuchaj najniższego dźwięku)',
+          answers: names.slice(0, n).map((l, i) => ({ key: String(i), label: l })),
+          correct: String(inv), item: n + ':' + inv,
+          play: () => { Sound.play(ms, 'chord', 'piano', 1.8); timers.push(setTimeout(() => Sound.play([ms[0]], 'chord', 'piano', 1.2), 1900)); },
+          explain: (box) => {
+            const st = staffBox();
+            I.renderMelody(st, [notes], { gap: 60, labels: [T.chordSymbol(chord, state.notation) + (inv ? '/' + nn(notes[0].note) : '')] });
+            const fb = T.figuredBass(chord, inv);
+            box.append(h('p', {}, `${T.chordSymbol(chord, state.notation)} — w basie ${nn(notes[0].note)}: ${names[inv]}` + (fb ? `, oznaczenie cyfrowe ${fb}.` : '.')), st,
+              h('p', { class: 'muted' }, 'Po akordzie gra sam bas — porównaj go z prymą akordu. Przewroty brzmią mniej „stabilnie” niż postać zasadnicza; II przewrót (6/4) najmniej.'));
+          },
+        };
+      },
+    },
+    {
+      id: 'name-scale', group: 'Nuty', title: 'Rozpoznaj skalę z nut',
+      desc: 'Skala zapisana na pięciolinii (bez znaków przykluczowych) — jaka to?',
+      levels: ['dur i moll naturalny', '+ moll harmoniczny i melodyczny', 'modusy'],
+      sets: [['major', 'minor'], ['major', 'minor', 'harmonicMinor', 'melodicMinor'], ['major', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'minor', 'locrian']],
+      make(level) {
+        const id = weighted(this.id, this.sets[level]);
+        const sc = T.buildScale(T.parseNote(pick(['C', 'D', 'E', 'F', 'G', 'A', 'Bb', 'Eb'])), id);
+        const start = 60 + sc.tonic.pc - (sc.tonic.pc > 6 ? 12 : 0);
+        const ms = [...sc.notes.map((x) => start + x.iv.semi), start + 12];
+        const cols = ms.map((m, i) => [{ midi: m, note: i < 7 ? sc.notes[i].note : sc.tonic }]);
+        return {
+          prompt: `Jaka to skala od ${nn(sc.tonic)}? (policz półtony między kolejnymi dźwiękami)`,
+          answers: this.sets[level].map((x) => ({ key: x, label: `${nn(sc.tonic)} ${T.scaleById(x).name.toLowerCase()}` })),
+          correct: id, item: id,
+          play: () => Sound.play(ms, 'arp', 'piano', 1.0),
+          show: (box) => { const st = staffBox(); I.renderMelody(st, cols, { gap: 30 }); box.append(st); },
+          explain: (box) => {
+            const steps = sc.notes.map((x, i) => (i + 1 < 7 ? sc.notes[i + 1].iv.semi : 12) - x.iv.semi);
+            const alts = T.alterationsVsMajor(sc.scale).map((d) => d.symbol);
+            box.append(h('p', {}, `${nn(sc.tonic)} ${sc.scale.name.toLowerCase()}: odległości ${steps.join(' ')}` + (alts.length ? `; względem durowej: ${alts.join(', ')}.` : ' — wzór skali durowej.')),
+              h('p', { class: 'muted' }, sc.scale.mood || ''));
+          },
+        };
+      },
+    },
+    {
       id: 'read-note', group: 'Nuty', title: 'Czytanie nut',
       desc: 'Nazwij nutę na pięciolinii.',
       levels: ['na pięciolinii', '+ linie dodane', 'szeroki zakres'],
