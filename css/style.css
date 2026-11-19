@@ -71,7 +71,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font: 15px/1.5 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font: 15px/1.5 Inter, system-ui, -apple-system, "Segoe UI", "Noto Music", sans-serif;
 }
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
 h1, h2, h3 { line-height: 1.2; margin: 0; }
@@ -570,3 +570,5 @@ kbd {
 .rh-barline { font-size: 34px; color: var(--muted); margin-left: auto; }
 .rh-fill { height: 6px; background: var(--surface-2); border-radius: 3px; margin-top: 6px; overflow: hidden; }
 .rh-fill > div { height: 100%; background: var(--accent); transition: width .2s; }
+.quiz-answers.rhythm .quiz-answer span, .quiz-prompt .rh-g { font-family: "Noto Music", "Apple Symbols", "Segoe UI Symbol", serif; font-size: 26px; letter-spacing: 2px; }
+.quiz-prompt .rh-g.big { font-size: 32px; }

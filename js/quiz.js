@@ -54,6 +54,7 @@
 
   let timers = [];
   let midiOn = false;
+  let stopRhythm = () => {};
   function seq(midis, gap = 0.62, dur = 1.1) {
     timers.forEach(clearTimeout);
     timers = midis.map((m, i) => setTimeout(() => Sound.play([].concat(m), 'chord', 'piano', dur), i * gap * 1000));
@@ -326,6 +327,85 @@
             box.append(h('p', {}, `Melodia: ${mel.map((k) => nn(noteOf(k))).join(' – ')} (stopnie ${mel.map((k) => (k === 7 ? 8 : k + 1)).join('–')}).`), st,
               h('button', { type: 'button', class: 'btn small ghost', onclick: () => seq(mel.map(midiAt), 0.6, 0.9) }, '▶ Melodia jeszcze raz'));
           },
+        };
+      },
+    },
+    {
+      id: 'rhythm-values', group: 'Rytm', title: 'Wartości rytmiczne',
+      desc: 'Ile krótszych wartości mieści się w dłuższej?',
+      levels: ['cała, półnuta, ćwierćnuta, ósemka', '+ szesnastki i kropki', '+ pauzy z kropką'],
+      make(level) {
+        const R = window.Rhythm;
+        const big = [['w', 'h', 'q'], ['w', 'h', 'q', 'h.', 'q.'], ['w', 'h', 'q', 'h.', 'q.', 'e.']][level];
+        const small = [['h', 'q', 'e'], ['h', 'q', 'e', 's'], ['h', 'q', 'e', 's']][level];
+        let a, b;
+        for (let t = 0; t < 100; t++) {
+          a = { v: pick(big), rest: level === 2 && Math.random() < 0.4 };
+          b = { v: pick(small), rest: false };
+          const r = R.units(a) / R.units(b);
+          if (Number.isInteger(r) && r >= 2) break;
+        }
+        const n = R.units(a) / R.units(b);
+        const opts = shuffle([...new Set([n, n * 2, n / 2, n + 1, n - 1, n + 2].filter((x) => Number.isInteger(x) && x >= 1))]).slice(0, 5);
+        if (!opts.includes(n)) opts[0] = n;
+        return {
+          prompt: h('span', {}, 'Ile ', h('b', {}, R.valueName(b) + ' '), h('span', { class: 'rh-g' }, R.glyph(b)), ' trwa tyle, co ', h('b', {}, R.valueName(a) + ' '), h('span', { class: 'rh-g' }, R.glyph(a)), '?'),
+          answers: opts.sort((x, y) => x - y).map((x) => ({ key: String(x), label: String(x) })),
+          correct: String(n), item: a.v + (a.rest ? 'r' : '') + '/' + b.v,
+          explain: (box) => box.append(h('p', {}, `${cap(R.valueName(a))} = ${R.units(a)} szesnastek, ${R.valueName(b)} = ${R.units(b)} → ${R.units(a)} : ${R.units(b)} = ${n}.` +
+            (a.v.endsWith('.') ? ' Kropka wydłuża wartość o połowę.' : '') + (a.rest ? ' Pauza trwa tyle samo co nuta o tej wartości.' : ''))),
+        };
+      },
+    },
+    {
+      id: 'rhythm-meter', group: 'Rytm', title: 'Metrum taktu',
+      desc: 'Policz wartości w takcie i wskaż metrum.',
+      levels: ['półnuty i ćwierćnuty', '+ ósemki i kropki', '+ szesnastki i pauzy'],
+      make(level) {
+        const R = window.Rhythm;
+        const pool = ['2/4', '3/4', '4/4', '3/8', '5/4'];
+        const id = weighted(this.id, pool);
+        const meter = R.meterById(id);
+        const allowed = [['h', 'q'], ['h', 'q', 'e', 'h.', 'q.'], ['h', 'q', 'e', 's', 'q.', 'e.']][level].filter((v) => R.units({ v }) <= R.barUnits(meter));
+        const bar = R.randomBar(meter, id === '3/8' ? allowed.filter((v) => R.units({ v }) <= 6).concat(['e']) : allowed, level === 2 ? 0.2 : 0);
+        return {
+          prompt: h('span', {}, 'Jakie metrum ma ten takt?  ', h('span', { class: 'rh-g big' }, bar.map((e) => R.glyph(e)).join(' '))),
+          answers: pool.map((m) => ({ key: m, label: m })),
+          correct: id, item: id,
+          play: () => { stopRhythm(); stopRhythm = R.playRhythm(bar, meter, 80, { countIn: false }); },
+          explain: (box) => {
+            const total = bar.reduce((s2, e) => s2 + R.units(e), 0);
+            box.append(h('p', {}, `${bar.map((e) => R.valueName(e)).join(' + ')} = ${String(total / 4).replace('.', ',')} ćwierćnuty → ${id}` +
+              (id === '3/8' ? ' (3 ósemki).' : ` (${meter.beats} ${meter.unit === 4 ? 'ćwierćnuty' : 'ósemki'}).`)),
+            h('p', { class: 'muted' }, 'Uwaga: takt 3/4 i 6/8 trwa tyle samo, ale inaczej się go akcentuje (3 × ćwierćnuta vs 2 × ćwierćnuta z kropką).'));
+          },
+        };
+      },
+    },
+    {
+      id: 'rhythm-ear', group: 'Słuch', title: 'Dyktando rytmiczne',
+      desc: 'Usłyszysz takt rytmu — wybierz jego zapis.',
+      levels: ['4/4: półnuty, ćwierćnuty', '4/4: + ósemki i kropki', '3/4 lub 4/4, + szesnastki i pauzy'],
+      make(level) {
+        const R = window.Rhythm;
+        const meter = R.meterById(level === 2 && Math.random() < 0.5 ? '3/4' : '4/4');
+        const allowed = [['h', 'q'], ['h', 'q', 'e', 'q.'], ['h', 'q', 'e', 's', 'q.', 'e.']][level];
+        const rest = level === 2 ? 0.15 : 0;
+        const key = (b) => b.map((e) => e.v + (e.rest ? 'r' : '')).join(' ');
+        const bar = R.randomBar(meter, allowed, rest);
+        const bars = [bar];
+        for (let t = 0; t < 200 && bars.length < 4; t++) {
+          const o = R.randomBar(meter, allowed, rest);
+          if (!bars.some((b) => key(b) === key(o))) bars.push(o);
+        }
+        const label = (b) => b.map((e) => R.glyph(e)).join(' ');
+        return {
+          prompt: `Który zapis odpowiada usłyszanemu rytmowi? (metrum ${meter.id}, najpierw takt metronomu)`,
+          answers: shuffle(bars).map((b) => ({ key: key(b), label: label(b) })), rhythm: true,
+          correct: key(bar), item: meter.id + level,
+          play: () => { stopRhythm(); stopRhythm = R.playRhythm(bar, meter, 76, { countIn: true }); },
+          explain: (box) => box.append(h('p', {}, `Rytm: ${bar.map((e) => R.valueName(e)).join(', ')}.`),
+            h('p', { class: 'muted' }, 'Wskazówka: stukaj miary razem z metronomem i licz „raz-i, dwa-i…” — ósemki wypadają na „i”.')),
         };
       },
     },
@@ -744,6 +824,7 @@
   function next() {
     const ex = exById(state.ex);
     timers.forEach(clearTimeout);
+    stopRhythm();
     let q;
     for (let i = 0; i < 4; i++) {
       q = ex.make(state.level, state.opts);
@@ -828,7 +909,7 @@
     }
 
     $('midi-btn').hidden = q.input !== 'piano' || midiOn;
-    $('ex-answers').className = 'quiz-answers' + (q.wide ? ' wide' : '');
+    $('ex-answers').className = 'quiz-answers' + (q.wide ? ' wide' : '') + (q.rhythm ? ' rhythm' : '');
     if (q.input === 'piano') {
       $('ex-answers').replaceChildren(
         h('button', { type: 'button', class: 'btn', disabled: !!state.answered || !state.sel.size, onclick: () => answer() }, '✓ Sprawdź (Enter)'),

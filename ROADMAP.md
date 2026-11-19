@@ -72,19 +72,14 @@ Zrobione do wersji 2.1: rozpoznawanie akordów, koło kwintowe, progresje i kade
 testy, porównanie modusów, akordy zapożyczone i dominanty wtrącone, kształcenie
 słuchu i quizy (15 rodzajów), ćwiczenia na instrumentach, karta ćwiczeń do druku,
 słowniczek, MIDI, dyktando melodyczne, analiza harmoniczna (tonacja z akordów),
-pozycje skali na gryfie, dział Rytm (wartości, kropka, metrum z metronomem, układanie taktu).
+pozycje skali na gryfie, dział Rytm (wartości, kropka, metrum z metronomem, układanie taktu)
+i ćwiczenia rytmiczne (18 rodzajów ćwiczeń).
 
 ## Stan prac — gdzie skończyliśmy (listopad 2026)
 
-Następny krok w toku: **ćwiczenia rytmiczne** w `quiz.js` (grupa „Rytm”):
-- „Wartości rytmiczne” — np. „ile ósemek ma półnuta z kropką?”;
-- „Metrum” — pokazany takt, które metrum pasuje (uwaga: 3/4 i 6/8 mają tę samą
-  długość — nie dawać obu jako odpowiedzi);
-- „Dyktando rytmiczne” — usłyszany takt, wybór spośród 4 zapisów.
-
-Gotowe klocki: `js/rhythm-core.js` (`Rhythm.randomBar`, `playRhythm`, `glyph`,
-`units`, `METERS`); `quiz.html` i `worksheet.html` już ładują `rhythm-core.js`.
-Do sprawdzenia: dział Rytm na stronie na żywo (testowany tylko lokalnie).
+Zrobione ostatnio: ćwiczenia rytmiczne (wartości, metrum taktu, dyktando
+rytmiczne ze słuchu), także w karcie ćwiczeń do druku. Do sprawdzenia: dział
+Rytm i nowe ćwiczenia na stronie na żywo.
 
 Dalsze pomysły (malejąco wg wartości dla nauki):
 

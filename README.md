@@ -25,9 +25,10 @@ kroku budowania), więc działa od razu na GitHub Pages.
   dźwiękiem charakterystycznym i akordem tonicznym; odsłuch na tle burdonu toniki.
   Modusy względne jednej tonacji (te same dźwięki, inny początek) z zapisem nutowym
   i układem półtonów.
-- **Ćwiczenia** (`quiz.html`): 15 rodzajów ćwiczeń w 3 poziomach trudności —
+- **Ćwiczenia** (`quiz.html`): 18 rodzajów ćwiczeń w 3 poziomach trudności —
   ze słuchu: interwały, akordy, skale/modusy, stopnie skali na tle kadencji,
-  progresje akordów i dyktando melodyczne (zapis stopniami); czytanie nut (klucz wiolinowy i basowy),
+  progresje akordów, dyktando melodyczne (zapis stopniami) i rytmiczne; rytm:
+  wartości rytmiczne i metrum taktu; czytanie nut (klucz wiolinowy i basowy),
   znaki przykluczowe (dur i moll), nazywanie interwałów i akordów z nut, budowanie
   akordów z poprawną pisownią, akordy na stopniach tonacji, a na instrumentach:
   zaznaczanie akordu i skali na klawiaturze oraz szukanie dźwięków na gryfie. Każda odpowiedź ma

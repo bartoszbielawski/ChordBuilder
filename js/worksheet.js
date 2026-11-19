@@ -16,6 +16,8 @@
     ['chord-name', 'Podaj symbol akordu zapisanego na pięciolinii.'],
     ['build-chord', 'Wypisz dźwięki akordów — z poprawną pisownią (akord buduje się co tercję).'],
     ['diatonic', 'Podaj akord leżący na wskazanym stopniu tonacji.'],
+    ['rhythm-values', 'Odpowiedz, ile krótszych wartości mieści się w dłuższej.'],
+    ['rhythm-meter', 'Wpisz metrum taktu (policz wartości).'],
   ];
   const exById = (id) => EX.find((e) => e.id === id);
 

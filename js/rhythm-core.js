@@ -101,7 +101,11 @@
       }
       if (left === 0) return out;
     }
-    return [{ v: 'w', rest: false }];
+    // Awaryjnie: wypełnij zachłannie dowolnymi wartościami (zawsze dokładnie cały takt).
+    const out = [];
+    let left = need;
+    for (const v of VALUES) while (v.units <= left) { out.push({ v: v.id, rest: false }); left -= v.units; }
+    return out;
   }
 
   global.Rhythm = { VALUES, DOTTED, METERS, meterById, barUnits, glyph, units, valueName, playRhythm, randomBar };
