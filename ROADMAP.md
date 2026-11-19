@@ -68,12 +68,25 @@ i najtańszych w realizacji.
 
 ## Proponowana kolejność
 
-Zrobione do wersji 2.0: rozpoznawanie akordów, koło kwintowe, progresje i kadencje,
+Zrobione do wersji 2.1: rozpoznawanie akordów, koło kwintowe, progresje i kadencje,
 testy, porównanie modusów, akordy zapożyczone i dominanty wtrącone, kształcenie
-słuchu i quizy, ćwiczenia na instrumentach, karta ćwiczeń do druku, słowniczek, MIDI, dyktando melodyczne, stopnie
-skali i progresje ze słuchu.
+słuchu i quizy (15 rodzajów), ćwiczenia na instrumentach, karta ćwiczeń do druku,
+słowniczek, MIDI, dyktando melodyczne, analiza harmoniczna (tonacja z akordów),
+pozycje skali na gryfie, dział Rytm (wartości, kropka, metrum z metronomem, układanie taktu).
 
-Co jeszcze miałoby sens (malejąco wg wartości dla nauki):
+## Stan prac — gdzie skończyliśmy (listopad 2026)
+
+Następny krok w toku: **ćwiczenia rytmiczne** w `quiz.js` (grupa „Rytm”):
+- „Wartości rytmiczne” — np. „ile ósemek ma półnuta z kropką?”;
+- „Metrum” — pokazany takt, które metrum pasuje (uwaga: 3/4 i 6/8 mają tę samą
+  długość — nie dawać obu jako odpowiedzi);
+- „Dyktando rytmiczne” — usłyszany takt, wybór spośród 4 zapisów.
+
+Gotowe klocki: `js/rhythm-core.js` (`Rhythm.randomBar`, `playRhythm`, `glyph`,
+`units`, `METERS`); `quiz.html` i `worksheet.html` już ładują `rhythm-core.js`.
+Do sprawdzenia: dział Rytm na stronie na żywo (testowany tylko lokalnie).
+
+Dalsze pomysły (malejąco wg wartości dla nauki):
 
 1. **3.2 Kształty CAGED** dla akordów (pozycje skal ✓) — dla nauczycieli gitary.
 2. **3.4 Inne instrumenty** (ukulele, bas) — wymaga uogólnienia gryfu i chwytów na 4 struny.
