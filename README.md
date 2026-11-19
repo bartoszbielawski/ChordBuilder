@@ -137,7 +137,8 @@ kroku budowania), więc działa od razu na GitHub Pages.
 - **Dźwięk:** odtwarzanie akordu, arpeggia, pojedynczych klawiszy i strun
   (Web Audio, bez plików z próbkami: pianino z nieharmonicznymi składowymi,
   gitara w syntezie Karplusa–Stronga, osobny dźwięk metronomu).
-- **Etykiety** na instrumentach: nazwy dźwięków / interwały / półtony.
+- **Etykiety** na instrumentach: nazwy dźwięków / interwały / półtony / solmizacja (do re mi —
+  do ruchome, „do” = tonika skali; także w opisie skali).
 - **Link do stanu:** aktualny wybór zapisuje się w adresie URL (`#t=F&s=major&r=Bb&c=maj7…`),
   więc można go wysłać komuś innemu.
 - Tryb jasny i ciemny, układ dopasowany do telefonu.

@@ -103,6 +103,7 @@
   }
 
   function labelFor(entry) {
+    if (state.labels === 'solfa') return T.solfege(T.parseNote(state.tonic), entry.note);
     if (state.labels === 'interval') return entry.info.symbol;
     if (state.labels === 'semi') return String(entry.iv.semi);
     return nn(entry.note);
@@ -313,6 +314,7 @@
       const cn = sc.notes[charIdx];
       rows.push(['Dźwięk charakterystyczny', h('span', {}, h('span', { class: 'char-note' }, `${T.describeInterval(cn.iv.deg, cn.iv.semi).symbol} = ${nn(cn.note)}`), ' — zaznaczony na fioletowo')]);
     }
+    if (sc.notes.length >= 5) rows.push(['Solmizacja', sc.notes.map((n) => T.solfege(sc.tonic, n.note)).join(' – ')]);
     if (sc.notes.length === 7) {
       rows.push(['Nazwy stopni', h('span', { class: 'degree-names' }, sc.notes.map((n, i) =>
         h('span', {}, h('b', {}, ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][i]), ' ' + T.degreeName(n.iv))))]);
@@ -1151,6 +1153,7 @@
       const labelAt = (s) => {
         const n = byPc.get(T.mod(tuning.midi[s] + v.frets[s], 12));
         if (!n) return '';
+        if (state.labels === 'solfa') return T.solfege(T.parseNote(state.tonic), n.note).replace('♯', '#').replace('♭', 'b');
         return state.labels === 'note' ? nn(n.note).replace('♯', '#').replace('♭', 'b') : state.labels === 'semi' ? String(T.mod(n.iv.semi, 12)) : n.info.symbol.replace('♯', '#').replace('♭', 'b');
       };
       return h('button', {

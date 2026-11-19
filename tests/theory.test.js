@@ -392,6 +392,12 @@
       eq(cs('B', 'm7b5'), 'locrian blues');
       eq(cs('C', 'aug7'), 'phrygianDominant wholeTone');
     }],
+    ['Solmizacja względna', (T, eq) => {
+      const sol = (t, id) => { const sc = T.buildScale(T.parseNote(t), id); return sc.notes.map((n) => T.solfege(sc.tonic, n.note)).join(' '); };
+      eq(sol('G', 'major'), 'do re mi fa sol la si');
+      eq(sol('A', 'minor'), 'do re mi♭ fa sol la♭ si♭');
+      eq(sol('D', 'dorian'), 'do re mi♭ fa sol la si♭');
+    }],
     ['Polskie nazwy tonacji', (T, eq) => {
       const k = (n, m) => T.polishKeyName(T.parseNote(n), m);
       eq(k('Eb', 'major'), 'Es-dur'); eq(k('Ab', 'major'), 'As-dur'); eq(k('Bb', 'major'), 'B-dur');

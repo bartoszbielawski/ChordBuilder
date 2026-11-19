@@ -541,6 +541,17 @@
       .filter((sc) => [...chord.pcs].every((pc) => sc.pcs.has(pc)));
   }
 
+  /**
+   * Solmizacja względna (do ruchome): sylaba dźwięku względem toniki skali.
+   * Stopień liczony literami; zmiana względem skali durowej — znakiem (np. mi♭ w molu).
+   */
+  const SOLFA = ['do', 're', 'mi', 'fa', 'sol', 'la', 'si'];
+  function solfege(tonic, note) {
+    const deg = mod(note.letter - tonic.letter, 7);
+    const diff = mod(note.pc - tonic.pc - MAJOR_SEMI[deg] + 6, 12) - 6;
+    return SOLFA[deg] + (diff > 0 ? '♯'.repeat(diff) : '♭'.repeat(-diff));
+  }
+
   /* ---------- Analiza: symbol akordu → akord, akordy → tonacja ---------- */
 
   // Dodatkowe zapisy symboli (oprócz tych z CHORD_TYPES).
@@ -950,7 +961,7 @@
     setLang, getLang: () => LANG,
     staffStep, intervalOf, invertInterval, consonance, enharmonicIntervals,
     keySignature, alterationsVsMajor, smoothVoicing, voiceMoves, secondaryDominant,
-    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels, cagedShape, harmonize, harmonizeGroups, nonChordTone, polishNoteName, polishKeyName, chordScales,
+    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels, cagedShape, harmonize, harmonizeGroups, nonChordTone, polishNoteName, polishKeyName, chordScales, solfege,
     LETTERS, SCALES, CHORD_TYPES, CHORD_GROUPS, TUNINGS,
     mod, makeNote, parseNote, noteKey, noteName,
     parseInterval, describeInterval, intervalBetween, transpose,
