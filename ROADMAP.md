@@ -86,4 +86,5 @@ wersja angielska (przełącznik PL/EN).
 Dalsze pomysły (malejąco wg wartości dla nauki):
 
 1. **4.3 Próbki instrumentów** (syntezator już ulepszony: pianino z nieharmonicznymi składowymi,
-   gitara Karplusa–Stronga, klik metronomu) — wymaga pobrania nagrań i sprawdzenia licencji.
+   gitara Karplusa–Stronga, klik metronomu) — wymaga pobrania nagrań i sprawdzenia licencji;
+   na razie odłożone (decyzja: zostajemy przy syntezatorze).
