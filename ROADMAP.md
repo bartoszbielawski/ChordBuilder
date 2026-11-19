@@ -37,7 +37,7 @@ i najtańszych w realizacji.
 
 | # | Funkcja | Opis | Nakład |
 |---|---|---|---|
-| 3.1 | **Pozycje skali na gryfie** | System CAGED i 3-nuty-na-strunę, przełączanie pozycji. | M |
+| 3.1 | ~~**Pozycje skali na gryfie**~~ ✓ (okna 5 progów) | System CAGED i 3-nuty-na-strunę, przełączanie pozycji. | M |
 | 3.2 | **Kształty CAGED dla akordów** | Pokazanie, z którego kształtu (C, A, G, E, D) pochodzi chwyt. | M |
 | 3.3 | **Gitara leworęczna, odwrócony gryf, więcej progów** | Ustawienia widoku. | S |
 | 3.4 | **Inne instrumenty strunowe** | Ukulele (GCEA), gitara basowa, mandolina, gitara 7-strunowa, własny strój. | S |
@@ -75,6 +75,6 @@ skali i progresje ze słuchu.
 
 Co jeszcze miałoby sens (malejąco wg wartości dla nauki):
 
-1. **3.1 / 3.2 Pozycje skal i CAGED** — dla nauczycieli gitary.
+1. **3.2 Kształty CAGED** dla akordów (pozycje skal ✓) — dla nauczycieli gitary.
 2. **3.4 Inne instrumenty** (ukulele, bas) — wymaga uogólnienia gryfu i chwytów na 4 struny.
 3. **4.3 Lepsze brzmienie** (próbki zamiast syntezatora) i **5.1 wersja angielska**.

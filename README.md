@@ -69,6 +69,8 @@ kroku budowania), więc działa od razu na GitHub Pages.
 - **Pianino:** akord w wybranym przewrocie, dźwięki skali zaznaczone kropkami.
 - **Gitara:** gryf do 15. progu, kilka strojów, automatycznie wyszukiwane
   grywalne chwyty z diagramami (bas zgodny z przewrotem).
+- **Pozycje skali na gryfie:** skala w oknie 5 progów od wybranego stopnia
+  na 6. strunie (np. G-dur w pozycji od 3. progu), z toniką i stopniami.
 - **Koło kwintowe:** tonacje durowe i równoległe molowe ze znakami przykluczowymi;
   zaznacza wybraną tonację i jej akordy (I, IV, V, ii, iii, vi, vii°), kliknięcie
   zmienia tonację. Dla trybów (np. doryckiego) pokazuje tonację macierzystą.

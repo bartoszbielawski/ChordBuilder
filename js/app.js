@@ -17,7 +17,7 @@
     notation: 'intl', labels: 'note',
     tuning: 'standard', showAll: true, showScale: false, voicing: 0,
     pianoNames: true, fbNames: true,
-    prog: 'pop', custom: [], bpm: 90, beats: 4, loop: true, smooth: true,
+    prog: 'pop', custom: [], bpm: 90, beats: 4, loop: true, smooth: true, scalePos: -1,
   };
 
   // Tryb „wklikaj akord”: dźwięki wybrane na pianinie albo na gryfie.
@@ -924,6 +924,21 @@
     const scaleByPc = new Map(sc.notes.map((n) => [n.note.pc, n]));
     const name = input.on ? (pc) => nn(rec.noteOf(pc)) : pcNamer(chord, sc);
 
+    // Pozycja skali: okno 5 progów zaczynające się od wybranego stopnia na 6. strunie.
+    const posSel = $('scale-pos');
+    const low = tuning.midi[0];
+    const posStart = (k) => T.mod(sc.notes[k].note.pc - low, 12) || 12;
+    if (state.scalePos >= sc.notes.length) state.scalePos = -1;
+    posSel.replaceChildren(new Option('— (pokazuj akord)', '-1', false, state.scalePos < 0),
+      ...sc.notes.map((n, k) => {
+        const f = posStart(k);
+        return new Option(`${k + 1}. od ${T.describeInterval(n.iv.deg, n.iv.semi).symbol} (${nn(n.note)}, ${f}. próg)`, String(k), false, state.scalePos === k);
+      }));
+    const pos = state.scalePos >= 0 && !input.on ? (() => { const f = posStart(state.scalePos); return { lo: Math.max(0, f - 1), hi: f + 3 }; })() : null;
+    $('scale-pos-hint').textContent = pos
+      ? `Progi ${pos.lo}–${pos.hi}: skala ${nn(sc.tonic)} ${sc.scale.name.toLowerCase()} w jednej pozycji ręki (palec 1 na progu ${Math.max(1, pos.lo + 1)}). Czerwone — tonika; przełącz etykiety na „interwały”, by zobaczyć stopnie.`
+      : '';
+
     I.renderFretboard($('fretboard'), {
       tuning: tuning.midi, frets: 15, stringNames,
       cellName: state.fbNames ? (s, f) => name(T.mod(tuning.midi[s] + f, 12)) : null,
@@ -934,6 +949,13 @@
       },
       cell: (s, f) => {
         const pc = T.mod(tuning.midi[s] + f, 12);
+        if (pos) {
+          if (f < pos.lo || f > pos.hi) return null;
+          const sn = scaleByPc.get(pc);
+          if (!sn) return null;
+          const lab = state.labels === 'note' ? nn(sn.note) : state.labels === 'semi' ? String(sn.iv.semi) : T.describeInterval(sn.iv.deg, sn.iv.semi).symbol;
+          return { label: lab, role: sn.iv.semi === 0 ? 'root' : sc.scale.char === sn.iv.sym ? 'ext' : 'scale', strong: true };
+        }
         if (input.on) {
           const m = tuning.midi[s] + f;
           if (input.source === 'guitar' && input.guitar[s] === f) return { ...inputMark(rec, m), strong: true };
@@ -1003,11 +1025,12 @@
       state.inv = +b.dataset.value; state.voicing = 0; render();
     });
     $('tonic').addEventListener('change', (e) => { state.tonic = e.target.value; selectFirstChord(); render(); });
-    $('scale').addEventListener('change', (e) => { state.scale = e.target.value; selectFirstChord(); render(); });
+    $('scale').addEventListener('change', (e) => { state.scale = e.target.value; state.scalePos = -1; selectFirstChord(); render(); });
     $('chord-root').addEventListener('change', (e) => { state.root = e.target.value; state.voicing = 0; render(); });
     $('chord-type').addEventListener('change', (e) => { state.type = e.target.value; state.inv = 0; state.voicing = 0; render(); });
     $('tuning').addEventListener('change', (e) => { state.tuning = e.target.value; state.voicing = 0; savePrefs(); render(); });
     $('show-all').addEventListener('change', (e) => { state.showAll = e.target.checked; savePrefs(); render(); });
+    $('scale-pos').addEventListener('change', (e) => { state.scalePos = +e.target.value; render(); });
     $('show-scale').addEventListener('change', (e) => { state.showScale = e.target.checked; savePrefs(); render(); });
     $('piano-names').addEventListener('change', (e) => { state.pianoNames = e.target.checked; savePrefs(); render(); });
     $('fb-names').addEventListener('change', (e) => { state.fbNames = e.target.checked; savePrefs(); render(); });
