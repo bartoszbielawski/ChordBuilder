@@ -16,6 +16,7 @@
     ['chord-name', 'Podaj symbol akordu zapisanego na pięciolinii.'],
     ['build-chord', 'Wypisz dźwięki akordów — z poprawną pisownią (akord buduje się co tercję).'],
     ['diatonic', 'Podaj akord leżący na wskazanym stopniu tonacji.'],
+    ['key-relations', 'Podaj tonację pokrewną (równoległą, jednoimienną, sąsiednią na kole kwintowym).'],
     ['name-scale', 'Nazwij skale zapisane na pięciolinii.'],
     ['rhythm-values', 'Odpowiedz, ile krótszych wartości mieści się w dłuższej.'],
     ['rhythm-meter', 'Wpisz metrum taktu (policz wartości).'],

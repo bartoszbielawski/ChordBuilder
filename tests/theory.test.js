@@ -363,6 +363,13 @@
       const am = T.buildScale(T.parseNote('A'), 'minor');
       eq(T.harmonize(am, [0, 1, 0]).choice.map((d) => T.chordSymbol(d.chord)).join(' '), 'Am E Am');
     }],
+    ['Polskie nazwy tonacji', (T, eq) => {
+      const k = (n, m) => T.polishKeyName(T.parseNote(n), m);
+      eq(k('Eb', 'major'), 'Es-dur'); eq(k('Ab', 'major'), 'As-dur'); eq(k('Bb', 'major'), 'B-dur');
+      eq(k('B', 'major'), 'H-dur'); eq(k('F#', 'minor'), 'fis-moll'); eq(k('Db', 'major'), 'Des-dur');
+      eq(k('C#', 'minor'), 'cis-moll'); eq(k('Gb', 'major'), 'Ges-dur'); eq(k('Cb', 'major'), 'Ces-dur');
+      eq(k('D#', 'minor'), 'dis-moll'); eq(k('Bbb', 'major'), 'Heses-dur');
+    }],
     ['Dominanty wtrącone', (T, eq) => {
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('D'))), 'A7');
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('Bb'))), 'F7');

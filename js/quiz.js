@@ -121,6 +121,9 @@
   }
   const DEG_LABEL = { '1': '1', '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', 'b3': '♭3', 'b6': '♭6', 'b7': '♭7' };
   const ROMAN_DEG = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+  /** Nazwa tonacji: w notacji A H C po polsku (Es-dur, fis-moll), inaczej E♭-dur, f♯-moll. */
+  const keyLabel = (tonic, mode) => (state.notation === 'H' ? T.polishKeyName(tonic, mode)
+    : mode === 'major' ? `${nn(tonic)}-dur` : `${nn(tonic).toLowerCase()}-moll`);
   const ROOTS_EASY = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
   const ROOTS_MED = [...ROOTS_EASY, 'Bb', 'Eb', 'F#', 'Ab', 'Db'];
   const ROOTS_ALL = [...ROOTS_MED, 'C#', 'Gb', 'G#', 'D#', 'A#'];
@@ -463,6 +466,50 @@
       },
     },
     {
+      id: 'key-relations', group: 'Nuty', title: 'Pokrewieństwo tonacji',
+      desc: 'Tonacja równoległa, jednoimienna, kwintę wyżej i niżej (koło kwintowe).',
+      levels: ['równoległa (do 3 znaków)', '+ jednoimienna, wszystkie tonacje', '+ tonacje sąsiednie na kole kwintowym'],
+      make(level) {
+        const majors = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb'];
+        const pool = level === 0 ? ['C', 'G', 'D', 'A', 'F', 'Bb', 'Eb'] : majors;
+        const kinds = [['rel'], ['rel', 'par'], ['rel', 'par', 'dom', 'sub']][level];
+        const kind = weighted(this.id, kinds);
+        const minor = Math.random() < 0.5;
+        // Bez tonacji teoretycznych (np. ges-moll ma 9♭): wtedy losuj z pozostałych.
+        const maj = T.parseNote(pick(kind === 'par' && !minor ? pool.filter((x) => !['Gb', 'Db'].includes(x)) : pool));
+        const tonic = minor ? T.transpose(maj, T.parseInterval('6')) : maj;
+        const mode = minor ? 'minor' : 'major';
+        let target, tmode, q, why;
+        const P = (sym) => T.parseInterval(sym);
+        if (kind === 'rel') {
+          target = minor ? T.transpose(tonic, P('b3')) : T.transpose(tonic, P('6')); tmode = minor ? 'major' : 'minor';
+          q = 'równoległa'; why = minor ? 'Równoległa durowa leży tercję małą wyżej; te same znaki przykluczowe.' : 'Równoległa molowa leży tercję małą niżej (seksta wielka wyżej); te same znaki przykluczowe.';
+        } else if (kind === 'par') {
+          target = tonic; tmode = minor ? 'major' : 'minor';
+          q = 'jednoimienna'; why = 'Jednoimienna ma tę samą tonikę i przeciwny tryb; różni się o 3 znaki przykluczowe.';
+        } else if (kind === 'dom') {
+          target = T.transpose(tonic, P('5')); tmode = mode;
+          q = 'dominantowa (kwintę wyżej)'; why = 'Tonacja dominanty leży kwintę wyżej — na kole kwintowym sąsiad zgodnie z ruchem wskazówek; ma o jeden ♯ więcej (lub ♭ mniej).';
+        } else {
+          target = T.transpose(tonic, P('4')); tmode = mode;
+          q = 'subdominantowa (kwintę niżej)'; why = 'Tonacja subdominanty leży kwintę niżej (kwartę wyżej) — sąsiad przeciwnie do ruchu wskazówek; ma o jeden ♭ więcej (lub ♯ mniej).';
+        }
+        const correct = keyLabel(target, tmode);
+        const cand = [];
+        const add = (n, m) => { const l = keyLabel(n, m); if (!cand.includes(l) && l !== correct && Math.abs(n.acc) <= 1) cand.push(l); };
+        add(T.transpose(tonic, P('6')), 'minor'); add(T.transpose(tonic, P('b3')), 'major'); add(tonic, minor ? 'major' : 'minor');
+        add(T.transpose(tonic, P('5')), mode); add(T.transpose(tonic, P('4')), mode); add(T.transpose(tonic, P('3')), tmode);
+        add(T.transpose(tonic, P('b6')), tmode); add(T.transpose(tonic, P('2')), tmode);
+        const answers = shuffle([correct, ...shuffle(cand).slice(0, 4)]).map((l) => ({ key: l, label: l }));
+        const sig = (n, m) => { const k = T.keySignature(n, m); return k.count ? `${k.count}${k.type === 'sharp' ? '♯' : '♭'}` : 'bez znaków'; };
+        return {
+          prompt: h('span', {}, 'Jaka jest tonacja ', h('b', {}, q), ' do ', h('b', { class: 'big-sym' }, keyLabel(tonic, mode)), '?'),
+          answers, correct, item: kind + mode,
+          explain: (box) => box.append(h('p', {}, `${keyLabel(tonic, mode)} (${sig(tonic, mode)}) → ${correct} (${sig(target, tmode)}).`), h('p', { class: 'muted' }, why)),
+        };
+      },
+    },
+    {
       id: 'read-note', group: 'Nuty', title: 'Czytanie nut',
       desc: 'Nazwij nutę na pięciolinii.',
       levels: ['na pięciolinii', '+ linie dodane', 'szeroki zakres'],
@@ -512,7 +559,7 @@
           }
         }
         const q = weighted(this.id, keys, (x) => x.key);
-        const name = (x) => x.scale === 'major' ? `${nn(x.tonic)}-dur` : `${nn(x.tonic).toLowerCase()}-moll`;
+        const name = (x) => keyLabel(x.tonic, x.scale);
         const pool = keys.filter((x) => x.key !== q.key);
         const rel = pool.find((x) => x.sig.count === q.sig.count && x.sig.type === q.sig.type);
         const near = pool.filter((x) => Math.abs(x.sig.count - q.sig.count) <= 1 && x !== rel);
@@ -676,7 +723,7 @@
         const types = size === 3 ? ['maj', 'min', 'dim', 'aug'] : ['maj7', '7', 'm7', 'm7b5'];
         const opts = types.map((t) => T.buildChord(d.chord.root, t));
         if (!opts.some((c) => c.type.id === d.chord.type.id)) opts[opts.length - 1] = d.chord;
-        const keyName = scaleId === 'major' ? `${nn(tonic)}-dur` : `${nn(tonic).toLowerCase()}-moll`;
+        const keyName = keyLabel(tonic, scaleId);
         const ROM = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
         return {
           prompt: h('span', {}, `Jaki ${size === 4 ? 'akord septymowy' : 'trójdźwięk'} leży na `, h('b', {}, `${ROM[d.degree]} stopniu`), ` tonacji `, h('b', {}, keyName), '?'),

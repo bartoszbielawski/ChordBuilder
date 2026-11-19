@@ -81,7 +81,7 @@ Ostatnio dodane: ćwiczenia rytmiczne, bas cyfrowany przy przewrotach,
 transpozycja w analizie harmonicznej, unikanie i oznaczanie kwint/oktaw
 równoległych w prowadzeniu głosów, ukulele i gitara basowa, kształty CAGED,
 ćwiczenia: przewroty ze słuchu i skala z nut (20 rodzajów), słowniczek (62 hasła),
-harmonizacja melodii. Wszystko sprawdzone
+harmonizacja melodii, polskie nazwy tonacji, ćwiczenie „Pokrewieństwo tonacji”. Wszystko sprawdzone
 w przeglądarce i wypchnięte.
 
 Dalsze pomysły (malejąco wg wartości dla nauki):

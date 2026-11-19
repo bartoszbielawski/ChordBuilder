@@ -468,6 +468,25 @@
     return { options, choice };
   }
 
+  /**
+   * Polska nazwa dźwięku/tonacji: c, cis, ces, es, as, b (= B♭), h, his, heses…
+   * keyName(note, 'major') → „Es-dur”, keyName(note, 'minor') → „fis-moll”.
+   */
+  function polishNoteName(n) {
+    const base = ['c', 'd', 'e', 'f', 'g', 'a', 'h'][n.letter];
+    if (n.acc === 0) return base;
+    if (n.acc > 0) return base + 'is'.repeat(n.acc);
+    if (n.letter === 6) return n.acc === -1 ? 'b' : 'heses';
+    const flat = n.acc === -1 ? 'es' : 'eses';
+    if (n.letter === 2) return 'e' + (n.acc === -1 ? 's' : 'ses');      // es, eses
+    if (n.letter === 5) return 'a' + (n.acc === -1 ? 's' : 'ses');      // as, ases
+    return base + flat;
+  }
+  function polishKeyName(note, mode) {
+    const n = polishNoteName(note);
+    return mode === 'major' ? n.charAt(0).toUpperCase() + n.slice(1) + '-dur' : n + '-moll';
+  }
+
   /* ---------- Analiza: symbol akordu → akord, akordy → tonacja ---------- */
 
   // Dodatkowe zapisy symboli (oprócz tych z CHORD_TYPES).
@@ -875,7 +894,7 @@
   global.Theory = {
     staffStep, intervalOf, invertInterval, consonance, enharmonicIntervals,
     keySignature, alterationsVsMajor, smoothVoicing, voiceMoves, secondaryDominant,
-    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels, cagedShape, harmonize,
+    MAJOR_SEMI, INTERVALS, degreeName, borrowedChords, parseChordSymbol, analyzeKey, figuredBass, transposeChords, parallels, cagedShape, harmonize, polishNoteName, polishKeyName,
     LETTERS, SCALES, CHORD_TYPES, CHORD_GROUPS, TUNINGS,
     mod, makeNote, parseNote, noteKey, noteName,
     parseInterval, describeInterval, intervalBetween, transpose,

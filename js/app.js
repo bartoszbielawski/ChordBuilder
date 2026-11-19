@@ -67,6 +67,9 @@
   /* ---------- Pomocnicze ---------- */
 
   const nn = (note) => T.noteName(note, state.notation);
+  /** Nazwa tonacji: w notacji A H C po polsku (Es-dur, fis-moll). */
+  const keyNm = (tonic, mode) => (state.notation === 'H' ? T.polishKeyName(tonic, mode)
+    : mode === 'major' ? `${nn(tonic)}-dur` : `${nn(tonic).toLowerCase()}-moll`);
   const nameForKey = (k) => nn(T.parseNote(k));
 
   const SHARP_KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -289,7 +292,7 @@
 
     const rows = [];
     if (sig) {
-      const parentName = nn(sig.parent) + '-dur';
+      const parentName = keyNm(sig.parent, 'major');
       rows.push(['Znaki przykluczowe', sig.count
         ? `${sig.count}${sig.type === 'sharp' ? '♯' : '♭'} — ${sig.notes.map(nn).join(', ')}` + (sig.theoretical ? ' (tonacja teoretyczna — w praktyce zapisuje się ją enharmonicznie)' : '')
         : 'brak']);
@@ -503,13 +506,15 @@
     const infoPos = parentPos !== null ? parentPos : tonicPos;
     const sig = signature(infoPos);
     const majName = keyName(COF_MAJOR, infoPos, false), minName = keyName(COF_MINOR, infoPos, true);
+    const majFull = infoPos === 6 ? majName + '-dur' : keyNm(T.parseNote(COF_MAJOR[infoPos]), 'major');
+    const minFull = infoPos === 6 ? minName + '-moll' : keyNm(T.parseNote(COF_MINOR[infoPos]), 'minor');
     const dimRoot = parentPos !== null ? T.transpose(T.parseNote(COF_MAJOR[parentPos]), T.parseInterval('7')) : null;
 
     I.renderCircle($('circle'), {
       majors, minors,
       dimAt: parentPos !== null ? (parentPos + 2) % 12 : null,
       dimLabel: dimRoot ? nn(dimRoot) + '°' : '',
-      center: [majName + '-dur', minName + '-moll', sig.short],
+      center: [majFull, minFull, sig.short],
       onMajor: (i) => { stopProg(); state.tonic = COF_MAJOR[i]; state.scale = 'major'; selectFirstChord(); render(); },
       onMinor: (i) => { stopProg(); state.tonic = COF_MINOR[i]; state.scale = 'minor'; selectFirstChord(); render(); },
     });
@@ -524,12 +529,12 @@
     const dia = T.diatonicChords(ps, 3);
     const k = (i) => keyName(COF_MAJOR, T.mod(i, 12), false);
     const rows = [
-      ['Tonacje', `${majName}-dur i równoległa ${minName}-moll`],
+      ['Tonacje', `${majFull} i równoległa ${minFull}`],
       ['Znaki przykluczowe', sig.notes.length ? `${sig.short}: ${sig.notes.map(nameForKey).join(', ')}` : 'brak (same białe klawisze)'],
       ['Sąsiedzi', `subdominanta ${k(parentPos - 1)}-dur (${signature(T.mod(parentPos - 1, 12)).short}), dominanta ${k(parentPos + 1)}-dur (${signature(T.mod(parentPos + 1, 12)).short})`],
     ];
     if (sc.scale.id !== 'major' && sc.scale.id !== 'minor') {
-      rows.unshift(['Skala', `${nn(sc.tonic)} ${sc.scale.name.toLowerCase()} używa znaków tonacji ${majName}-dur`]);
+      rows.unshift(['Skala', `${nn(sc.tonic)} ${sc.scale.name.toLowerCase()} używa znaków tonacji ${majFull}`]);
     }
     info.replaceChildren(
       h('dl', { class: 'circle-dl' }, rows.flatMap(([a, b]) => [h('dt', {}, a), h('dd', {}, b)])),
@@ -742,7 +747,7 @@
     if (!chords.length) { box.replaceChildren(...parts); return; }
     const keys = T.analyzeKey(chords);
     const best = keys[0];
-    const keyName = (k) => k.mode === 'major' ? `${nn(k.tonic)}-dur` : `${nn(k.tonic).toLowerCase()}-moll`;
+    const keyName = (k) => keyNm(k.tonic, k.mode);
     parts.push(h('div', { class: 'an-key' },
       h('span', { class: 'an-big' }, keyName(best)),
       h('span', { class: 'muted' }, `${best.fit} z ${best.total} akordów należy do tonacji`),
@@ -778,7 +783,7 @@
       renderAnalysis();
     } }, new Option('— wybierz —', ''), ...tKeys.map((k) => {
       const t = best.mode === 'major' ? T.parseNote(k) : T.transpose(T.parseNote(k), T.parseInterval('6'));
-      return new Option(best.mode === 'major' ? `${nn(t)}-dur` : `${nn(t).toLowerCase()}-moll`, k);
+      return new Option(keyNm(t, best.mode), k);
     }));
     parts.push(h('label', { class: 'field an-tr' }, h('span', {}, 'Transponuj do tonacji (cyfry rzymskie zostają te same)'), trSel));
     if (alts.length) {

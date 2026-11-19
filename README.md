@@ -25,7 +25,7 @@ kroku budowania), więc działa od razu na GitHub Pages.
   dźwiękiem charakterystycznym i akordem tonicznym; odsłuch na tle burdonu toniki.
   Modusy względne jednej tonacji (te same dźwięki, inny początek) z zapisem nutowym
   i układem półtonów.
-- **Ćwiczenia** (`quiz.html`): 20 rodzajów ćwiczeń w 3 poziomach trudności —
+- **Ćwiczenia** (`quiz.html`): 21 rodzajów ćwiczeń (m.in. pokrewieństwo tonacji) w 3 poziomach trudności —
   ze słuchu: interwały, akordy, skale/modusy, stopnie skali na tle kadencji,
   progresje akordów, przewroty, dyktando melodyczne (zapis stopniami) i rytmiczne;
   skale z nut; rytm:
@@ -71,7 +71,8 @@ kroku budowania), więc działa od razu na GitHub Pages.
 - **Budowa krok po kroku:** stos interwałów między kolejnymi dźwiękami
   (np. C +4 tercja wielka → E +3 tercja mała → G).
 - **Poprawna pisownia enharmoniczna:** F-dur ma B♭, nie A♯; C♯-dur ma E♯ i B♯.
-- **Notacja A B C lub A H C** (polska/niemiecka, gdzie B = B♭).
+- **Notacja A B C lub A H C** (polska/niemiecka, gdzie B = B♭); w notacji A H C
+  tonacje mają polskie nazwy (Es-dur, fis-moll, B-dur, h-moll).
 - **Pianino:** akord w wybranym przewrocie, dźwięki skali zaznaczone kropkami.
 - **Gitara, ukulele i gitara basowa:** gryf do 15. progu, kilka strojów (także ukulele GCEA i bas EADG), automatycznie wyszukiwane
   grywalne chwyty z diagramami (bas zgodny z przewrotem).
