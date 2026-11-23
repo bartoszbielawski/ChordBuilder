@@ -34,6 +34,22 @@
       </div>
       <div class="settings">
         <label class="field">
+          <span>Widok</span>
+          <select id="profile" aria-label="Dla kogo dopasować stronę"></select>
+        </label>
+        <label class="field" id="voice-field">
+          <span>Mój głos</span>
+          <select id="voice" aria-label="Głos w chórze"></select>
+        </label>
+        <label class="field">
+          <span>Poziom</span>
+          <div class="seg" id="level" role="radiogroup" aria-label="Ile narzędzi pokazać">
+            <button type="button" data-value="1" title="Skala, akordy w skali, budowa akordu, pianino">podstawy</button>
+            <button type="button" data-value="2" title="+ koło kwintowe, progresje, gitara">więcej</button>
+            <button type="button" data-value="3" title="+ akordy zapożyczone, dominanty wtrącone, analiza, harmonizacja, MIDI">wszystko</button>
+          </div>
+        </label>
+        <label class="field">
           <span>Notacja</span>
           <div class="seg" id="notation" role="radiogroup" aria-label="Notacja nazw dźwięków">
             <button type="button" data-value="intl" title="Międzynarodowa: … A B C">A B C</button>
@@ -54,6 +70,38 @@
   </header>
 
   <main class="wrap">
+    <section class="card welcome" id="welcome" hidden>
+      <div id="welcome-start">
+        <h2>Od czego zacząć?</h2>
+        <p class="hint">Wybierz, kim jesteś — strona pokaże najpierw to, co dla Ciebie najważniejsze. Później możesz to zmienić w nagłówku („Widok” i „Poziom”).</p>
+        <div class="welcome-btns">
+          <button type="button" class="btn" data-profile="choir">🎵 Śpiewam w chórze</button>
+          <button type="button" class="btn" data-profile="piano">🎹 Gram na pianinie</button>
+          <button type="button" class="btn" data-profile="guitar">🎸 Gram na gitarze</button>
+          <button type="button" class="btn ghost" data-profile="all">Pokaż wszystko</button>
+        </div>
+      </div>
+      <div id="welcome-voice" hidden>
+        <h2>Jaki głos śpiewasz?</h2>
+        <p class="hint">Ćwiczenia czytania nut i słuchu dopasują się do zakresu Twojego głosu.</p>
+        <div class="welcome-btns">
+          <button type="button" class="btn" data-voice="S">sopran</button>
+          <button type="button" class="btn" data-voice="A">alt</button>
+          <button type="button" class="btn" data-voice="T">tenor</button>
+          <button type="button" class="btn" data-voice="B">bas</button>
+          <button type="button" class="btn ghost" data-voice="">różnie / nie wiem</button>
+        </div>
+      </div>
+      <div id="welcome-next" hidden>
+        <h2>Gotowe</h2>
+        <p class="hint">Strona pokazuje teraz podstawy: skalę, akordy i pianino, z polskimi nazwami dźwięków. Dla chórzystów przygotowaliśmy osobną ścieżkę nauki — od czytania partytury do kadencji.</p>
+        <div class="welcome-btns">
+          <a class="btn" href="learn.html#path=choir">Ścieżka „Dla chóru” →</a>
+          <button type="button" class="btn ghost" data-close>Zostań tutaj</button>
+        </div>
+      </div>
+    </section>
+
     <section class="card" id="scale-section">
       <h2><span class="step">1</span> Skala</h2>
       <div class="controls">
@@ -75,7 +123,7 @@
       </div>
     </section>
 
-    <section class="card" id="circle-section">
+    <section class="card" id="circle-section" data-lv="2">
       <h2>Koło kwintowe</h2>
       <div class="circle-layout">
         <div id="circle" class="circle-wrap"></div>
@@ -106,23 +154,23 @@
       </div>
       <p class="hint" id="diatonic-hint"></p>
       <div id="diatonic" class="diatonic"></div>
-      <details class="fitting" id="borrowed-wrap">
+      <details class="fitting" id="borrowed-wrap" data-lv="3">
         <summary id="borrowed-summary">Akordy zapożyczone z tonacji jednoimiennej</summary>
         <p class="hint" id="borrowed-hint"></p>
         <div id="borrowed" class="chips"></div>
       </details>
-      <details class="fitting" id="secdom-wrap">
+      <details class="fitting" id="secdom-wrap" data-lv="3">
         <summary>Dominanty wtrącone (V7/x) — akordy spoza skali, które prowadzą do akordów skali</summary>
         <p class="hint">Każdy akord durowy lub molowy w tonacji może mieć „własną” dominantę: akord septymowy kwintę wyżej, który do niego prowadzi — tak jak V7 prowadzi do I. Zawiera dźwięk spoza skali (zwykle podwyższony), który działa jak dźwięk prowadzący do prymy celu.</p>
         <div id="secdom" class="secdom"></div>
       </details>
-      <details class="fitting">
+      <details class="fitting" data-lv="3">
         <summary>Wszystkie akordy zbudowane wyłącznie z dźwięków tej skali</summary>
         <div id="fitting"></div>
       </details>
     </section>
 
-    <section class="card" id="prog-section">
+    <section class="card" id="prog-section" data-lv="2">
       <h2>Progresje akordów</h2>
       <div class="controls">
         <label class="field grow"><span>Progresja</span><select id="prog"></select></label>
@@ -143,7 +191,7 @@
       <div class="controls tight prog-tools" id="prog-tools"></div>
     </section>
 
-    <section class="card" id="analysis-section">
+    <section class="card" id="analysis-section" data-lv="3">
       <h2>Analiza: w jakiej tonacji są te akordy?</h2>
       <div class="controls">
         <label class="field grow"><span>Akordy (oddzielone spacjami, np. z piosenki)</span>
@@ -154,7 +202,7 @@
       <p class="hint">Strona sprawdza wszystkie tonacje dur i moll: w której mieści się najwięcej akordów (premiując tonikę na początku i końcu oraz V–I), a potem opisuje akordy cyframi rzymskimi. Akordy spoza tonacji są oznaczone — często to akordy zapożyczone lub dominanty wtrącone. Symbole: C, Cm, C7, Cmaj7, Cm7, Cm7b5, Cdim, Caug, Csus4, C/E; w notacji A H C także H i B = B♭.</p>
     </section>
 
-    <section class="card" id="harm-section">
+    <section class="card" id="harm-section" data-lv="3">
       <h2>Harmonizacja melodii</h2>
       <p class="hint" id="harm-hint">Zbuduj melodię z dźwięków wybranej skali (sekcja 1), a strona dobierze do każdej nuty akord, który ją zawiera — tak, by zacząć i skończyć na tonice, przed końcem mieć dominantę, a bas poruszał się naturalnie. Pod nutami są inne pasujące akordy: kliknij, aby zmienić wybór.</p>
       <div class="controls tight below-head" id="harm-keys"></div>
@@ -191,7 +239,7 @@
         <div>
           <div class="chord-name" id="chord-name"></div>
           <div class="fit" id="chord-fit"></div>
-          <div class="chord-scales" id="chord-scales"></div>
+          <div class="chord-scales" id="chord-scales" data-lv="3" data-not="choir"></div>
         </div>
         <div class="play-group">
           <button type="button" class="btn" id="play-chord" title="Zagraj akord">▶ Akord</button>
@@ -219,7 +267,7 @@
       </div>
     </section>
 
-    <section class="card" id="piano-section">
+    <section class="card" id="piano-section" data-not="guitar">
       <div class="card-head">
         <h2>Pianino</h2>
         <div class="legend" aria-hidden="true">
@@ -229,7 +277,7 @@
       <div class="controls tight below-head">
         <button type="button" class="btn ghost" id="input-piano">✎ Wklikaj akord</button>
         <label class="check"><input type="checkbox" id="piano-names"> nazwy wszystkich klawiszy</label>
-        <button type="button" class="btn ghost small" id="midi-btn" title="Zagraj akord na podłączonej klawiaturze MIDI — strona go rozpozna">🎹 Klawiatura MIDI</button>
+        <button type="button" class="btn ghost small" id="midi-btn" data-lv="3" data-not="choir" title="Zagraj akord na podłączonej klawiaturze MIDI — strona go rozpozna">🎹 Klawiatura MIDI</button>
         <span class="hint midi-status" id="midi-status"></span>
       </div>
       <div id="piano" class="instrument"></div>
@@ -237,7 +285,7 @@
       <p class="hint" id="piano-hint">Akord w wybranym przewrocie, od C3. Kliknij klawisz, aby go usłyszeć; najedź na klawisz, aby zobaczyć dźwięk z oktawą. Możesz też grać na klawiaturze komputera: A W S E D F T G Y H U J K = C4…C5 (Z / X — oktawa niżej / wyżej).</p>
     </section>
 
-    <section class="card" id="guitar-section">
+    <section class="card" id="guitar-section" data-lv="2" data-not="choir piano">
       <div class="card-head">
         <h2>Gitara</h2>
         <div class="controls tight">
@@ -260,6 +308,7 @@
         <div id="voicings" class="voicings"></div>
       </div>
     </section>
+    <p class="hint more-hint" id="more-hint" hidden></p>
   </main>
 
   <footer class="wrap site-footer">

@@ -36,7 +36,12 @@
   <main class="wrap">
     <section class="card">
       <h2>Ścieżka nauki</h2>
-      <p class="hint">Proponowana kolejność nauki teorii muzyki — od dźwięków i pięciolinii do harmonii i modusów. Każda lekcja prowadzi do odpowiedniego miejsca na stronie i do ćwiczeń; postęp liczy się z wyników ćwiczeń zapisanych w tej przeglądarce.</p>
+      <div class="seg path-tabs" id="path" role="radiogroup" aria-label="Wybór ścieżki">
+        <button type="button" data-value="general">Ścieżka ogólna</button>
+        <button type="button" data-value="choir">🎵 Dla chóru</button>
+      </div>
+      <p class="hint" id="path-intro-choir" hidden>Ścieżka dla chórzystów: jak czytać partyturę na cztery głosy, swoją linię w swoim kluczu, rytm, tonację, interwały i dyktando — w zakresie Twojego głosu. Głos wybierzesz w opcjach ćwiczenia („Głos”) albo na stronie głównej („Widok”). Postęp liczy się z wyników ćwiczeń zapisanych w tej przeglądarce.</p>
+      <p class="hint" id="path-intro-general">Proponowana kolejność nauki teorii muzyki — od dźwięków i pięciolinii do harmonii i modusów. Każda lekcja prowadzi do odpowiedniego miejsca na stronie i do ćwiczeń; postęp liczy się z wyników ćwiczeń zapisanych w tej przeglądarce.</p>
       <div class="lesson-progress"><div id="progress-bar"></div></div>
       <p class="hint" id="progress-text"></p>
       <ol id="lessons" class="lessons"></ol>

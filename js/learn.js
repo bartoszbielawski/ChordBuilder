@@ -19,7 +19,7 @@
     ['Skala durowa', 'Budowa 2 2 1 2 2 2 1, stopnie skali i ich nazwy (tonika, dominanta…).',
       [['Skala C-dur', './#t=C&s=major'], ['Skala na klawiaturze', 'quiz.html#ex=piano-scale&lv=0']], ['piano-scale', 'ear-degree']],
     ['Znaki przykluczowe i koło kwintowe', 'Kolejność krzyżyków i bemoli, wyznaczanie tonacji, tonacje równoległe i jednoimienne.',
-      [['Koło kwintowe i tabela tonacji', './#t=G&s=major']], ['key-sig', 'key-relations']],
+      [['Koło kwintowe i tabela tonacji', './#t=G&s=major&lv=2']], ['key-sig', 'key-relations']],
     ['Trójdźwięki', 'Dur, moll, zmniejszony, zwiększony — budowane z tercji.',
       [['Budowa akordu', './#r=C&c=maj']], ['build-chord', 'chord-name', 'ear-chord', 'piano-chord']],
     ['Akordy w tonacji', 'Akordy na stopniach skali, cyfry rzymskie (I, ii, iii, IV, V, vi, vii°).',
@@ -37,7 +37,27 @@
     ['Słuch: melodia', 'Dyktando melodyczne — zapis usłyszanej melodii stopniami skali.',
       [['Ćwiczenie', 'quiz.html#ex=dictation&lv=0']], ['dictation']],
     ['Modusy i akordy zapożyczone', 'Siedem modusów, dźwięki charakterystyczne, mieszanie trybów, dominanty wtrącone.',
-      [['Modusy', 'modes.html'], ['Analiza harmoniczna', './#t=C&s=major']], []],
+      [['Modusy', 'modes.html'], ['Analiza harmoniczna', './#t=C&s=major&lv=3']], []],
+  ];
+
+  // Ścieżka dla chóru (amatorski chór, cztery głosy z nut, z akompaniamentem).
+  const CHOIR_LESSONS = [
+    ['Partytura chóralna', 'Cztery głosy na dwóch pięcioliniach: sopran i alt w kluczu wiolinowym (sopran ma laseczki w górę, alt w dół), tenor i bas w basowym. W partyturze z osobną pięciolinią dla każdego głosu tenor śpiewa z klucza wiolinowego z ósemką pod spodem — oktawę niżej, niż wygląda. Akompaniament ma własne dwie pięciolinie.',
+      [['Słowniczek: partytura chóralna', 'glossary.html'], ['Słowniczek: klucze', 'glossary.html']], []],
+    ['Czytanie nut w swoim kluczu', 'Linie i pola w kluczu Twojego głosu, linie dodane nad i pod pięciolinią. Ćwiczenie pokazuje dźwięki z zakresu wybranego głosu.',
+      [['Ćwiczenie: czytanie nut', 'quiz.html#ex=read-note&lv=0']], ['read-note']],
+    ['Rytm i metrum', 'Wartości nut i pauz, kropka przy nucie, metrum 3/4 i 4/4 (najczęstsze w pieśniach) oraz alla breve (2/2). Licz miary razem z metronomem.',
+      [['Rytm', 'rhythm.html']], ['rhythm-values', 'rhythm-meter', 'rhythm-ear']],
+    ['W jakiej tonacji śpiewamy?', 'Znaki przykluczowe wyznaczają tonację; tonika to „do” — punkt, do którego melodia wraca. Ćwicz rozpoznawanie stopni po kadencji.',
+      [['Skala i tonacja', './#t=G&s=major']], ['key-sig', 'ear-degree']],
+    ['Interwały ze słuchu', 'Najpierw tercja, kwarta, kwinta i oktawa, potem sekundy i seksty — w górę i w dół. Pomaga trafiać w dźwięk po skoku w swojej linii.',
+      [['Interwały', 'intervals.html']], ['ear-interval']],
+    ['Dyktando melodyczne', 'Usłyszana krótka melodia zapisana stopniami skali (do re mi…). Ćwiczy pamięć melodii i czyste śpiewanie od toniki.',
+      [['Ćwiczenie', 'quiz.html#ex=dictation&lv=0']], ['dictation']],
+    ['Trójdźwięk i strojenie', 'Akord to pryma, tercja i kwinta — każdy głos śpiewa jeden z tych dźwięków (czasem dwa głosy ten sam). Tercję akordu durowego śpiewa się minimalnie niżej niż na fortepianie, a dźwięk prowadzący — raczej wyżej; wtedy akord „brzmi”.',
+      [['Budowa akordu', './#r=C&c=maj'], ['Przewroty', './#r=C&c=maj&i=1']], ['ear-chord', 'ear-inversion']],
+    ['Kadencje — zakończenia fraz', 'Doskonała (V–I) to „kropka” na końcu zwrotki, plagalna (IV–I) — „amen”, zawieszona (na V) — „przecinek” w środku. Słuchaj, czy fraza się kończy, czy prowadzi dalej.',
+      [['Kadencja doskonała', './#t=C&s=major&p=perfect'], ['Plagalna („amen”)', './#t=C&s=major&p=plagal'], ['Zawieszona', './#t=C&s=major&p=half']], []],
   ];
 
   const stats = loadJSON('chordbuilder.quiz', {});
@@ -49,8 +69,23 @@
     return { done: s.total >= 10 && pct >= 80, text: `${s.ok}/${s.total} (${pct}%)` };
   };
 
+  // Wybór ścieżki: #path=choir w adresie, inaczej wg profilu (chór → ścieżka dla chóru).
+  const fromHash = new URLSearchParams(location.hash.slice(1)).get('path');
+  let path = fromHash === 'choir' || fromHash === 'general' ? fromHash
+    : window.Common.getView().profile === 'choir' ? 'choir' : 'general';
+  window.Common.seg($('path'), path, (v) => { path = v; history.replaceState(null, '', '#path=' + v); render(); });
+  window.addEventListener('hashchange', () => {
+    const p = new URLSearchParams(location.hash.slice(1)).get('path');
+    if (p === 'choir' || p === 'general') { path = p; render(); }
+  });
+
+  function render() {
+  const list = path === 'choir' ? CHOIR_LESSONS : LESSONS;
+  $('path-intro-choir').hidden = path !== 'choir';
+  $('path-intro-general').hidden = path === 'choir';
+  for (const b of $('path').querySelectorAll('button[data-value]')) { const on = b.dataset.value === path; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }
   let doneCount = 0;
-  $('lessons').replaceChildren(...LESSONS.map(([title, desc, links, exs], i) => {
+  $('lessons').replaceChildren(...list.map(([title, desc, links, exs], i) => {
     const st = exs.map(status);
     const done = exs.length > 0 && st.every((x) => x.done);
     if (done) doneCount++;
@@ -64,8 +99,10 @@
           exs.map((id, k) => h('a', { href: `quiz.html#ex=${id}&lv=0`, class: 'lesson-ex' + (st[k].done ? ' ok' : '') },
             `${st[k].done ? '✓' : '✎'} `, h('span', {}, exTitle(id)), ' · ', h('span', {}, st[k].text))))));
   }));
-  const withEx = LESSONS.filter((l) => l[3].length).length;
+  const withEx = list.filter((l) => l[3].length).length;
   $('progress-text').textContent = `Zaliczone lekcje: ${doneCount} z ${withEx} (z ćwiczeniami). Lekcja jest zaliczona, gdy w każdym jej ćwiczeniu masz co najmniej 10 odpowiedzi i 80% poprawnych.`;
   $('progress-bar').style.width = `${(100 * doneCount) / withEx}%`;
+  }
+  render();
   window.Common.registerSW();
 })();

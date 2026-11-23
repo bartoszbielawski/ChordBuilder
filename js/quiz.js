@@ -142,6 +142,24 @@
   const ROOTS_MED = [...ROOTS_EASY, 'Bb', 'Eb', 'F#', 'Ab', 'Db'];
   const ROOTS_ALL = [...ROOTS_MED, 'C#', 'Gb', 'G#', 'D#', 'A#'];
 
+  /* ---------- Głos w chórze ---------- */
+
+  // Opcja wspólna dla ćwiczeń: zakres głosu. Zapisywana globalnie (prefs.voice), nie osobno dla ćwiczenia.
+  const VOICE_OPT = { id: 'voice', label: 'Głos', global: true,
+    values: [['all', 'dowolny'], ['S', 'sopran'], ['A', 'alt'], ['T', 'tenor'], ['B', 'bas']] };
+  const voiceRange = (o) => C.VOICE_RANGES[o && o.voice] || null;
+  /** Tonika (MIDI) o danej klasie wysokości, tak by w zakresie głosu zmieściło się `span` półtonów nad nią. */
+  function placeInVoice(pc, span, o, fallback) {
+    const r = voiceRange(o);
+    if (!r) return fallback;
+    let best = fallback, bestCost = Infinity;
+    for (let m = 24 + pc; m < 96; m += 12) {
+      const cost = Math.max(0, r[0] - m) + Math.max(0, m + span - r[1]);
+      if (cost < bestCost) { best = m; bestCost = cost; }
+    }
+    return best;
+  }
+
   /* ---------- Ćwiczenia ---------- */
 
   const EXERCISES = [
@@ -149,13 +167,14 @@
       id: 'ear-interval', group: 'Słuch', title: 'Interwały ze słuchu',
       desc: 'Usłyszysz dwa dźwięki — nazwij odległość między nimi.',
       levels: ['3 i 5, 4 i 8', '+ sekundy i seksty', 'wszystkie w oktawie'],
-      options: [{ id: 'dir', label: 'Sposób', values: [['up', 'w górę'], ['down', 'w dół'], ['harm', 'razem'], ['mix', 'losowo']] }],
+      options: [{ id: 'dir', label: 'Sposób', values: [['up', 'w górę'], ['down', 'w dół'], ['harm', 'razem'], ['mix', 'losowo']] }, VOICE_OPT],
       sets: [['b3', '3', '4', '5', '8'], ['2', 'b3', '3', '4', '5', 'b6', '6', '8'], ['b2', '2', 'b3', '3', '4', '#4', '5', 'b6', '6', 'b7', '7', '8']],
       make(level, o) {
         const set = this.sets[level];
         const sym = weighted(this.id, set);
         const iv = T.parseInterval(sym);
-        const low = randInt(52, 67);
+        const vr = voiceRange(o);
+        const low = vr ? randInt(vr[0], Math.max(vr[0], vr[1] - iv.semi)) : randInt(52, 67);
         const dir = o.dir === 'mix' ? pick(['up', 'down', 'harm']) : o.dir || 'up';
         const lowNote = noteOfMidi(low);
         const play = () => (dir === 'harm' ? seq([[low, low + iv.semi]]) : seq(dir === 'up' ? [low, low + iv.semi] : [low + iv.semi, low]));
@@ -243,13 +262,15 @@
       id: 'ear-degree', group: 'Słuch', title: 'Stopnie skali ze słuchu',
       desc: 'Najpierw kadencja ustala tonację, potem jeden dźwięk — który to stopień?',
       levels: ['1, 3, 5 (dźwięki toniki)', 'wszystkie stopnie dur', 'dur i moll'],
-      make(level) {
+      options: [VOICE_OPT],
+      make(level, o) {
         const minor = level === 2 && Math.random() < 0.5;
         const sc = T.buildScale(T.parseNote(pick(['C', 'D', 'Eb', 'F', 'G', 'A', 'Bb'])), minor ? 'minor' : 'major');
         const idxs = level === 0 ? [0, 2, 4] : [0, 1, 2, 3, 4, 5, 6];
         const i = weighted(this.id, idxs, (x) => (minor ? 'm' : 'M') + x);
-        const tm = 60 + sc.tonic.pc - (sc.tonic.pc > 6 ? 12 : 0);
-        const target = tm + sc.notes[i].iv.semi + (Math.random() < 0.3 && i < 4 ? 12 : 0);
+        const tm = placeInVoice(sc.tonic.pc, 12, o, 60 + sc.tonic.pc - (sc.tonic.pc > 6 ? 12 : 0));
+        const up = Math.random() < 0.3 && i < 4 && (!voiceRange(o) || tm + sc.notes[i].iv.semi + 12 <= voiceRange(o)[1]);
+        const target = tm + sc.notes[i].iv.semi + (up ? 12 : 0);
         const lbl = (k) => DEG_LABEL[sc.notes[k].iv.sym] || sc.notes[k].iv.sym;
         const play = () => {
           const t = playCadence(sc.tonic, minor);
@@ -310,7 +331,8 @@
       id: 'dictation', group: 'Słuch', title: 'Dyktando melodyczne',
       desc: 'Usłyszysz krótką melodię — zapisz ją stopniami skali.',
       levels: ['3 dźwięki, stopnie 1–5, krokami', '4 dźwięki, cała skala', '5 dźwięków ze skokami'],
-      make(level) {
+      options: [VOICE_OPT],
+      make(level, o) {
         const sc = T.buildScale(T.parseNote(pick(['C', 'D', 'F', 'G', 'Bb', 'A', 'Eb'])), 'major');
         const len = [3, 4, 5][level];
         const top = level === 0 ? 4 : 7; // indeksy 0..top
@@ -322,7 +344,7 @@
           const opts = steps.map((d) => prev + d).filter((x) => x >= 0 && x <= top);
           mel.push(pick(opts));
         }
-        const tm = 60 + sc.tonic.pc - (sc.tonic.pc > 6 ? 12 : 0);
+        const tm = placeInVoice(sc.tonic.pc, top === 7 ? 12 : sc.notes[top].iv.semi, o, 60 + sc.tonic.pc - (sc.tonic.pc > 6 ? 12 : 0));
         const midiAt = (k) => tm + (k === 7 ? 12 : sc.notes[k].iv.semi);
         const choices = Array.from({ length: top === 7 ? 8 : top + 1 }, (_, k) => ({ key: k, label: k === 7 ? '8 · do↑' : `${k + 1} · ${T.solfege(sc.tonic, sc.notes[k].note)}` }));
         const sounds = Object.fromEntries(choices.map((c) => [c.key, midiAt(c.key)]));
@@ -569,13 +591,20 @@
       id: 'read-note', group: 'Nuty', title: 'Czytanie nut',
       desc: 'Nazwij nutę na pięciolinii.',
       levels: ['na pięciolinii', '+ linie dodane', 'szeroki zakres'],
-      options: [{ id: 'clef', label: 'Klucz', values: [['treble', 'wiolinowy'], ['bass', 'basowy'], ['mix', 'oba']] }],
+      // Gdy wybrany jest głos, klucz wynika z niego — wtedy wybór klucza jest ukryty.
+      options: [{ id: 'clef', label: 'Klucz', values: [['treble', 'wiolinowy'], ['bass', 'basowy'], ['mix', 'oba']], hideIf: (o) => o.voice && o.voice !== 'all' }, VOICE_OPT],
       make(level, o) {
-        const clef = o.clef === 'mix' ? pick(['treble', 'bass']) : o.clef || 'treble';
+        const vr = voiceRange(o);
+        // Głos wyznacza klucz jak w partyturze chóralnej na dwóch pięcioliniach: S i A — wiolinowy, T i B — basowy.
+        const clef = vr ? (['S', 'A'].includes(o.voice) ? 'treble' : 'bass') : o.clef === 'mix' ? pick(['treble', 'bass']) : o.clef || 'treble';
         const bottom = clef === 'bass' ? 18 : 30;
-        const ext = [0, 3, 6][level];
-        const steps = [];
+        const ext = vr ? [0, 3, 8][level] : [0, 3, 6][level];
+        let steps = [];
         for (let s = bottom - ext; s <= bottom + 8 + ext; s++) steps.push(s);
+        if (vr) {
+          const inRange = steps.filter((s) => { const m = noteAt(s).midi; return m >= vr[0] && m <= vr[1]; });
+          if (inRange.length >= 3) steps = inRange;
+        }
         const step = weighted(this.id, steps, (s) => clef + s);
         const { note, midi } = noteAt(step);
         const letters = [0, 1, 2, 3, 4, 5, 6].map((l) => T.makeNote(l, 0));
@@ -593,7 +622,8 @@
             box.append(h('p', {}, `To ${nn(note)}${octaveName(note, midi)} — ${placeText(step, clef)} w kluczu ${clef === 'bass' ? 'basowym' : 'wiolinowym'}.`),
               h('p', { class: 'muted' }, clef === 'bass'
                 ? 'Klucz basowy (F): jego kropki obejmują 4. linię — to F3. Linie od dołu: G, H/B, D, F, A; pola: A, C, E, G.'
-                : 'Klucz wiolinowy (G) zawija się wokół 2. linii — to G4. Linie od dołu: E, G, H/B, D, F; pola: F, A, C, E.'));
+                : 'Klucz wiolinowy (G) zawija się wokół 2. linii — to G4. Linie od dołu: E, G, H/B, D, F; pola: F, A, C, E.'),
+              ...(o.voice === 'T' ? [h('p', { class: 'muted' }, 'Tenor: w partyturze na dwóch pięcioliniach zapisuje się go w kluczu basowym (razem z basem), a w osobnej partii — w kluczu wiolinowym z ósemką pod spodem, który brzmi oktawę niżej, niż wygląda.')] : []));
           },
         };
       },
@@ -943,7 +973,9 @@
   function optsFor(ex) {
     const saved = C.loadJSON('chordbuilder.quizopts', {});
     const o = {};
-    for (const opt of ex.options || []) o[opt.id] = (saved[ex.id] && saved[ex.id][opt.id]) || opt.values[0][0];
+    for (const opt of ex.options || []) {
+      o[opt.id] = opt.global ? (C.getView().voice || 'all') : (saved[ex.id] && saved[ex.id][opt.id]) || opt.values[0][0];
+    }
     return o;
   }
   function saveOpt(exId, key, value) {
@@ -952,11 +984,22 @@
     C.saveJSON('chordbuilder.quizopts', saved);
   }
 
+  // Zestaw „rozśpiewania” dla chórzystów: czytanie nut i słuch w zakresie własnego głosu, rytm, tonacja.
+  const CHOIR_SET = ['read-note', 'ear-interval', 'ear-degree', 'dictation', 'rhythm-ear', 'key-sig'];
+
   function renderMenu() {
-    const groups = [...new Set(EXERCISES.map((e) => e.group))];
-    $('menu').replaceChildren(...groups.map((g) => h('div', { class: 'quiz-group' },
+    const view = C.getView();
+    const groups = [...new Set(EXERCISES.map((e) => e.group))].map((g) => [g, EXERCISES.filter((e) => e.group === g), null]);
+    if (view.profile === 'choir') {
+      const vName = (C.VOICES.find(([id]) => id === view.voice) || [])[1];
+      groups.unshift(['Dla chóru', CHOIR_SET.map(exById),
+        vName ? `Ćwiczenia czytania nut i słuchu są dopasowane do zakresu głosu: ${vName}. Zmienisz to w opcjach ćwiczenia („Głos”).`
+          : 'Wybierz swój głos w opcjach ćwiczenia („Głos”), a dźwięki będą w jego zakresie.']);
+    }
+    $('menu').replaceChildren(...groups.map(([g, list, note]) => h('div', { class: 'quiz-group' + (note ? ' choir-group' : '') },
       h('h3', {}, g),
-      h('div', { class: 'quiz-tiles' }, EXERCISES.filter((e) => e.group === g).map((e) => {
+      note ? h('p', { class: 'hint' }, note) : null,
+      h('div', { class: 'quiz-tiles' }, list.map((e) => {
         const s = exStats(e.id);
         return h('button', {
           type: 'button', class: 'quiz-tile' + (state.ex === e.id ? ' active' : ''),
@@ -1046,9 +1089,14 @@
     const lv = $('ex-level');
     lv.replaceChildren(...ex.levels.map((l, i) => h('button', { type: 'button', 'data-value': i, class: i === state.level ? 'on' : '', 'aria-pressed': i === state.level, title: l }, ['Łatwy', 'Średni', 'Trudny'][i])));
     $('ex-level-desc').textContent = ex.levels[state.level];
-    $('ex-options').replaceChildren(...(ex.options || []).map((opt) => h('label', { class: 'field' }, h('span', {}, opt.label),
+    $('ex-options').replaceChildren(...(ex.options || []).filter((opt) => !(opt.hideIf && opt.hideIf(state.opts))).map((opt) => h('label', { class: 'field' }, h('span', {}, opt.label),
       (() => {
-        const sel = h('select', { onchange: (e) => { state.opts[opt.id] = e.target.value; saveOpt(ex.id, opt.id, e.target.value); next(); } });
+        const sel = h('select', { onchange: (e) => {
+          state.opts[opt.id] = e.target.value;
+          if (opt.global) C.savePref('voice', e.target.value === 'all' ? null : e.target.value);
+          else saveOpt(ex.id, opt.id, e.target.value);
+          next();
+        } });
         for (const [v, l] of opt.values) sel.append(new Option(l, v, false, state.opts[opt.id] === v));
         return sel;
       })())));

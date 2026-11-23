@@ -636,3 +636,14 @@ html.present .site-footer, html.present .settings .field:first-child { display: 
 .an-ev.ok { color: var(--ok); }
 .an-ev.no { color: var(--muted); }
 .an-warn { color: var(--text); }
+
+/* ---------- Widok: profil i poziom ---------- */
+html[data-level="1"] [data-lv="2"], html[data-level="1"] [data-lv="3"], html[data-level="2"] [data-lv="3"],
+html[data-profile="choir"] [data-not~="choir"], html[data-profile="piano"] [data-not~="piano"],
+html[data-profile="guitar"] [data-not~="guitar"] { display: none !important; }
+html:not([data-profile="choir"]) #voice-field { display: none; }
+.welcome { border: 2px solid var(--accent); }
+.welcome-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.more-hint { text-align: center; display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.more-hint[hidden] { display: none; }
+.path-tabs { margin: 4px 0 12px; }

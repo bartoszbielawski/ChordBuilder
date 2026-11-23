@@ -68,6 +68,104 @@
 
   const octaveName = (note, midi) => Math.floor((midi - note.acc) / 12) - 1;
 
+  /* ---------- Widok: profil użytkownika, poziom szczegółowości, głos w chórze ---------- */
+
+  // Profil decyduje, które instrumenty widać; poziom (1 podstawy, 2 więcej, 3 wszystko) — ile narzędzi.
+  // Sekcje oznacza się w HTML: data-lv="2|3" (od którego poziomu widać) i data-not="choir piano…"
+  // (w jakich profilach ukryć). Ukrywanie robi CSS na podstawie atrybutów <html data-level data-profile>.
+  const PROFILES = [['all', 'wszystko'], ['choir', 'śpiewam w chórze'], ['piano', 'gram na pianinie'], ['guitar', 'gram na gitarze']];
+  const VOICES = [['S', 'sopran'], ['A', 'alt'], ['T', 'tenor'], ['B', 'bas']];
+  // Typowe zakresy głosów chóru amatorskiego (MIDI): S C4–G5, A G3–D5, T C3–G4, B F2–D4.
+  const VOICE_RANGES = { S: [60, 79], A: [55, 74], T: [48, 67], B: [41, 62] };
+
+  function getView() {
+    const p = loadPrefs();
+    const profile = PROFILES.some(([id]) => id === p.profile) ? p.profile : null;
+    const level = [1, 2, 3].includes(p.level) ? p.level : (profile && profile !== 'all' ? 1 : 3);
+    const voice = VOICE_RANGES[p.voice] ? p.voice : null;
+    return { profile, level, voice };
+  }
+
+  /** Ustawia atrybuty widoku na <html>; minLevel — np. gdy link prowadzi do zaawansowanego narzędzia. */
+  function applyView(minLevel = 1) {
+    const v = getView();
+    const root = document.documentElement;
+    root.dataset.profile = v.profile || 'all';
+    root.dataset.level = String(Math.max(v.level, minLevel));
+    return v;
+  }
+
+  /**
+   * Podłącza (jeśli są na stronie) przełączniki #profile, #level, #voice i kartę powitalną #welcome.
+   * onChange(view, chosenProfile) — wołane po każdej zmianie (chosenProfile przy wyborze profilu).
+   */
+  function bindView(onChange = () => {}) {
+    const $ = (id) => document.getElementById(id);
+    const root = document.documentElement;
+    const sync = () => {
+      const v = getView();
+      if ($('profile')) $('profile').value = v.profile || 'all';
+      if ($('voice')) $('voice').value = v.voice || '';
+      if (levelSeg) levelSeg(root.dataset.level);
+      updateMoreHint();
+    };
+    const setLevel = (lv) => { savePref('level', lv); root.dataset.level = String(lv); sync(); onChange(getView()); };
+    const setProfile = (id) => {
+      savePref('profile', id);
+      savePref('level', id === 'all' ? 3 : 1);
+      applyView();
+      sync();
+      onChange(getView(), id);
+    };
+    let levelSeg = null;
+    if ($('profile')) {
+      $('profile').replaceChildren(...PROFILES.map(([id, label]) => new Option(label, id)));
+      $('profile').addEventListener('change', (e) => setProfile(e.target.value));
+    }
+    if ($('voice')) {
+      $('voice').replaceChildren(new Option('—', ''), ...VOICES.map(([id, label]) => new Option(label, id)));
+      $('voice').addEventListener('change', (e) => { savePref('voice', e.target.value || null); onChange(getView()); });
+    }
+    if ($('level')) {
+      seg($('level'), root.dataset.level, (v) => setLevel(+v));
+      levelSeg = (v) => { for (const b of $('level').querySelectorAll('button[data-value]')) { const on = b.dataset.value === String(v); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); } };
+    }
+    // Ile sekcji jest schowanych przez poziom — zachęta „Pokaż więcej”.
+    function updateMoreHint() {
+      const box = $('more-hint');
+      if (!box) return;
+      const lv = +root.dataset.level;
+      const hiddenCount = [...document.querySelectorAll('main > section[data-lv]')]
+        .filter((s) => +s.dataset.lv > lv && !(s.dataset.not || '').split(' ').includes(root.dataset.profile)).length;
+      box.hidden = !hiddenCount;
+      if (!hiddenCount) return;
+      box.replaceChildren(
+        h('span', {}, `Na wyższym poziomie jest więcej narzędzi (${hiddenCount}).`), ' ',
+        h('button', { type: 'button', class: 'btn ghost small', onclick: () => setLevel(Math.min(3, lv + 1)) }, 'Pokaż więcej'));
+    }
+    // Karta powitalna przy pierwszej wizycie (brak wybranego profilu).
+    const w = $('welcome');
+    if (w) {
+      w.hidden = !!getView().profile;
+      w.addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        if (b.dataset.profile) {
+          setProfile(b.dataset.profile);
+          if (b.dataset.profile === 'choir') { $('welcome-start').hidden = true; $('welcome-voice').hidden = false; }
+          else w.hidden = true;
+        } else if (b.dataset.voice !== undefined) {
+          savePref('voice', b.dataset.voice || null);
+          sync();
+          onChange(getView());
+          $('welcome-voice').hidden = true;
+          $('welcome-next').hidden = false;
+        } else if (b.dataset.close !== undefined) w.hidden = true;
+      });
+    }
+    sync();
+  }
+
   /** Pasek „Dostępna jest nowa wersja strony” z przyciskiem odświeżenia. */
   function showUpdateBar() {
     if (document.querySelector('.update-bar')) return;
@@ -222,7 +320,7 @@
   const semitones = (n) => n + ' ' + plural(n, 'półton', 'półtony', 'półtonów');
 
   global.Common = {
-    plural, semitones, showUpdateBar,
+    plural, semitones, showUpdateBar, getView, applyView, bindView, PROFILES, VOICES, VOICE_RANGES,
     h, loadPrefs, savePref, loadJSON, saveJSON, seg, NOTE_KEYS, DEFAULT_SPELLING,
     noteOfMidi, midiOf, octaveName, registerSW, pick, shuffle, connectMidi, computerPiano, midiFile, midiEvents, saveFile,
   };

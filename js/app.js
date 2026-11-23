@@ -34,7 +34,8 @@
   }
   function savePrefs() {
     try {
-      const p = {};
+      // Dopisz do istniejących ustawień (język, profil, poziom, głos zapisują inne moduły).
+      const p = JSON.parse(localStorage.getItem('chordbuilder.prefs') || '{}') || {};
       for (const k of PREF_KEYS) p[k] = state[k];
       localStorage.setItem('chordbuilder.prefs', JSON.stringify(p));
     } catch (e) { /* ignoruj */ }
@@ -1303,10 +1304,21 @@
   // localStorage chordbuilder.nosw = '1' — wyłącza SW (do pracy nad stroną).
   window.Common.registerSW();
 
+  // Widok (profil i poziom). Link do zaawansowanego narzędzia podnosi poziom na tę wizytę:
+  // melodia do harmonizacji (m=) → 3, wybrana progresja (p=) → 2, jawnie lv=2|3.
+  {
+    const hp = new URLSearchParams(location.hash.slice(1));
+    const minLevel = Math.max(hp.get('m') ? 3 : hp.get('p') && hp.get('p') !== 'pop' ? 2 : 1, +hp.get('lv') || 1);
+    window.Common.applyView(Math.min(3, minLevel));
+  }
   loadPrefs();
   const hadHash = location.hash.length > 1;
   loadHash();
   if (!hadHash) selectFirstChord();
   bind();
+  // Wybór profilu „chór” przełącza na polskie nazwy dźwięków (c, cis, b, h).
+  window.Common.bindView((view, chosen) => {
+    if (chosen === 'choir' && !(window.I18N && window.I18N.lang === 'en') && state.notation !== 'H') $('notation').querySelector('[data-value="H"]').click();
+  });
   render();
 })();
