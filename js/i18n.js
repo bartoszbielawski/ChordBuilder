@@ -92,7 +92,7 @@
     const d = D().data || {};
     for (const v of R.VALUES) if (d.values && d.values[v.id]) [v.name, v.restName] = d.values[v.id];
     for (const v of R.DOTTED) if (d.dotted && d.dotted[v.id]) v.name = d.dotted[v.id];
-    for (const m of R.METERS) if (d.meters && d.meters[m.id]) { m.desc = d.meters[m.id]; m.kind = (d.kinds || {})[m.kind] || m.kind; }
+    for (const m of R.METERS) if (d.meters && d.meters[m.id]) { m.desc = d.meters[m.id]; m.kind = (d.meterKinds || {})[m.id] || (d.kinds || {})[m.kind] || m.kind; }
   };
 
   /* ---------- Tłumaczenie tekstów ---------- */

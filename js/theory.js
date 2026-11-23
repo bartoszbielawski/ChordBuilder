@@ -333,7 +333,7 @@
     { id: 'sensitive', group: 'Durowe', name: 'vi–IV–I–V', steps: '6:min 4:maj 1:maj 5:maj',
       desc: 'Ta sama czwórka akordów co „pop”, ale zaczęta od vi — brzmi bardziej melancholijnie.' },
     { id: 'canon', group: 'Durowe', name: 'Kanon: I–V–vi–iii–IV–I–IV–V', steps: '1:maj 5:maj 6:min 3:min 4:maj 1:maj 4:maj 5:maj',
-      desc: 'Ciąg harmoniczny znany z Kanonu D-dur Pachelbela; schodzący bas co kwartę i sekundę.' },
+      desc: 'Ciąg harmoniczny znany z Kanonu D-dur Pachelbela; bas na przemian schodzi o kwartę i wznosi się o sekundę (w D-dur: D–A–H–Fis–G–D–G–A).' },
     { id: 'mixo', group: 'Durowe', name: 'Rock: I–♭VII–IV–I', steps: '1:maj b7:maj 4:maj 1:maj',
       desc: 'Brzmienie miksolidyjskie: akord na obniżonym VII stopniu, częsty w rocku.' },
     { id: 'minorPop', group: 'Molowe', name: 'i–♭VI–♭III–♭VII', steps: '1:min b6:maj b3:maj b7:maj',
@@ -351,10 +351,10 @@
     { id: 'turnaround', group: 'Jazz i blues', name: 'Turnaround: I–vi–ii–V', steps: '1:maj7 6:m7 2:m7 5:7',
       desc: 'Krótki ciąg prowadzący z powrotem do toniki, np. na końcu chorusu.' },
     { id: 'circle', group: 'Durowe', name: 'Ciąg kwintowy: I–IV–vii°–iii–vi–ii–V–I', steps: '1:maj 4:maj 7:dim 3:min 6:min 2:min 5:maj 1:maj',
-      desc: 'Progresja „po kole kwintowym”: bas schodzi co kwintę (wznosi się co kwartę) przez wszystkie stopnie skali — klasyczna sekwencja barokowa.' },
+      desc: 'Progresja „po kole kwintowym”: bas schodzi co kwintę (wznosi się co kwartę) przez wszystkie stopnie skali — raz, między IV a vii°, o kwintę zmniejszoną, żeby nie wyjść poza tonację. Klasyczna sekwencja barokowa.' },
     { id: 'royal', group: 'Durowe', name: '„Royal Road”: IV–V–iii–vi', steps: '4:maj 5:maj 3:min 6:min',
       desc: 'Progresja bardzo popularna w muzyce japońskiej (J-pop, anime) — zawieszona, tęskna, unika toniki.' },
-    { id: 'perfect', group: 'Kadencje', name: 'Doskonała (autentyczna): IV–V7–I', steps: '1:maj 4:maj 5:7 1:maj',
+    { id: 'perfect', group: 'Kadencje', name: 'Doskonała (autentyczna): V7–I', steps: '1:maj 4:maj 5:7 1:maj',
       desc: 'Najmocniejsze zakończenie: dominanta septymowa rozwiązuje się na tonikę — dźwięk prowadzący idzie o półton w górę, septyma o sekundę w dół.' },
     { id: 'plagal', group: 'Kadencje', name: 'Plagalna („amen”): IV–I', steps: '1:maj 4:maj 4:maj 1:maj',
       desc: 'Subdominanta prosto do toniki — łagodne, „kościelne” zakończenie (amen na końcu hymnów).' },
@@ -547,9 +547,10 @@
    */
   const SOLFA = ['do', 're', 'mi', 'fa', 'sol', 'la', 'si'];
   function solfege(tonic, note) {
+    const names = LANG === 'en' ? ['do', 're', 'mi', 'fa', 'sol', 'la', 'ti'] : SOLFA;
     const deg = mod(note.letter - tonic.letter, 7);
     const diff = mod(note.pc - tonic.pc - MAJOR_SEMI[deg] + 6, 12) - 6;
-    return SOLFA[deg] + (diff > 0 ? '♯'.repeat(diff) : '♭'.repeat(-diff));
+    return names[deg] + (diff > 0 ? '♯'.repeat(diff) : '♭'.repeat(-diff));
   }
 
   /* ---------- Analiza: symbol akordu → akord, akordy → tonacja ---------- */

@@ -201,7 +201,21 @@
     return a;
   }
 
+  /**
+   * Polska odmiana rzeczownika po liczebniku: plural(2, 'półton', 'półtony', 'półtonów') → 'półtony'.
+   * Dla ułamków (1,5) zwraca `frac` (domyślnie formę `few`, np. „1,5 ćwierćnuty”).
+   */
+  function plural(n, one, few, many, frac = few) {
+    if (!Number.isInteger(n)) return frac;
+    const a = Math.abs(n);
+    if (a === 1) return one;
+    if (a % 10 >= 2 && a % 10 <= 4 && (a % 100 < 12 || a % 100 > 14)) return few;
+    return many;
+  }
+  const semitones = (n) => n + ' ' + plural(n, 'półton', 'półtony', 'półtonów');
+
   global.Common = {
+    plural, semitones,
     h, loadPrefs, savePref, loadJSON, saveJSON, seg, NOTE_KEYS, DEFAULT_SPELLING,
     noteOfMidi, midiOf, octaveName, registerSW, pick, shuffle, connectMidi, computerPiano, midiFile, midiEvents, saveFile,
   };

@@ -233,7 +233,7 @@
       h('dl', { class: 'info-dl' },
         h('dt', {}, 'Brzmi'), h('dd', {}, `${kname(concert)} (${sigTxt(sigC)})`),
         h('dt', {}, 'Zapis dla instrumentu'), h('dd', {}, h('b', {}, `${kname(written)} (${sigTxt(sigW)})`)),
-        h('dt', {}, 'Przesunięcie zapisu'), h('dd', {}, `${desc.name} w górę (${iv.semi} półtonów)`),
+        h('dt', {}, 'Przesunięcie zapisu'), h('dd', {}, `${desc.name} w górę (${window.Common.semitones(iv.semi)})`),
         h('dt', {}, 'Reguła znaków'), h('dd', {}, `${sigW.count === sigC.count && sigW.type === sigC.type ? 'bez zmiany' : `${sigTxt(sigC)} → ${sigTxt(sigW)}`}`)),
       h('div', { class: 'tr-staves' },
         h('div', {}, h('p', { class: 'hint' }, 'Brzmienie (dźwięki rzeczywiste)'), scale(concert, sigC)),

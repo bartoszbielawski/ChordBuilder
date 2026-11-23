@@ -5,7 +5,7 @@
  * Czcionki Google: najpierw pamięć (nie zmieniają się).
  * Po zmianie listy plików podbij VERSION.
  */
-const VERSION = 'v8';
+const VERSION = 'v9';
 const CACHE = 'chordbuilder-' + VERSION;
 const ASSETS = [
   './',

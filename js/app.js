@@ -266,7 +266,7 @@
       h('span', { class: 'sm' }, sn.iv.semi + ' pt')));
       const next = i + 1 < sc.notes.length ? sc.notes[i + 1].iv.semi : 12;
       const step = next - sn.iv.semi;
-      items.push(h('span', { class: 'step-gap' + (step === 1 ? ' half' : step >= 3 ? ' wide' : ''), title: step + ' półtonów' }, '+' + step));
+      items.push(h('span', { class: 'step-gap' + (step === 1 ? ' half' : step >= 3 ? ' wide' : ''), title: window.Common.semitones(step) }, '+' + step));
     });
     items.push(h('span', { class: 'scale-note octave' },
       h('span', { class: 'deg' }, '8'), h('span', { class: 'nm' }, nn(sc.tonic)), h('span', { class: 'sm' }, '12 pt')));
@@ -298,7 +298,7 @@
       rows.push(['Znaki przykluczowe', sig.count
         ? `${sig.count}${sig.type === 'sharp' ? '♯' : '♭'} — ${sig.notes.map(nn).join(', ')}` + (sig.theoretical ? ' (tonacja teoretyczna — w praktyce zapisuje się ją enharmonicznie)' : '')
         : 'brak']);
-      if (sc.scale.id !== 'major') rows.push(['Tonacja macierzysta', h('span', {}, `te same znaki co ${parentName}`, ['harmonicMinor', 'melodicMinor', 'phrygianDominant', 'blues', 'minorPentatonic', 'majorPentatonic'].includes(sc.scale.id) ? '; pozostałe zmiany jako znaki przygodne przy nutach' : '')]);
+      if (sc.scale.id !== 'major') rows.push(['Tonacja macierzysta', h('span', {}, `te same znaki co ${parentName}`, ['harmonicMinor', 'melodicMinor', 'phrygianDominant', 'blues'].includes(sc.scale.id) ? '; pozostałe zmiany jako znaki przygodne przy nutach' : '')]);
     } else {
       rows.push(['Znaki przykluczowe', 'skala spoza systemu dur–moll — zapisuje się ją znakami przygodnymi']);
     }
@@ -359,7 +359,7 @@
     const par = `${nn(sc.tonic)} ${minorThird ? 'durowej' : 'molowej'}`;
     $('borrowed-summary').textContent = `Akordy zapożyczone z równoległej ${minorThird ? 'durowej' : 'molowej'} (${list.length})`;
     $('borrowed-hint').replaceChildren((minorThird
-      ? `Akordy ze skali ${par} (ta sama tonika), których nie ma w bieżącej skali. W molu najczęściej pożycza się durową dominantę V i tonikę I na zakończenie (tercja pikardyjska).`
+      ? `Akordy ze skali ${par} (ta sama tonika), których nie ma w bieżącej skali. W molu najczęściej pożycza się durową tonikę I na zakończenie (tercja pikardyjska). Durowa dominanta V pochodzi z molowej harmonicznej i należy do zwykłej harmonii molowej.`
       : `Akordy ze skali ${par} (ta sama tonika), których nie ma w bieżącej skali — tzw. mieszanie trybów. Najczęstsze: iv (molowa subdominanta), ♭VI i ♭VII (rock, muzyka filmowa), ♭III. Dodają „ciemny” odcień bez zmiany tonacji.`)
       , ' ', 'Kliknij akord, aby zobaczyć jego budowę.');
     $('borrowed').replaceChildren(...list.map((d) => h('button', {

@@ -36,10 +36,11 @@
   }
 
   // Metrum: beats — liczba miar, unit — wartość miary (w szesnastkach), accents — siła miar.
+  // kind — wg polskiej terminologii: proste (jeden akcent mocny), złożone (połączenie jednakowych prostych), nieregularne.
   const METERS = [
     { id: '2/4', beats: 2, unit: 4, accents: [2, 0], kind: 'proste', desc: 'Dwie ćwierćnuty w takcie: mocna – słaba. Marsz, polka.' },
     { id: '3/4', beats: 3, unit: 4, accents: [2, 0, 0], kind: 'proste', desc: 'Trzy ćwierćnuty: mocna – słaba – słaba. Walc, mazurek, polonez.' },
-    { id: '4/4', beats: 4, unit: 4, accents: [2, 0, 1, 0], kind: 'proste', desc: 'Cztery ćwierćnuty: mocna – słaba – średnia – słaba. Najczęstsze metrum w muzyce rozrywkowej (oznaczane też C).' },
+    { id: '4/4', beats: 4, unit: 4, accents: [2, 0, 1, 0], kind: 'złożone', desc: 'Cztery ćwierćnuty: mocna – słaba – średnia – słaba. Najczęstsze metrum w muzyce rozrywkowej (oznaczane też C).' },
     { id: '2/2', beats: 2, unit: 8, accents: [2, 0], kind: 'proste', desc: 'Alla breve: dwie półnuty w takcie (oznaczane też ¢) — liczymy „na dwa”, choć nut jest tyle co w 4/4.' },
     { id: '3/8', beats: 3, unit: 2, accents: [2, 0, 0], kind: 'proste', desc: 'Trzy ósemki: mocna – słaba – słaba; szybkie, lekkie (często liczone „na raz”).' },
     { id: '6/8', beats: 6, unit: 2, accents: [2, 0, 0, 1, 0, 0], kind: 'złożone', desc: 'Sześć ósemek w dwóch grupach po trzy: wyczuwamy dwie miary (ćwierćnuty z kropką). Kołysanki, barkarole, tarantela.' },

@@ -169,7 +169,7 @@
             I.renderMelody(st, [[{ midi: low, note: lowNote, role: 'root' }], [{ midi: low + iv.semi, note: top, role: 'third' }]], {
               labels: [nn(lowNote), nn(top)], onColumn: (i) => Sound.play([i ? low + iv.semi : low]),
             });
-            box.append(h('p', {}, `${nn(lowNote)} → ${nn(top)}: ${ivInfo(sym).name}, ${iv.semi} półtonów. `, h('span', { class: 'muted' }, T.consonance(ivInfo(sym)).name)), st);
+            box.append(h('p', {}, `${nn(lowNote)} → ${nn(top)}: ${ivInfo(sym).name}, ${C.semitones(iv.semi)}. `, h('span', { class: 'muted' }, T.consonance(ivInfo(sym)).name)), st);
           },
         };
       },
@@ -266,6 +266,8 @@
             });
             const tips = ['tonika — punkt spoczynku, nic nie „ciągnie” dalej', 'supertonika — chce zejść do toniki', 'medianta — stabilna, „kolor” trybu (dur/moll)',
               'subdominanta — ciąży w dół do tercji', 'dominanta — stabilna, ale otwarta', 'submedianta — ciąży w dół do kwinty', 'dźwięk prowadzący — silnie ciągnie w górę do toniki'];
+            // W molu naturalnym VII stopień leży cały ton pod toniką — to subtonika, nie dźwięk prowadzący.
+            if (minor) tips[6] = 'subtonika — cały ton pod toniką, ciągnie do niej słabiej niż dźwięk prowadzący';
             box.append(h('p', {}, `To ${nn(sc.notes[i].note)}: ${lbl(i)} stopień (${tips[i]}).`), st,
               h('p', { class: 'muted' }, 'Wskazówka: zaśpiewaj w myślach drogę od usłyszanego dźwięku do toniki — liczba kroków podpowie stopień.'));
           },
@@ -322,8 +324,7 @@
         }
         const tm = 60 + sc.tonic.pc - (sc.tonic.pc > 6 ? 12 : 0);
         const midiAt = (k) => tm + (k === 7 ? 12 : sc.notes[k].iv.semi);
-        const SOL = ['do', 're', 'mi', 'fa', 'sol', 'la', 'si'];
-        const choices = Array.from({ length: top === 7 ? 8 : top + 1 }, (_, k) => ({ key: k, label: k === 7 ? '8 · do↑' : `${k + 1} · ${SOL[k]}` }));
+        const choices = Array.from({ length: top === 7 ? 8 : top + 1 }, (_, k) => ({ key: k, label: k === 7 ? '8 · do↑' : `${k + 1} · ${T.solfege(sc.tonic, sc.notes[k].note)}` }));
         const sounds = Object.fromEntries(choices.map((c) => [c.key, midiAt(c.key)]));
         const play = () => {
           const t = playCadence(sc.tonic, false, 0.5);
@@ -372,7 +373,7 @@
             : h('span', {}, 'Ile ', h('b', {}, R.valueName(b) + ' '), h('span', { class: 'rh-g' }, R.glyph(b)), ' trwa tyle, co ', h('b', {}, R.valueName(a) + ' '), h('span', { class: 'rh-g' }, R.glyph(a)), '?'),
           answers: opts.sort((x, y) => x - y).map((x) => ({ key: String(x), label: String(x) })),
           correct: String(n), item: a.v + (a.rest ? 'r' : '') + '/' + b.v,
-          explain: (box) => box.append(h('p', {}, `${cap(R.valueName(a))} = ${R.units(a)} szesnastek, ${R.valueName(b)} = ${R.units(b)} → ${R.units(a)} : ${R.units(b)} = ${n}.`,
+          explain: (box) => box.append(h('p', {}, `${cap(R.valueName(a))} = ${R.units(a)} ${C.plural(R.units(a), 'szesnastka', 'szesnastki', 'szesnastek')}, ${R.valueName(b)} = ${R.units(b)} → ${R.units(a)} : ${R.units(b)} = ${n}.`,
             a.v.endsWith('.') ? ' ' : '', a.v.endsWith('.') ? 'Kropka wydłuża wartość o połowę.' : '', a.rest ? ' ' : '', a.rest ? 'Pauza trwa tyle samo co nuta o tej wartości.' : '')),
         };
       },
@@ -395,8 +396,8 @@
           play: () => { stopRhythm(); stopRhythm = R.playRhythm(bar, meter, 80, { countIn: false }); },
           explain: (box) => {
             const total = bar.reduce((s2, e) => s2 + R.units(e), 0);
-            box.append(h('p', {}, `${bar.map((e) => R.valueName(e)).join(' + ')} = ${String(total / 4).replace('.', ',')} ćwierćnuty → ${id}`, ' ',
-              id === '3/8' ? '(3 ósemki).' : `(${meter.beats} ${meter.unit === 4 ? 'ćwierćnuty' : 'ósemki'}).`),
+            box.append(h('p', {}, `${bar.map((e) => R.valueName(e)).join(' + ')} = ${String(total / 4).replace('.', ',')} ${C.plural(total / 4, 'ćwierćnuta', 'ćwierćnuty', 'ćwierćnut')} → ${id}`, ' ',
+              id === '3/8' ? '(3 ósemki).' : `(${meter.beats} ${meter.unit === 4 ? C.plural(meter.beats, 'ćwierćnuta', 'ćwierćnuty', 'ćwierćnut') : C.plural(meter.beats, 'ósemka', 'ósemki', 'ósemek')}).`),
             h('p', { class: 'muted' }, 'Uwaga: takt 3/4 i 6/8 trwa tyle samo, ale inaczej się go akcentuje (3 × ćwierćnuta vs 2 × ćwierćnuta z kropką).'));
           },
         };
@@ -718,7 +719,7 @@
             const st = staffBox();
             I.renderMelody(st, [notes], { gap: 60 });
             box.append(h('p', {}, `${T.chordSymbol(chord, state.notation)} — akord ${chord.type.name}: wzór ${chord.notes.map((n) => n.info.symbol).join('–')}, półtony od prymy ${chord.notes.map((n) => n.iv.semi).join('–')}.`), st,
-              h('p', { class: 'muted' }, 'Pamiętaj o pisowni: akord buduje się co tercję, więc nazwy literowe idą co drugą literę (np. C–E–G–B, E♭–G–B♭–D♭) — dlatego np. D♯ zamiast E♭ jest błędem, choć brzmi tak samo.'));
+              h('p', { class: 'muted' }, `Pamiętaj o pisowni: akord buduje się co tercję, więc nazwy literowe idą co drugą literę (np. ${['C', 'E', 'G', 'B'].map((k) => nn(T.parseNote(k))).join('–')}, ${['Eb', 'G', 'Bb', 'Db'].map((k) => nn(T.parseNote(k))).join('–')}) — dlatego np. ${nn(T.parseNote('D#'))} zamiast ${nn(T.parseNote('Eb'))} jest błędem, choć brzmi tak samo.`));
           },
         };
       },
@@ -895,7 +896,7 @@
             box.append(fb);
           },
           explain: (box) => {
-            box.append(h('p', {}, `${nn(note)} na strunie ${6 - string} (${sName(string)}) to próg ${fret}${fret + 12 <= 12 ? ` (i ${fret + 12})` : ''} — od pustej struny ${sName(string)} liczymy ${fret} półtonów w górę.`),
+            box.append(h('p', {}, `${nn(note)} na strunie ${6 - string} (${sName(string)}) to próg ${fret}${fret + 12 <= 12 ? ` (i ${fret + 12})` : ''} — od pustej struny ${sName(string)} liczymy ${C.semitones(fret)} w górę.`),
               h('p', { class: 'muted' }, 'Wskazówki: 12. próg to ta sama nazwa co pusta struna (oktawa wyżej). Ten sam dźwięk co na 5. progu jest na następnej (cieńszej) pustej strunie — poza struną G, gdzie trzeba wziąć 4. próg. Na szarych kropkach — ten sam dźwięk na innych strunach.'));
           },
         };

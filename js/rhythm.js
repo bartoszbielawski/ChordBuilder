@@ -77,7 +77,7 @@
       ...st.bar.map((e) => h('span', { class: 'rh-g big' }, R.glyph(e))), h('span', { class: 'rh-barline' }, '|'));
     $('fill').style.width = Math.min(100, (100 * used) / need) + '%';
     const left = need - used;
-    $('bar-msg').textContent = left === 0 ? '✓ Takt pełny!' : `Brakuje jeszcze ${left} szesnastek (= ${String(left / 4).replace('.', ',')} ćwierćnuty).`;
+    $('bar-msg').textContent = left === 0 ? '✓ Takt pełny!' : `Brakuje jeszcze ${left} ${left === 1 ? 'szesnastki' : 'szesnastek'} (= ${String(left / 4).replace('.', ',')} ${window.Common.plural(left / 4, 'ćwierćnuta', 'ćwierćnuty', 'ćwierćnut')}).`;
   }
 
   function bind() {
