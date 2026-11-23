@@ -410,6 +410,58 @@
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('Bb'))), 'F7');
       eq(T.chordSymbol(T.secondaryDominant(T.parseNote('E'))), 'B7');
     }],
+
+    /* ---------- Trudna pisownia (interwały nazywane z liter, nie z półtonów) ---------- */
+    ['Trudne skale: C♭-dur, f♯ i a♭ harmoniczna, d♯ melodyczna', (T, eq) => {
+      eq(scaleNames(T, 'Cb', 'major'), 'C♭ D♭ E♭ F♭ G♭ A♭ B♭');
+      eq(scaleNames(T, 'F#', 'harmonicMinor'), 'F♯ G♯ A B C♯ D E♯');
+      eq(scaleNames(T, 'Ab', 'harmonicMinor'), 'A♭ B♭ C♭ D♭ E♭ F♭ G');
+      eq(scaleNames(T, 'D#', 'melodicMinor'), 'D♯ E♯ F♯ G♯ A♯ B♯ C♯♯');
+    }],
+    ['Interwały enharmoniczne nazywane po literach', (T, eq) => {
+      const iv = (a, b) => T.intervalBetween(T.parseNote(a), T.parseNote(b));
+      eq(iv('C', 'F#').name, 'kwarta zwiększona (tryton)');
+      eq(iv('C', 'Gb').name, 'kwinta zmniejszona (tryton)');
+      eq(iv('C#', 'F').name, 'kwarta zmniejszona');
+      eq(iv('C', 'E#').name, 'tercja zwiększona');
+      eq(iv('Cb', 'Bb').name, 'septyma wielka');
+      eq(iv('C', 'D#').name, 'sekunda zwiększona');
+      eq(iv('C', 'Bbb').name, 'septyma zmniejszona');
+    }],
+    ['Przewrót interwału: liczby do 9, półtony do 12, dwukrotny przewrót wraca', (T, eq, ok) => {
+      for (const iv of T.INTERVALS.filter((x) => x.deg >= 1 && x.deg <= 8)) {
+        const inv = T.invertInterval(iv.deg, iv.semi);
+        ok(inv.deg + (iv.deg === 1 ? 1 : iv.deg) === 9 || (iv.deg === 1 && inv.deg === 8), `${iv.sym}: liczba`);
+        ok(inv.semi + iv.semi === 12, `${iv.sym}: półtony`);
+        const back = T.invertInterval(inv.deg, inv.semi);
+        eq(back.name, iv.info.name, `${iv.sym}: dwukrotny przewrót`);
+      }
+      // Interwał złożony: najpierw sprowadzony do prostego (nona wielka → septyma mała).
+      eq(T.invertInterval(9, 14).name, 'septyma mała');
+    }],
+    ['Akordy: pisownia co tercję, przewrót zachowuje dźwięki, rozpoznawanie zwraca akord', (T, eq, ok) => {
+      const roots = ['C', 'C#', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+      for (const t of T.CHORD_TYPES.filter((x) => ['triad', 'seventh'].includes(x.group) && !/sus/.test(x.id))) {
+        for (const r of roots) {
+          const c = T.buildChord(T.parseNote(r), t.id);
+          const root = c.root.letter;
+          ok(c.notes.every((n) => T.mod(n.note.letter - root, 7) === T.mod(n.iv.deg - 1, 7)), `${r}${t.symbol}: litery`);
+          for (let i = 0; i < c.notes.length; i++) {
+            const pcs = new Set(T.inversion(c, i).map((n) => n.note.pc));
+            ok(pcs.size === c.pcs.size && [...c.pcs].every((p) => pcs.has(p)), `${r}${t.symbol} przewrót ${i}`);
+          }
+          const midis = T.inversion(c, 0).map((n) => 48 + c.root.pc + n.semiAbs);
+          ok(T.recognize(midis).some((x) => x.rootPc === c.root.pc && x.type.id === t.id), `${r}${t.symbol}: rozpoznanie`);
+        }
+      }
+    }],
+    ['Analiza tonacji podaje przesłanki', (T, eq, ok) => {
+      const k = T.analyzeKey(['Dm7', 'G7', 'Cmaj7'].map((s) => T.parseChordSymbol(s).chord))[0];
+      eq(T.noteName(k.tonic) + ' ' + k.mode, 'C major');
+      ok(k.evidence.some((e) => e.ok && /V–I/.test(e.text)), 'kadencja V–I');
+      const m = T.analyzeKey(['Am', 'Dm', 'E7', 'Am'].map((s) => T.parseChordSymbol(s).chord))[0];
+      eq(T.noteName(m.tonic) + ' ' + m.mode, 'A minor');
+    }],
   ];
 
   /** Uruchamia testy; zwraca listę wyników { name, ok, errors[] }. */

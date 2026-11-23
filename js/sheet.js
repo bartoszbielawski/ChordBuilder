@@ -119,18 +119,5 @@
   }
   $('print').addEventListener('click', () => window.print());
 
-  let noSW = false;
-  try { noSW = localStorage.getItem('chordbuilder.nosw') === '1'; } catch (e) { /* ignoruj */ }
-  if (!noSW && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-    // Nowa wersja service workera przejęła stronę → przeładuj raz, by wszystkie pliki były z tej samej wersji.
-    if (navigator.serviceWorker.controller) {
-      let reloaded = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (reloaded) return;
-        reloaded = true;
-        location.reload();
-      });
-    }
-  }
+  window.Common.registerSW();
 })();

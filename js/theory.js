@@ -636,16 +636,27 @@
         });
         let score = fit * 10;
         const isTonic = (c) => c.root.pc === tonic.pc && (mode === 'major' ? !c.type.intervals.some((i) => i.semi === 3) : c.type.intervals.some((i) => i.deg === 3 && i.semi === 3));
-        if (isTonic(chords[0])) score += 6;
-        if (isTonic(chords[chords.length - 1])) score += 7;
-        if (chords.some(isTonic)) score += 2;
-        else score -= 6;
-        // V → I na końcu wzmacnia tonację
         const n = chords.length;
-        if (n >= 2 && isTonic(chords[n - 1]) && mod(chords[n - 2].root.pc - tonic.pc, 12) === 7) score += 3;
+        // evidence — przesłanki za tą tonacją (ok: true) i przeciw (ok: false), do pokazania uczniowi.
+        const evidence = [];
+        const first = isTonic(chords[0]), last = isTonic(chords[n - 1]), any = chords.some(isTonic);
+        // V → I na końcu wzmacnia tonację
+        const cadence = n >= 2 && last && mod(chords[n - 2].root.pc - tonic.pc, 12) === 7;
+        if (first) score += 6;
+        if (last) score += 7;
+        if (any) score += 2;
+        else score -= 6;
+        if (cadence) score += 3;
+        if (fit === n) evidence.push({ ok: true, text: tr('wszystkie akordy należą do tonacji', 'all chords belong to the key') });
+        if (first) evidence.push({ ok: true, text: tr('zaczyna się od toniki', 'starts on the tonic') });
+        if (last) evidence.push({ ok: true, text: tr('kończy się na tonice', 'ends on the tonic') });
+        if (cadence) evidence.push({ ok: true, text: tr('kadencja V–I na końcu', 'V–I cadence at the end') });
+        if (!any) evidence.push({ ok: false, text: tr('brak akordu tonicznego', 'no tonic chord') });
+        else if (!last) evidence.push({ ok: false, text: tr('nie kończy się na tonice', 'does not end on the tonic') });
+        if (any && !cadence) evidence.push({ ok: false, text: tr('brak kadencji V–I', 'no V–I cadence') });
         // tonacje z mniejszą liczbą znaków lekko premiowane (enharmonia: Gb vs F#)
         score -= Math.abs(buildScale(mode === 'major' ? tonic : majorTonic, 'major').notes.reduce((a, x) => a + x.note.acc, 0)) * 0.05;
-        out.push({ tonic, mode, fit, total: n, score, analysis });
+        out.push({ tonic, mode, fit, total: n, score, analysis, evidence });
       }
     }
     // Usuń enharmoniczne duplikaty (F♯-dur / G♭-dur) — zostaw lepszy wynik.

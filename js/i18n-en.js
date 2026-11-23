@@ -106,11 +106,11 @@
     'Pryma, kwarta, kwinta i oktawa są czyste; sekundy, tercje, seksty i septymy — małe lub wielkie.': 'Unisons, fourths, fifths and octaves are <b>perfect</b>; seconds, thirds, sixths and sevenths are <b>minor or major</b>.',
     'ChordBuilder · strona główna · kod na GitHubie': 'ChordBuilder · <a href="./">home</a> · <a href="https://github.com/bartoszbielawski/ChordBuilder">code on GitHub</a>',
     '1 Od najjaśniejszego do najciemniejszego': '<span class="step">1</span> From brightest to darkest',
-    'Wszystkie modusy od tej samej toniki (modusy równoległe). Każdy kolejny wiersz obniża dokładnie jeden dźwięk o półton — w kolejności koła kwintowego: 4, 7, 3, 6, 2, 5. Fioletem zaznaczono dźwięk charakterystyczny modusu.':
-      'All modes on the same tonic (<b>parallel</b> modes). Each row lowers exactly <b>one</b> note by a semitone — in circle-of-fifths order: 4, 7, 3, 6, 2, 5. The characteristic note of each mode is marked in purple.',
+    'Wszystkie modusy od tej samej toniki (modusy równoległe). Każdy kolejny wiersz obniża dokładnie jeden dźwięk o półton — w kolejności koła kwintowego: 4, 7, 3, 6, 2, 5. Fioletem zaznaczono dźwięk charakterystyczny modusu. Taka kolejność „jasności” to wygodny model (im więcej obniżonych stopni względem durowej, tym ciemniej), a nie prawo — odbiór zależy też od rejestru, harmonii, barwy i melodii.':
+      'All modes on the same tonic (<b>parallel</b> modes). Each row lowers exactly <b>one</b> note by a semitone — in circle-of-fifths order: 4, 7, 3, 6, 2, 5. The characteristic note of each mode is marked in purple. This brightness ordering is a handy model (the more degrees lowered relative to major, the darker), not a law — perception also depends on register, harmony, timbre and melody.',
     '2 Te same dźwięki, inny początek': '<span class="step">2</span> Same notes, different starting point',
-    'Modusy względne: siedem skal z dźwięków jednej tonacji durowej — każda zaczyna się od innego stopnia, więc półtony (1) wypadają w innych miejscach.':
-      '<b>Relative</b> modes: seven scales from the notes of one major key — each starts on a different degree, so the semitones (1) fall in different places.',
+    'Modusy względne: siedem skal z dźwięków jednej tonacji durowej — każda zaczyna się od innego stopnia, więc półtony (1) wypadają w innych miejscach. Uwaga: D dorycki to nie „C-dur zagrany od D”. O modusie decyduje centrum tonalne — tonika w basie lub burdonie, akcenty i zakończenia fraz na D. Bez tego ucho i tak usłyszy C-dur.':
+      '<b>Relative</b> modes: seven scales from the notes of one major key — each starts on a different degree, so the semitones (1) fall in different places. Note: D Dorian is not just “C major played from D”. A mode is defined by its tonal centre — the tonic in the bass or drone, accents and phrase endings on D. Without that, the ear still hears C major.',
     '3 Jak rozpoznać i zapamiętać modusy': '<span class="step">3</span> How to recognise and remember the modes',
     'Durowe czy molowe? Modusy z tercją wielką (lidyjski, joński, miksolidyjski) brzmią „durowo”, z tercją małą (dorycki, eolski, frygijski, lokrycki) — „molowo”.':
       '<b>Major or minor?</b> Modes with a major third (Lydian, Ionian, Mixolydian) sound “major”; those with a minor third (Dorian, Aeolian, Phrygian, Locrian) sound “minor”.',
@@ -195,6 +195,14 @@
     '{0} na strunie {1} ({2}) to próg {3}{4} — od pustej struny {5} liczymy {6} półtony w górę.': '{0} on string {1} ({2}) is fret {3}{4} — count {6} semitones up from the open {5} string.',
     'Brakuje jeszcze {0} szesnastki (= {1} ćwierćnuty).': 'Still missing {0} sixteenth (= {1} quarter notes).', 'Brakuje jeszcze {0} szesnastek (= {1} ćwierćnuta).': 'Still missing {0} sixteenths (= {1} quarter note).',
     'Brakuje jeszcze {0} szesnastek (= {1} ćwierćnut).': 'Still missing {0} sixteenths (= {1} quarter notes).',
+    '{0}, czarny klawisz': '{0}, black key', '{0}, biały klawisz': '{0}, white key',
+    '{0}, czarny klawisz, zaznaczony': '{0}, black key, selected', '{0}, biały klawisz, zaznaczony': '{0}, white key, selected',
+    '{0}, czarny klawisz, zaznaczony: {1}': '{0}, black key, selected: {1}', '{0}, biały klawisz, zaznaczony: {1}': '{0}, white key, selected: {1}',
+    'Zaznaczone: {0}': 'Selected: {0}', 'Struna {0}, pusta: {1}': 'String {0}, open: {1}', 'Struna {0}, próg {1}: {2}': 'String {0}, fret {1}: {2}',
+    'Dostępna jest nowa wersja strony.': 'A new version of the site is available.', 'Odśwież': 'Reload', 'Zamknij': 'Close',
+    'Dlaczego:': 'Why:', 'Wynik niepewny:': 'Uncertain result:', 'pasuje prawie równie dobrze — rozstrzygają melodia, powtórzenia i zakończenia fraz.': 'fits almost as well — melody, repetition and phrase endings decide.',
+    'wszystkie akordy należą do tonacji': 'all chords belong to the key', 'zaczyna się od toniki': 'starts on the tonic', 'kończy się na tonice': 'ends on the tonic',
+    'kadencja V–I na końcu': 'V–I cadence at the end', 'brak akordu tonicznego': 'no tonic chord', 'nie kończy się na tonice': 'does not end on the tonic', 'brak kadencji V–I': 'no V–I cadence',
     'Akordy zapożyczone z tonacji jednoimiennej': 'Borrowed chords from the parallel key', 'Akordy zapożyczone z równoległej {0} ({1})': 'Chords borrowed from the parallel {0} ({1})',
     'durowej': 'major', 'molowej': 'minor',
     'Akordy ze skali {0} (ta sama tonika), których nie ma w bieżącej skali. W molu najczęściej pożycza się durową tonikę I na zakończenie (tercja pikardyjska). Durowa dominanta V pochodzi z molowej harmonicznej i należy do zwykłej harmonii molowej.':

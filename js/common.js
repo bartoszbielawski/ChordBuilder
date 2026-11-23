@@ -68,19 +68,26 @@
 
   const octaveName = (note, midi) => Math.floor((midi - note.acc) / 12) - 1;
 
+  /** Pasek „Dostępna jest nowa wersja strony” z przyciskiem odświeżenia. */
+  function showUpdateBar() {
+    if (document.querySelector('.update-bar')) return;
+    const bar = h('div', { class: 'update-bar', role: 'status' },
+      h('span', {}, 'Dostępna jest nowa wersja strony.'),
+      h('button', { type: 'button', class: 'btn small', onclick: () => location.reload() }, 'Odśwież'),
+      h('button', { type: 'button', class: 'btn ghost small', 'aria-label': 'Zamknij', title: 'Zamknij', onclick: () => bar.remove() }, '✕'));
+    document.body.append(bar);
+  }
+
   function registerSW() {
     let dev = false;
     try { dev = localStorage.getItem('chordbuilder.nosw') === '1'; } catch (e) { /* ignoruj */ }
     if (!dev && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
       global.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
-      // Nowa wersja service workera przejęła stronę → przeładuj raz, by wszystkie pliki były z tej samej wersji.
+      // Nowa wersja service workera przejęła stronę → zaproponuj odświeżenie (bez samoczynnego
+      // przeładowania, które mogłoby przerwać np. rozwiązywane ćwiczenie). Online pliki i tak idą
+      // z sieci („najpierw sieć”), więc odłożenie odświeżenia jest bezpieczne.
       if (navigator.serviceWorker.controller) {
-        let reloaded = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (reloaded) return;
-          reloaded = true;
-          location.reload();
-        });
+        navigator.serviceWorker.addEventListener('controllerchange', showUpdateBar);
       }
     }
   }
@@ -215,7 +222,7 @@
   const semitones = (n) => n + ' ' + plural(n, 'półton', 'półtony', 'półtonów');
 
   global.Common = {
-    plural, semitones,
+    plural, semitones, showUpdateBar,
     h, loadPrefs, savePref, loadJSON, saveJSON, seg, NOTE_KEYS, DEFAULT_SPELLING,
     noteOfMidi, midiOf, octaveName, registerSW, pick, shuffle, connectMidi, computerPiano, midiFile, midiEvents, saveFile,
   };

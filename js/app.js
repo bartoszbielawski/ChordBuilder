@@ -798,6 +798,17 @@
         state.custom = chords.map((c) => T.noteKey(c.root) + '.' + c.type.id); state.prog = 'custom'; render();
         $('prog-section').scrollIntoView({ behavior: 'smooth' });
       } }, 'Zrób z tego progresję')));
+    // Dlaczego ta tonacja — przesłanki z oceny; przy zbliżonym wyniku innej tonacji — ostrzeżenie.
+    parts.push(h('p', { class: 'hint an-why' }, h('b', {}, 'Dlaczego: '),
+      best.evidence.flatMap((e, i) => [i ? ' · ' : '', h('span', { class: e.ok ? 'an-ev ok' : 'an-ev no' }, `${e.ok ? '✓' : '✗'} `, h('span', {}, e.text))])));
+    // Niepewność: inna tonacja ma prawie ten sam wynik albo tyle samo pasujących akordów,
+    // a przy tym najlepsza nie ma pełnego potwierdzenia (np. brak kończącej toniki lub V–I).
+    const k2 = keys[1];
+    const close = k2 && (k2.score >= best.score - 3 || (k2.fit === best.fit && k2.score >= best.score - 8 && best.evidence.some((e) => !e.ok))) ? k2 : null;
+    if (close) {
+      parts.push(h('p', { class: 'hint an-warn' }, '⚠ ', h('span', {}, 'Wynik niepewny:'), ' ', h('b', {}, keyName(close)),
+        ' ', h('span', {}, 'pasuje prawie równie dobrze — rozstrzygają melodia, powtórzenia i zakończenia fraz.')));
+    }
     parts.push(h('div', { class: 'an-chords' }, chords.map((c, i) => {
       const a = best.analysis[i];
       return h('button', {
@@ -1289,20 +1300,8 @@
   }
 
   // Działanie offline / instalacja jako aplikacja (wymaga https lub localhost).
-  let noSW = false; // localStorage chordbuilder.nosw = '1' — wyłącza SW (do pracy nad stroną)
-  try { noSW = localStorage.getItem('chordbuilder.nosw') === '1'; } catch (e) { /* ignoruj */ }
-  if (!noSW && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
-    // Nowa wersja service workera przejęła stronę → przeładuj raz, by wszystkie pliki były z tej samej wersji.
-    if (navigator.serviceWorker.controller) {
-      let reloaded = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (reloaded) return;
-        reloaded = true;
-        location.reload();
-      });
-    }
-  }
+  // localStorage chordbuilder.nosw = '1' — wyłącza SW (do pracy nad stroną).
+  window.Common.registerSW();
 
   loadPrefs();
   const hadHash = location.hash.length > 1;

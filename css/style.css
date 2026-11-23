@@ -616,3 +616,23 @@ html.present .site-footer, html.present .settings .field:first-child { display: 
 .tr-staves .hint { margin: 0 0 4px; }
 .chord-scales { font-size: 13px; margin-top: 4px; } .chord-scales .lbl { color: var(--muted); }
 .seq-key { min-width: 76px; }
+
+/* ---------- Pasek nowej wersji ---------- */
+.update-bar {
+  position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 50;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
+  max-width: calc(100vw - 32px); padding: 10px 14px;
+  background: var(--surface); color: var(--text); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+@media print { .update-bar { display: none; } }
+
+/* ---------- Fokus z klawiatury na instrumentach ---------- */
+.key-g:focus, .fb-cell:focus { outline: none; }
+.key-g:focus-visible rect.key { stroke: var(--accent); stroke-width: 3; }
+.fb-cell:focus-visible .fb-hit { stroke: var(--accent); stroke-width: 2.5; rx: 6; }
+
+/* ---------- Analiza: przesłanki ---------- */
+.an-ev.ok { color: var(--ok); }
+.an-ev.no { color: var(--muted); }
+.an-warn { color: var(--text); }

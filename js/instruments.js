@@ -18,6 +18,49 @@
     return t;
   }
 
+  /* ---------- Obsługa z klawiatury (dostępność) ---------- */
+
+  /**
+   * „Wędrujący” fokus: cały instrument to jeden przystanek klawisza Tab, strzałki
+   * przechodzą między elementami, Enter lub spacja — jak kliknięcie.
+   * nodes: [{ g, label, activate }]; cols — szerokość wiersza (gryf), inaczej jeden wiersz.
+   * Po ponownym narysowaniu fokus wraca na ten sam element (data-nav).
+   */
+  function rovingFocus(container, svg, nodes, cols = nodes.length) {
+    const prev = container.contains(document.activeElement) ? document.activeElement.getAttribute('data-nav') : null;
+    let cur = prev != null && nodes[+prev] ? +prev : 0;
+    svg.setAttribute('role', 'group');
+    nodes.forEach((n, i) => {
+      n.g.setAttribute('role', 'button');
+      n.g.setAttribute('tabindex', i === cur ? '0' : '-1');
+      n.g.setAttribute('aria-label', n.label);
+      n.g.setAttribute('data-nav', i);
+      n.g.addEventListener('focus', () => {
+        if (nodes[cur]) nodes[cur].g.setAttribute('tabindex', '-1');
+        cur = i;
+        n.g.setAttribute('tabindex', '0');
+      });
+      n.g.addEventListener('keydown', (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        const row = Math.floor(i / cols);
+        let j = null;
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); n.activate(); return; }
+        if (e.key === 'ArrowRight') j = i + 1;
+        else if (e.key === 'ArrowLeft') j = i - 1;
+        else if (e.key === 'ArrowUp') j = cols < nodes.length ? i + cols : i + 1;
+        else if (e.key === 'ArrowDown') j = cols < nodes.length ? i - cols : i - 1;
+        else if (e.key === 'Home') j = row * cols;
+        else if (e.key === 'End') j = Math.min(nodes.length, (row + 1) * cols) - 1;
+        else return;
+        e.preventDefault();
+        e.stopPropagation();
+        const sameRow = !['ArrowRight', 'ArrowLeft'].includes(e.key) || Math.floor(j / cols) === row;
+        if (j >= 0 && j < nodes.length && sameRow) nodes[j].g.focus();
+      });
+    });
+    if (prev != null && nodes[cur]) nodes[cur].g.focus();
+  }
+
   /* ---------- Pianino ---------- */
 
   const WHITE_PCS = [0, 2, 4, 5, 7, 9, 11];
@@ -36,6 +79,8 @@
       'aria-label': 'Klawiatura fortepianu z zaznaczonymi dźwiękami akordu',
     });
     const whites = el('g', {}, svg), blacks = el('g', {}, svg);
+    const nav = [];
+    const PC = ['C', 'C♯/D♭', 'D', 'D♯/E♭', 'E', 'F', 'F♯/G♭', 'G', 'G♯/A♭', 'A', 'A♯/B♭', 'B'];
 
     const keyX = {};
     for (let i = 0; i < whiteCount; i++) {
@@ -73,9 +118,18 @@
       if (!k.black && mod(midi, 12) === 0) {
         text(svg, cx, H + 12, 'C' + (Math.floor(midi / 12) - 1), 'octave-label');
       }
-      if (onKey) g.addEventListener('click', () => onKey(midi));
+      if (onKey) {
+        g.addEventListener('click', () => onKey(midi));
+        const name = keyTitle ? keyTitle(midi) : PC[mod(midi, 12)] + (Math.floor(midi / 12) - 1);
+        const mark = h ? (h.label && h.label !== '●' ? `, zaznaczony: ${h.label}` : ', zaznaczony') : '';
+        nav.push({ midi, g, activate: () => onKey(midi), label: `${name}, ${k.black ? 'czarny klawisz' : 'biały klawisz'}${mark}` });
+      }
     }
+    // Opis tekstowy dla czytników ekranu: które klawisze są zaznaczone.
+    const marked = [...highlights.entries()].sort((a, b) => a[0] - b[0]).map(([, x]) => x.label).filter((l) => l && l !== '●');
+    if (marked.length) el('desc', {}, svg).textContent = 'Zaznaczone: ' + marked.join(', ');
     container.replaceChildren(svg);
+    if (nav.length) rovingFocus(container, svg, nav.sort((a, b) => a.midi - b.midi));
   }
 
   /* ---------- Gryf gitary ---------- */
@@ -120,6 +174,7 @@
       text(svg, 12, yOf(s), stringNames[s] || '', 'fb-sname');
     }
 
+    const nav = [];
     for (let s = 0; s < N; s++) {
       for (let f = 0; f <= frets; f++) {
         const cx = f === 0 ? x0 - 16 : (fretX(f - 1, frets, x0, width) + fretX(f, frets, x0, width)) / 2;
@@ -136,10 +191,17 @@
           el('rect', { x: cx - 10, y: cy - 7, width: 20, height: 14, rx: 7, class: 'fb-name-bg' }, g);
           text(g, cx, cy, nm, 'fb-name' + (nm.length > 1 ? ' small' : ''));
         }
-        if (onCell) g.addEventListener('click', () => onCell(s, f));
+        if (onCell) {
+          g.addEventListener('click', () => onCell(s, f));
+          // cellTitle (jeśli jest) opisuje już pole w pełni; inaczej — struna, próg i zaznaczony dźwięk.
+          const label = cellTitle ? cellTitle(s, f)
+            : `Struna ${N - s}, ${f === 0 ? 'pusta' : 'próg ' + f}` + (c && c.strong ? `: ${c.label}` : '');
+          nav.push({ g, activate: () => onCell(s, f), label });
+        }
       }
     }
     container.replaceChildren(svg);
+    if (nav.length) rovingFocus(container, svg, nav, frets + 1);
   }
 
   /* ---------- Diagram chwytu ---------- */
