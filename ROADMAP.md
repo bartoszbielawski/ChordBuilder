@@ -82,7 +82,9 @@ i oktaw równoległych, ukulele i bas, kształty CAGED, harmonizacja melodii z d
 obcymi, polskie nazwy tonacji, tabela tonacji, nowe progresje (ciąg kwintowy, backdoor),
 ścieżka nauki (15 lekcji), 22 rodzaje ćwiczeń, słowniczek (66 haseł), ulepszony syntezator,
 wersja angielska (przełącznik PL/EN), dla klasy: wspólny zestaw pytań z linku (?seed=),
-tryb sprawdzianu z kopiowaniem wyniku, tryb prezentacji na projektor.
+tryb sprawdzianu z kopiowaniem wyniku, tryb prezentacji na projektor, klawiatura komputera
+jako pianino, eksport do MIDI, instrumenty transponujące, skale pasujące do akordu,
+solmizacja względna (etykiety i ćwiczenia słuchowe). Praca zakończona.
 
 Dalsze pomysły (malejąco wg wartości dla nauki):
 

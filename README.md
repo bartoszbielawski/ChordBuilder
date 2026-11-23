@@ -36,7 +36,7 @@ kroku budowania), więc działa od razu na GitHub Pages.
   i układem półtonów.
 - **Ćwiczenia** (`quiz.html`): 22 rodzaje ćwiczeń (m.in. pokrewieństwo tonacji, dźwięki obce) w 3 poziomach trudności —
   ze słuchu: interwały, akordy, skale/modusy, stopnie skali na tle kadencji,
-  progresje akordów, przewroty, dyktando melodyczne (zapis stopniami) i rytmiczne;
+  progresje akordów, przewroty, dyktando melodyczne (zapis stopniami z sylabami do re mi) i rytmiczne;
   skale z nut; rytm:
   wartości rytmiczne i metrum taktu; czytanie nut (klucz wiolinowy i basowy),
   znaki przykluczowe (dur i moll), nazywanie interwałów i akordów z nut, budowanie
