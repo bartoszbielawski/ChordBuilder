@@ -647,3 +647,39 @@ html:not([data-profile="choir"]) #voice-field { display: none; }
 .more-hint { text-align: center; display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
 .more-hint[hidden] { display: none; }
 .path-tabs { margin: 4px 0 12px; }
+
+/* ---------- Słowniczek: rysunki ---------- */
+.gl-fig { margin: 8px 0 4px; display: flex; width: fit-content; flex-direction: column; gap: 4px; max-width: 100%; }
+.gl-fig figcaption { font-size: 13px; color: var(--muted); max-width: 520px; }
+.gl-figs { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.gl-staff { overflow-x: auto; max-width: 100%; }
+.gl-piano { width: 260px; max-width: 100%; }
+.gl-rows { display: flex; flex-direction: column; gap: 2px; padding: 6px 10px; background: var(--surface-2); border-radius: 10px; }
+.gl-row { white-space: nowrap; }
+.gl-meter { display: inline-flex; align-items: baseline; gap: 10px; font-size: 15px; }
+.gl-meter span { font-size: 13px; color: var(--muted); }
+.gl-meter .acc2 { font-size: 22px; font-weight: 700; color: var(--accent); }
+.gl-meter .acc1 { font-size: 17px; font-weight: 600; color: var(--text); }
+.satb .st-head.filled { fill: var(--c, var(--text)); }
+.st-stem { stroke: var(--c, var(--text)); stroke-width: 1.4; }
+.satb-name { font: 700 11px Inter, system-ui, sans-serif; fill: var(--c, var(--text)); }
+.satb-bracket { stroke-width: 3; opacity: .9; }
+
+/* ---------- Rozśpiewka ---------- */
+.wu-now { border: 2px solid var(--accent); }
+.wu-key { font-size: 20px; margin: 4px 0 8px; }
+.wu-staff { overflow-x: auto; max-width: 100%; }
+.wu-staff .st-col.active .st-head { stroke-width: 3.2; fill: var(--accent-soft); }
+.wu-staff .st-col.active .st-label { fill: var(--accent); font-size: 13px; }
+.wu-amen { display: flex; gap: 16px; flex-wrap: wrap; }
+.wu-amen-chord { width: 200px; opacity: .55; }
+.wu-amen-chord.active { opacity: 1; }
+.st-cap { text-align: center; margin: 0; font-size: 13px; color: var(--muted); }
+.wu-points { margin: 4px 0 12px; padding-left: 20px; line-height: 1.6; }
+.wu-plan { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.wu-item { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.wu-item.off { opacity: .55; }
+.wu-item.playing { border-color: var(--accent); background: var(--accent-soft); }
+.wu-title { font-weight: 600; }
+.wu-pattern { color: var(--muted); font-size: 13px; flex: 1; min-width: 140px; }
+.wu-btns { display: inline-flex; gap: 4px; margin-left: auto; }

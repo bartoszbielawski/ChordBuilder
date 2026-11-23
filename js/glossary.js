@@ -79,7 +79,110 @@
 
   // Wersja angielska: hasła i definicje ze słownika i18n-en.js.
   const G = window.I18N && window.I18N.lang === 'en' && window.I18N_EN && window.I18N_EN.glossary;
-  if (G) for (const t of TERMS) if (G[t[0]]) [t[0], t[1]] = G[t[0]];
+  const pl = {}; // nazwa wyświetlana (np. angielska) → polskie hasło (klucz rysunku)
+  if (G) for (const t of TERMS) if (G[t[0]]) { const k = t[0]; [t[0], t[1]] = G[t[0]]; pl[t[0]] = k; }
+
+  /* ---------- Rysunki do haseł (SVG rysowane przez stronę; kliknięcie — dźwięk) ---------- */
+
+  const T = window.Theory, I = window.Instruments, C = window.Common;
+  const notation = C.loadPrefs().notation === 'H' ? 'H' : 'intl';
+  const nn = (n) => T.noteName(n, notation);
+  /** 'E4' → { midi, note } */
+  const N = (s) => { const m = /^([A-G](?:#|b)?)(\d)$/.exec(s); const note = T.parseNote(m[1]); return { midi: C.midiOf(note, +m[2]), note }; };
+  const play = (midis, mode = 'chord') => window.Sound && window.Sound.play(midis, mode, 'piano', 1.4);
+  const fig = (body, caption) => h('figure', { class: 'gl-fig' }, body, caption ? h('figcaption', {}, caption) : null);
+
+  /** Pięciolinia: kolumny 'C4 E4 G4' (spacja = współbrzmienie); role kolorują pryma/tercja/kwinta. */
+  function staffFig(cols, caption, opts = {}) {
+    const box = h('div', { class: 'melody-wrap gl-staff' });
+    const columns = cols.map((c, i) => c.split(' ').filter(Boolean).map((x, k) => ({ ...N(x), role: opts.roles ? opts.roles[i] && opts.roles[i][k] : null })));
+    I.renderMelody(box, columns, { gap: opts.gap || 34, clef: opts.clef, labels: opts.labels, keySig: opts.keySig, scale: 1, minWidth: opts.minWidth,
+      onColumn: columns.length ? (i) => play(columns[i].map((n) => n.midi), columns[i].length > 1 ? 'chord' : 'chord') : null,
+      ariaLabel: caption });
+    return fig(box, caption);
+  }
+  /** Klawiatura (jedna oktawa od C4) z zaznaczonymi dźwiękami: [['E4', 'root'], …]. */
+  function pianoFig(marks, caption, label) {
+    const box = h('div', { class: 'gl-piano' });
+    const hl = new Map(marks.map(([x, role, lab]) => { const n = N(x); return [n.midi, { label: lab || nn(n.note), role }]; }));
+    I.renderPiano(box, { startMidi: 60, octaves: 1, highlights: hl, onKey: (m) => play([m]) });
+    return fig(box, caption);
+  }
+  const R3 = ['root', 'third', 'fifth'];
+  const textFig = (rows, caption) => fig(h('div', { class: 'gl-rows' }, rows.map((r) => h('div', { class: 'gl-row' }, r))), caption);
+
+  /** Partytura chóralna: dwie pięciolinie, cztery głosy (S i T laseczki w górę, A i B w dół), kadencja V–I. */
+  function satbFig() {
+    const NS = 'http://www.w3.org/2000/svg';
+    const el = (name, attrs, parent) => { const e = document.createElementNS(NS, name); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); parent.appendChild(e); return e; };
+    const W = 300, H = 178, L = 34;
+    const yT = (st) => 26 + (38 - st) * 5, yB = (st) => 106 + (26 - st) * 5;
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('class', 'staff melody satb'); svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'Partytura chóralna: sopran i alt w kluczu wiolinowym, tenor i bas w basowym');
+    for (const st of [30, 32, 34, 36, 38]) el('line', { x1: L, x2: W - 4, y1: yT(st), y2: yT(st), class: 'st-line' }, svg);
+    for (const st of [18, 20, 22, 24, 26]) el('line', { x1: L, x2: W - 4, y1: yB(st), y2: yB(st), class: 'st-line' }, svg);
+    el('line', { x1: L, x2: L, y1: yT(38), y2: yB(18), class: 'st-line' }, svg);
+    el('line', { x1: L - 6, x2: L - 6, y1: yT(38), y2: yB(18), class: 'st-line satb-bracket' }, svg);
+    const t1 = el('text', { x: L + 4, y: yT(32) + 9, class: 'st-clef g' }, svg); t1.textContent = '𝄞';
+    const t2 = el('text', { x: L + 4, y: yB(24) + 8, class: 'st-clef f' }, svg); t2.textContent = '𝄢';
+    // V → I w C-dur: [krok pięciolinii, MIDI] dla S, A, T, B.
+    const chords = [
+      { label: 'V', v: [[34, 71], [29, 62], [25, 55], [18, 43]] },
+      { label: 'I', v: [[35, 72], [30, 64], [25, 55], [21, 48]] },
+    ];
+    const VOICE = [['S', 'T', 1, 'role-root'], ['A', 'T', -1, 'role-third'], ['T', 'B', 1, 'role-fifth'], ['B', 'B', -1, 'role-seventh']];
+    chords.forEach((c, ci) => {
+      const x = 118 + ci * 110;
+      const g = el('g', { class: 'st-col clickable' }, svg);
+      el('rect', { x: x - 40, y: 0, width: 80, height: H, class: 'st-hit' }, g);
+      g.addEventListener('click', () => play(c.v.map((v) => v[1])));
+      c.v.forEach(([st, , ], vi) => {
+        const [name, staff, dir, cls] = VOICE[vi];
+        const y = staff === 'T' ? yT(st) : yB(st);
+        if (staff === 'T' && st <= 28) for (let l = 28; l >= st; l -= 2) el('line', { x1: x - 10, x2: x + 10, y1: yT(l), y2: yT(l), class: 'st-line ledger' }, g);
+        el('ellipse', { cx: x, cy: y, rx: 6.4, ry: 4.4, transform: `rotate(-22 ${x} ${y})`, class: 'st-head filled ' + cls }, g);
+        const sx = dir > 0 ? x + 5.8 : x - 5.8;
+        el('line', { x1: sx, x2: sx, y1: y, y2: y - dir * 32, class: 'st-stem ' + cls }, g);
+        if (ci === 0) { const tl = el('text', { x: x - 30, y: y + 4, class: 'satb-name ' + cls }, g); tl.textContent = name; }
+      });
+      const lb = el('text', { x, y: H - 4, class: 'st-label', 'text-anchor': 'middle' }, g); lb.textContent = c.label;
+    });
+    return fig(h('div', { class: 'melody-wrap gl-staff' }, svg),
+      'Kadencja V–I na cztery głosy: sopran (laseczki w górę) i alt (w dół) na pięciolinii z kluczem wiolinowym, tenor (w górę) i bas (w dół) — z basowym. Kliknij akord, aby go usłyszeć.');
+  }
+
+  const FIGS = {
+    'pięciolinia': () => staffFig(['E4', 'G4', 'B4', 'D5', 'F5', 'F4', 'A4', 'C5', 'E5'],
+      'Nuty na liniach (1–5, liczonych od dołu) i w polach (1–4). Kliknij nutę, aby ją usłyszeć.', { labels: ['1', '2', '3', '4', '5', '1', '2', '3', '4'], clef: 'treble' }),
+    'klucz wiolinowy (G)': () => staffFig(['E4', 'G4', 'B4', 'D5', 'F5', 'F4', 'A4', 'C5', 'E5'],
+      'Linie: E G H D F, pola: F A C E. Klucz zawija się wokół 2. linii — dźwięku G.', { clef: 'treble', labels: ['E4', 'G4', 'B4', 'D5', 'F5', 'F4', 'A4', 'C5', 'E5'].map((x) => nn(N(x).note)) }),
+    'klucz basowy (F)': () => staffFig(['G2', 'B2', 'D3', 'F3', 'A3', 'A2', 'C3', 'E3', 'G3'],
+      'Linie: G H D F A, pola: A C E G. Kropki klucza obejmują 4. linię — dźwięk F.', { clef: 'bass', labels: ['G2', 'B2', 'D3', 'F3', 'A3', 'A2', 'C3', 'E3', 'G3'].map((x) => nn(N(x).note)) }),
+    'półton': () => pianoFig([['E4', 'root'], ['F4', 'third']], 'E–F: sąsiednie klawisze, bez klawisza pomiędzy — półton.'),
+    'cały ton': () => pianoFig([['C4', 'root'], ['D4', 'third']], 'C–D: między nimi jest jeszcze jeden klawisz (C♯) — cały ton, czyli dwa półtony.'),
+    'enharmonia': () => pianoFig([['F#4', 'ext', '♯/♭']], 'Jeden klawisz, dwie nazwy: F♯ = G♭.'),
+    'interwał': () => staffFig(['C4', 'E4', 'C4 E4'], 'C–E: trzy nazwy literowe (C, D, E) i cztery półtony — tercja wielka; zagrana po kolei i razem.', { roles: [['root'], ['third'], ['root', 'third']] }),
+    'tryton': () => staffFig(['F4', 'B4', 'F4 B4'], 'F–H: trzy całe tony (sześć półtonów) — kwarta zwiększona.', { roles: [['root'], ['ext'], ['root', 'ext']] }),
+    'oktawa': () => staffFig(['C4', 'C5', 'C4 C5'], 'C4–C5: ta sama nazwa, osiem stopni wyżej (12 półtonów).', { roles: [['root'], ['root'], ['root', 'root']] }),
+    'akord': () => staffFig(['C4 E4 G4'], 'Akord C-dur: pryma C, tercja E, kwinta G — ułożone tercjami.', { roles: [R3], gap: 60, minWidth: 140 }),
+    'trójdźwięk': () => staffFig(['C4 E4 G4', 'C4 Eb4 G4', 'C4 Eb4 Gb4', 'C4 E4 G#4'], 'Durowy, molowy, zmniejszony i zwiększony — od tej samej prymy C.', { roles: [R3, R3, R3, R3], gap: 48, labels: ['C', 'Cm', 'C°', 'C+'] }),
+    'przewrót akordu': () => staffFig(['C4 E4 G4', 'E4 G4 C5', 'G4 C5 E5'], 'Akord C-dur: postać zasadnicza, I przewrót (tercja w basie), II przewrót (kwinta w basie).', { roles: [R3, ['third', 'fifth', 'root'], ['fifth', 'root', 'third']], gap: 50, labels: ['C', 'C/E', 'C/G'] }),
+    'kadencja': () => staffFig(['G4 B4 D5 F5', 'C5 E5 G5'], 'Kadencja doskonała w C-dur: dominanta septymowa (G7) rozwiązuje się na tonikę (C).', { gap: 56, labels: ['V7', 'I'], roles: [['root', 'third', 'fifth', 'seventh'], R3] }),
+    'skala': () => staffFig(['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'], 'Skala C-dur ze stopniami i solmizacją. Kliknij nutę, aby ją usłyszeć.', { labels: ['do', 're', 'mi', 'fa', 'sol', 'la', 'si', 'do'], gap: 30 }),
+    'znaki przykluczowe': () => h('div', { class: 'gl-figs' },
+      staffFig([], 'Krzyżyki w kolejności: F C G D A E H.', { keySig: T.keySignature(T.parseNote('C#'), 'major'), minWidth: 150 }),
+      staffFig([], 'Bemole w kolejności: B E A D G C F.', { keySig: T.keySignature(T.parseNote('Cb'), 'major'), minWidth: 150 })),
+    'wartości rytmiczne': () => textFig([
+      h('span', { class: 'rh-g big' }, '𝅝'), h('span', { class: 'rh-g big' }, '𝅗𝅥 𝅗𝅥'), h('span', { class: 'rh-g big' }, '𝅘𝅥 𝅘𝅥 𝅘𝅥 𝅘𝅥'), h('span', { class: 'rh-g big' }, '𝅘𝅥𝅮 '.repeat(8).trim()),
+    ], 'Cała nuta = 2 półnuty = 4 ćwierćnuty = 8 ósemek.'),
+    'kropka przy nucie': () => textFig([h('span', { class: 'rh-g big' }, '𝅗𝅥. = 𝅗𝅥 + 𝅘𝅥'), h('span', { class: 'rh-g big' }, '𝅘𝅥. = 𝅘𝅥 + 𝅘𝅥𝅮')], 'Kropka dodaje połowę wartości nuty.'),
+    'metrum': () => textFig([
+      h('span', { class: 'gl-meter' }, h('b', {}, '3/4'), ' ', h('span', { class: 'acc2' }, '1'), h('span', {}, '2'), h('span', {}, '3')),
+      h('span', { class: 'gl-meter' }, h('b', {}, '4/4'), ' ', h('span', { class: 'acc2' }, '1'), h('span', {}, '2'), h('span', { class: 'acc1' }, '3'), h('span', {}, '4')),
+    ], 'Miary w takcie: duża — mocna, średnia — półmocna, mała — słaba.'),
+    'partytura chóralna (SATB)': satbFig,
+  };
 
   const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l');
 
@@ -98,7 +201,8 @@
       h('h2', {}, L),
       h('dl', {}, items.flatMap(([t, d, links]) => [
         h('dt', { id: 'g-' + norm(t).replace(/[^a-z0-9]+/g, '-') }, t),
-        h('dd', {}, d, links.length ? h('span', { class: 'gl-links' }, links.map(([label, href]) => h('a', { href }, label + ' →'))) : null),
+        h('dd', {}, d, links.length ? h('span', { class: 'gl-links' }, links.map(([label, href]) => h('a', { href }, label + ' →'))) : null,
+          FIGS[pl[t] || t] ? FIGS[pl[t] || t]() : null),
       ])))));
     if (!list.length) $('terms').append(h('p', { class: 'muted' }, 'Nie znaleziono — spróbuj innego słowa.'));
   }

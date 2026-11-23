@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rozśpiewka — ChordBuilder</title>
+  <meta name="description" content="Rozśpiewka dla chóru: wokalizy transponowane co półton z akompaniamentem, w zakresie głosów, z planem do ułożenia i linkiem dla chóru.">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#c2410c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Music&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div>
+        <h1>ChordBuilder</h1>
+        <p class="tagline">Rozśpiewka — wokalizy z akompaniamentem, co półton wyżej.</p>
+        <nav class="site-nav" aria-label="Działy">
+          <a href="learn.html">Ścieżka nauki</a>
+          <a href="./">Akordy i skale</a>
+          <a href="intervals.html">Interwały</a>
+          <a href="modes.html">Modusy</a>
+          <a href="rhythm.html">Rytm</a>
+          <a href="warmup.html" aria-current="page">Rozśpiewka</a>
+          <a href="quiz.html">Ćwiczenia</a>
+          <a href="glossary.html">Słowniczek</a>
+        </nav>
+      </div>
+      <div class="settings">
+        <label class="field">
+          <span>Notacja</span>
+          <div class="seg" id="notation" role="radiogroup" aria-label="Notacja nazw dźwięków">
+            <button type="button" data-value="intl">A B C</button>
+            <button type="button" data-value="H">A H C</button>
+          </div>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card wu-now" id="now" aria-live="polite">
+      <div class="card-head">
+        <h2 id="now-title">Rozśpiewka</h2>
+        <div class="controls tight">
+          <button type="button" class="btn" id="play-all">▶ Cała rozśpiewka</button>
+          <button type="button" class="btn ghost" id="stop" disabled>■ Stop</button>
+          <button type="button" class="btn ghost" id="skip" disabled title="Następne ćwiczenie">⏭ Dalej</button>
+        </div>
+      </div>
+      <div id="now-body"><p class="hint">Wybierz ćwiczenie z planu poniżej albo uruchom całą rozśpiewkę. Strona gra akord, potem wzór, a następnie powtarza go o półton wyżej — do górnej granicy głosów i z powrotem.</p></div>
+    </section>
+
+    <section class="card">
+      <h2>Ustawienia</h2>
+      <div class="controls">
+        <label class="field"><span>Kto śpiewa</span><select id="who"></select></label>
+        <label class="field"><span>Tempo: <b id="bpm-val"></b> na minutę</span><input type="range" id="bpm" min="50" max="150" step="5"></label>
+        <label class="field"><span>Powtórzeń w górę</span>
+          <select id="reps"><option value="3">3</option><option value="5">5</option><option value="7">7</option><option value="9">9</option></select></label>
+        <label class="field"><span>Kierunek</span>
+          <select id="dir"><option value="updown">w górę i z powrotem</option><option value="up">tylko w górę</option></select></label>
+        <label class="check"><input type="checkbox" id="chord"> akord przed każdym powtórzeniem</label>
+        <label class="check"><input type="checkbox" id="melody"> graj melodię</label>
+      </div>
+      <p class="hint" id="who-hint"></p>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Plan rozśpiewki</h2>
+        <div class="controls tight">
+          <button type="button" class="btn ghost small" id="share">🔗 Link do planu</button>
+          <button type="button" class="btn ghost small" id="reset">Przywróć plan domyślny</button>
+        </div>
+      </div>
+      <p class="hint">Zaznacz ćwiczenia, które wchodzą do rozśpiewki, i ustaw ich kolejność strzałkami. Link do planu zapamiętuje wybór, kolejność i ustawienia — można go wysłać chórowi.</p>
+      <ol id="plan" class="wu-plan"></ol>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>ChordBuilder · <a href="./">strona główna</a> · <a href="https://github.com/bartoszbielawski/ChordBuilder">kod na GitHubie</a></p>
+  </footer>
+
+  <script src="js/theory.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/i18n-en.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/warmup.js"></script>
+</body>
+</html>

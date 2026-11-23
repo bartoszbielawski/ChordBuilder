@@ -49,7 +49,11 @@ kroku budowania), więc działa od razu na GitHub Pages.
   i akcentami, układanie taktu z kontrolą wypełnienia.
 - **Słowniczek** (`glossary.html`): ponad 65 pojęć (akord, tryton, tonacja
   równoległa, kadencja, przewrót…) z krótkimi definicjami, wyszukiwarką
-  i odnośnikami do miejsc na stronie, gdzie można je zobaczyć i usłyszeć.
+  i odnośnikami do miejsc na stronie, gdzie można je zobaczyć i usłyszeć; przy ok. 20 hasłach
+  rysunki (pięciolinia, klucze, klawiatura, interwały, akordy, rytm, partytura SATB) z dźwiękiem.
+- **Rozśpiewka** (`warmup.html`): wokalizy grane z akordem i transponowane co półton w górę
+  i z powrotem, w zakresie całego chóru lub jednego głosu (S/A/T/B), ćwiczenia zespołowe
+  (akord od basu, „Amen”), plan do ułożenia i link do planu dla chóru.
 - **Dla klasy:** przycisk „🔗 Link dla klasy” w ćwiczeniu tworzy link (`?seed=…`), po którym
   wszyscy uczniowie dostają te same pytania w tej samej kolejności; „📝 Sprawdzian” to 10 pytań
   bez podpowiedzi z wynikiem, listą błędów i przyciskiem „Kopiuj wynik” (do wysłania nauczycielowi); „⛶ Tryb prezentacji”
