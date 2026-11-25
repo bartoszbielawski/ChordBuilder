@@ -375,6 +375,144 @@
   $('sp-chord').addEventListener('click', () => spPlay(true, false));
   $('fork').addEventListener('click', () => { stopSound(); Sound.play([69], 'chord', 'piano', 3); });
 
+  /* ---------- Stroik: wysokość śpiewanego dźwięku z mikrofonu (algorytm YIN) ---------- */
+
+  const tn = { ctx: null, stream: null, an: null, buf: null, timer: null, hist: [], recent: [] };
+
+  /** Częstotliwość podstawowa (Hz) fragmentu sygnału albo null (cisza / brak wyraźnej wysokości). */
+  function detectPitch(buf, sr) {
+    let rms = 0;
+    for (let i = 0; i < buf.length; i++) rms += buf[i] * buf[i];
+    if (Math.sqrt(rms / buf.length) < 0.01) return null;
+    const W = 1024, minTau = Math.floor(sr / 1100), maxTau = Math.min(Math.floor(sr / 70), buf.length - W - 1);
+    const d = new Float32Array(maxTau + 2);
+    for (let tau = 1; tau <= maxTau + 1; tau++) {
+      let s = 0;
+      for (let i = 0; i < W; i++) { const x = buf[i] - buf[i + tau]; s += x * x; }
+      d[tau] = s;
+    }
+    // Skumulowana, znormalizowana funkcja różnicowa: pierwsze minimum poniżej progu to okres.
+    let run = 0;
+    d[0] = 1;
+    for (let tau = 1; tau <= maxTau + 1; tau++) { run += d[tau]; d[tau] = run ? (d[tau] * tau) / run : 1; }
+    let tau = -1;
+    for (let t = minTau; t <= maxTau; t++) {
+      if (d[t] < 0.15) { while (t + 1 <= maxTau && d[t + 1] < d[t]) t++; tau = t; break; }
+    }
+    if (tau < 2) return null;
+    const a = d[tau - 1], b = d[tau], c = d[tau + 1];
+    const den = 2 * (2 * b - c - a);
+    return sr / (den ? tau + (c - a) / den : tau);
+  }
+
+  const tnTarget = () => {
+    if ($('tn-target').value !== 'start') return null;
+    return spFirst(sp.voice === 'all' ? 'S' : sp.voice).midi;
+  };
+
+  async function tnStart() {
+    if (tn.stream) { tnStop(); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      $('tn-cents').textContent = 'Ta przeglądarka nie udostępnia mikrofonu (potrzebna strona https lub localhost).';
+      $('tn-display').hidden = false;
+      return;
+    }
+    try {
+      tn.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    } catch (e) {
+      $('tn-display').hidden = false;
+      $('tn-cents').textContent = 'Brak dostępu do mikrofonu — zezwól na niego w ustawieniach przeglądarki i spróbuj ponownie.';
+      return;
+    }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    tn.ctx = new AC();
+    tn.an = tn.ctx.createAnalyser();
+    tn.an.fftSize = 4096;
+    tn.buf = new Float32Array(tn.an.fftSize);
+    tn.ctx.createMediaStreamSource(tn.stream).connect(tn.an);
+    tn.hist = [];
+    $('tn-display').hidden = false;
+    $('tn-start').textContent = '■ Wyłącz mikrofon';
+    tn.timer = setInterval(tnTick, 50);
+  }
+  function tnStop() {
+    clearInterval(tn.timer);
+    if (tn.stream) tn.stream.getTracks().forEach((t) => t.stop());
+    if (tn.ctx) tn.ctx.close();
+    Object.assign(tn, { ctx: null, stream: null, an: null, timer: null });
+    $('tn-start').textContent = '🎤 Włącz mikrofon';
+  }
+
+  function tnTick() {
+    tn.an.getFloatTimeDomainData(tn.buf);
+    const f = detectPitch(tn.buf, tn.ctx.sampleRate);
+    const now = performance.now();
+    let midi = f ? 69 + 12 * Math.log2(f / 440) : null;
+    if (midi != null && (midi < 28 || midi > 96)) midi = null;
+    // Mediana z ostatnich odczytów — stabilniejszy odczyt.
+    tn.recent.push(midi);
+    if (tn.recent.length > 5) tn.recent.shift();
+    const vals = tn.recent.filter((x) => x != null).sort((a, b) => a - b);
+    const m = vals.length >= 3 ? vals[Math.floor(vals.length / 2)] : null;
+    const target = tnTarget();
+    let cents = null, label = '—', msg = 'Zaśpiewaj długi dźwięk…';
+    if (m != null) {
+      const ref = target != null ? target : Math.round(m);
+      cents = Math.round((m - ref) * 100);
+      const n = C.noteOfMidi(Math.round(m));
+      label = nn(n) + C.octaveName(n, Math.round(m));
+      if (target != null && Math.abs(cents) > 150) {
+        msg = `Cel: ${pitchName(target)} — śpiewasz ${cents > 0 ? 'wyżej' : 'niżej'} o ${Math.round(Math.abs(cents) / 100)} ${C.plural(Math.round(Math.abs(cents) / 100), 'półton', 'półtony', 'półtonów')}.`;
+      } else {
+        const s = (cents > 0 ? '+' : cents < 0 ? '−' : '±') + Math.abs(cents) + ' c';
+        msg = `${s} — ${Math.abs(cents) <= 10 ? 'czysto ✓' : Math.abs(cents) <= 25 ? (cents > 0 ? 'trochę za wysoko' : 'trochę za nisko') : cents > 0 ? 'za wysoko' : 'za nisko'}` +
+          (target != null ? ` (cel: ${pitchName(target)})` : '');
+      }
+    }
+    $('tn-note').textContent = label;
+    $('tn-cents').textContent = msg;
+    const needle = $('tn-needle');
+    needle.style.left = `${50 + Math.max(-50, Math.min(50, cents == null ? 0 : cents))}%`;
+    needle.className = 'tn-needle' + (cents == null ? ' idle' : Math.abs(cents) <= 10 ? ' ok' : Math.abs(cents) <= 25 ? ' warn' : ' bad');
+    tn.hist.push([now, cents]);
+    while (tn.hist.length && now - tn.hist[0][0] > 6000) tn.hist.shift();
+    tnGraph(now);
+  }
+
+  function tnGraph(now) {
+    const cv = $('tn-graph'), g = cv.getContext('2d');
+    const css = getComputedStyle(document.documentElement);
+    const W = cv.width, H = cv.height, yOf = (c) => H / 2 - (Math.max(-60, Math.min(60, c)) / 60) * (H / 2 - 6);
+    g.clearRect(0, 0, W, H);
+    g.fillStyle = css.getPropertyValue('--ok').trim() || '#15803d';
+    g.globalAlpha = 0.18;
+    g.fillRect(0, yOf(10), W, yOf(-10) - yOf(10));
+    g.globalAlpha = 1;
+    g.strokeStyle = css.getPropertyValue('--border').trim() || '#ccc';
+    g.beginPath(); g.moveTo(0, H / 2); g.lineTo(W, H / 2); g.stroke();
+    g.strokeStyle = css.getPropertyValue('--accent').trim() || '#c2410c';
+    g.lineWidth = 2.5;
+    g.beginPath();
+    let pen = false;
+    for (const [t, c] of tn.hist) {
+      if (c == null) { pen = false; continue; }
+      const x = W - ((now - t) / 6000) * W, y = yOf(c);
+      if (pen) g.lineTo(x, y); else g.moveTo(x, y);
+      pen = true;
+    }
+    g.stroke();
+    g.lineWidth = 1;
+  }
+
+  $('tn-start').addEventListener('click', tnStart);
+  $('tn-ref').addEventListener('click', () => {
+    const target = tnTarget();
+    stopSound();
+    if (target != null) Sound.play([target], 'chord', 'piano', 2.5);
+    else Sound.play([69], 'chord', 'piano', 2.5);
+  });
+  window.addEventListener('pagehide', tnStop);
+
   // Kolejność: zapisany plan, potem parametry z linku (mają pierwszeństwo).
   try { const saved = localStorage.getItem(SAVE_KEY); if (saved) applyParams(new URLSearchParams(saved)); } catch (e) { /* ignoruj */ }
   if (location.hash.length > 1) applyParams(new URLSearchParams(location.hash.slice(1)));

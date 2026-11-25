@@ -707,3 +707,35 @@ html:not([data-profile="choir"]) #voice-field { display: none; }
 .mk-big .mk-svg { height: 64px; }
 .mk-big .mk-dyn { font-size: 40px; }
 .mk-big .mk-text { font-size: 30px; }
+
+/* ---------- Pięciolinia z rytmem ---------- */
+.st-head.filled { fill: var(--c, var(--text)); }
+.st-dot { fill: var(--text); }
+.st-flag { fill: none; stroke: var(--text); stroke-width: 1.4; }
+.st-rest { font-family: "Noto Music", serif; font-size: 22px; fill: var(--text); }
+.st-bar { opacity: .9; }
+
+/* ---------- Fragment do nauczenia ---------- */
+.pr-staves { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.pr-voice { border: 1px solid var(--border); border-radius: 10px; padding: 6px 10px; }
+.pr-voice.editing { border-color: var(--accent); }
+.pr-vname { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.pr-staff { overflow-x: auto; max-width: 100%; }
+.pr-staff .st-col.active .st-head { stroke: var(--accent); stroke-width: 3.2; }
+.pr-staff .st-col.active .st-head.filled { fill: var(--accent); }
+.pr-staff .st-col.active .st-rest { fill: var(--accent); }
+.rh-seg .rh-g { font-size: 20px; line-height: 1; }
+
+/* ---------- Stroik ---------- */
+.tn-display[hidden] { display: none; }
+.tn-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.tn-note { font: 700 40px Inter, system-ui, sans-serif; min-width: 110px; }
+.tn-meter { position: relative; flex: 1; min-width: 220px; height: 46px; border-radius: 10px; background: var(--surface-2); }
+.tn-band { position: absolute; left: 40%; width: 20%; top: 0; bottom: 0; background: color-mix(in srgb, var(--ok) 22%, transparent); border-radius: 6px; }
+.tn-tick { position: absolute; bottom: 2px; font-size: 11px; color: var(--muted); transform: translateX(-50%); }
+.tn-tick.l { left: 4%; } .tn-tick.c { left: 50%; } .tn-tick.r { left: 96%; }
+.tn-needle { position: absolute; top: 4px; bottom: 16px; width: 4px; margin-left: -2px; left: 50%; border-radius: 2px; background: var(--muted); transition: left .08s linear; }
+.tn-needle.ok { background: var(--ok); } .tn-needle.warn { background: var(--third); } .tn-needle.bad { background: var(--no); }
+.tn-needle.idle { opacity: .35; }
+.tn-cents { font-size: 17px; font-weight: 600; margin: 8px 0; }
+.tn-graph { width: 100%; height: 120px; border-radius: 10px; background: var(--surface-2); }

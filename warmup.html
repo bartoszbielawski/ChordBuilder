@@ -27,6 +27,7 @@
           <a href="modes.html">Modusy</a>
           <a href="rhythm.html">Rytm</a>
           <a href="warmup.html" aria-current="page">Rozśpiewka</a>
+          <a href="practice.html">Fragment</a>
           <a href="quiz.html">Ćwiczenia</a>
           <a href="glossary.html">Słowniczek</a>
         </nav>
@@ -72,6 +73,32 @@
         <button type="button" class="btn" id="sp-play">▶ Akord i dźwięk</button>
         <button type="button" class="btn ghost" id="sp-note">▶ Tylko dźwięk</button>
         <button type="button" class="btn ghost" id="sp-chord">▶ Tylko akord</button>
+      </div>
+    </section>
+
+    <section class="card" id="tuner-section">
+      <div class="card-head">
+        <h2>Stroik — czy śpiewam czysto?</h2>
+        <button type="button" class="btn" id="tn-start">🎤 Włącz mikrofon</button>
+      </div>
+      <p class="hint">Zaśpiewaj długi dźwięk na „a” lub „u”. Strona pokazuje, jaki dźwięk słyszy i o ile jest za nisko lub za wysoko — w centach, czyli setnych częściach półtonu. Dźwięk z mikrofonu jest analizowany tylko w tej przeglądarce: nic nie jest nagrywane ani wysyłane.</p>
+      <div class="controls tight">
+        <label class="field"><span>Porównuj z</span>
+          <select id="tn-target"><option value="near">najbliższym dźwiękiem</option><option value="start">pierwszym dźwiękiem z „Dźwięku startowego”</option></select></label>
+        <button type="button" class="btn ghost" id="tn-ref">▶ Zagraj dźwięk docelowy</button>
+      </div>
+      <div class="tn-display" id="tn-display" hidden>
+        <div class="tn-row">
+          <div class="tn-note" id="tn-note" aria-live="polite">—</div>
+          <div class="tn-meter" aria-hidden="true">
+            <div class="tn-band"></div>
+            <span class="tn-tick l">−50</span><span class="tn-tick c">0</span><span class="tn-tick r">+50</span>
+            <div class="tn-needle" id="tn-needle"></div>
+          </div>
+        </div>
+        <p class="tn-cents" id="tn-cents"></p>
+        <canvas id="tn-graph" class="tn-graph" width="640" height="120" aria-label="Wykres wysokości śpiewanego dźwięku w ostatnich sekundach"></canvas>
+        <p class="hint">Zielony pas na wykresie to ±10 centów — tak czysto, że ucho nie słyszy różnicy. Linia pokazuje ostatnie sekundy: czy dźwięk jest stabilny, czy „pływa”.</p>
       </div>
     </section>
 

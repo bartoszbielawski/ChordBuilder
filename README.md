@@ -55,6 +55,12 @@ kroku budowania), więc działa od razu na GitHub Pages.
   i z powrotem, w zakresie całego chóru lub jednego głosu (S/A/T/B), ćwiczenia zespołowe
   (akord od basu, „Amen”), plan do ułożenia i link do planu dla chóru. Na tej samej stronie
   „Dźwięk startowy” (akord tonacji + pierwszy dźwięk swojego głosu lub wszystkich głosów) i kamerton a¹.
+- **Fragment do nauczenia** (`practice.html`): trudne takty swojego głosu (i do trzech innych głosów)
+  wpisywane z klawiatury, z rytmem i kreskami taktowymi; odtwarzanie „tylko mój głos / wszystkie /
+  bez mojego”, tempo, pętla, odliczanie; fragment zapisany w przeglądarce i w linku (część po `#`).
+- **Stroik** (na stronie Rozśpiewka): wysokość śpiewanego dźwięku z mikrofonu (algorytm YIN),
+  odchylenie w centach od najbliższego dźwięku lub od dźwięku startowego, wykres ostatnich sekund;
+  analiza wyłącznie w przeglądarce, nic nie jest nagrywane ani wysyłane.
 - **Oznaczenia w nutach:** dynamika, tempo, artykulacja, łuki, oddech, repetycje, volty, D.C./D.S./coda —
   hasła z rysunkami w słowniczku i ćwiczenie „Oznaczenia w nutach” (3 poziomy).
 - **Dla klasy:** przycisk „🔗 Link dla klasy” w ćwiczeniu tworzy link (`?seed=…`), po którym

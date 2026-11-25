@@ -56,6 +56,8 @@
       [['Interwały', 'intervals.html']], ['ear-interval']],
     ['Dyktando melodyczne', 'Usłyszana krótka melodia zapisana stopniami skali (do re mi…). Ćwiczy pamięć melodii i czyste śpiewanie od toniki.',
       [['Ćwiczenie', 'quiz.html#ex=dictation&lv=0']], ['dictation']],
+    ['Ćwicz trudny fragment', 'Przepisz z nut kilka trudnych taktów swojego głosu (i ewentualnie innych głosów) i ćwicz je wolno, w pętli, sam albo na tle reszty. Stroikiem z mikrofonem sprawdzisz, czy śpiewasz czysto.',
+      [['Fragment do nauczenia', 'practice.html'], ['Stroik', 'warmup.html']], []],
     ['Trójdźwięk i strojenie', 'Akord to pryma, tercja i kwinta — każdy głos śpiewa jeden z tych dźwięków (czasem dwa głosy ten sam). Tercję akordu durowego śpiewa się minimalnie niżej niż na fortepianie, a dźwięk prowadzący — raczej wyżej; wtedy akord „brzmi”.',
       [['Budowa akordu', './#r=C&c=maj'], ['Przewroty', './#r=C&c=maj&i=1']], ['ear-chord', 'ear-inversion']],
     ['Kadencje — zakończenia fraz', 'Doskonała (V–I) to „kropka” na końcu zwrotki, plagalna (IV–I) — „amen”, zawieszona (na V) — „przecinek” w środku. Słuchaj, czy fraza się kończy, czy prowadzi dalej.',

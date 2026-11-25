@@ -340,7 +340,9 @@
   /**
    * columns: [[{ midi, note, role?, label? }], …] — każda kolumna to nuta lub współbrzmienie.
    * opts: { clef: 'treble' | 'bass' | 'auto', keySig (Theory.keySignature), gap, activeCol,
-   *         onColumn(i), labels: [tekst pod kolumną], ariaLabel, minWidth }
+   *         onColumn(i), labels: [tekst pod kolumną], ariaLabel, minWidth,
+   *         durations: [{ units (szesnastki; 16 = cała), rest, glyph (znak pauzy) }] — rytm: główki,
+   *         laseczki, chorągiewki, kropki i pauzy; barAfter: Set indeksów kolumn z kreską taktową po nich }
    * Znaki chromatyczne stawiane tylko tam, gdzie dźwięk różni się od obowiązującego
    * (znaki przykluczowe + wcześniejsze znaki w takcie).
    */
@@ -406,10 +408,31 @@
         }
         current.set(p.step, want);
       }
+      const dur = opts.durations && opts.durations[ci];
+      // Wartość bez kropki: 12 → 8 (półnuta), 6 → 4, 3 → 2.
+      const dotted = dur && [12, 6, 3].includes(dur.units);
+      const base = dur ? (dotted ? dur.units / 1.5 : dur.units) : 16;
       for (const p of pos) {
         const hx = cx + p.dx, hy = y(p.step);
-        el('ellipse', { cx: hx, cy: hy, rx: 6.4, ry: 4.4, transform: `rotate(-22 ${hx} ${hy})`, class: 'st-head role-' + (p.role || 'none') }, g);
+        el('ellipse', { cx: hx, cy: hy, rx: 6.4, ry: 4.4, transform: `rotate(-22 ${hx} ${hy})`, class: 'st-head role-' + (p.role || 'none') + (dur && base <= 4 ? ' filled' : '') }, g);
+        if (dotted) el('circle', { cx: hx + 11, cy: hy - (p.step % 2 === lines[0] % 2 ? 2.5 : 0), r: 1.7, class: 'st-dot' }, g);
       }
+      if (dur && dur.rest) {
+        text(g, cx, y(lines[2]), dur.glyph + (dotted ? '.' : ''), 'st-rest');
+      } else if (dur && pos.length && base < 16) {
+        // Laseczka: w górę, gdy nuty leżą poniżej środkowej linii; chorągiewki dla ósemek i szesnastek.
+        const lo = pos[0].step, hi = pos[pos.length - 1].step;
+        const up = (lo + hi) / 2 < lines[2];
+        const sx = up ? cx + 5.8 : cx - 5.8;
+        const y1 = up ? y(lo) : y(hi), y2 = up ? y(hi) - 32 : y(lo) + 32;
+        el('line', { x1: sx, x2: sx, y1, y2, class: 'st-stem' }, g);
+        const flags = base === 2 ? 1 : base === 1 ? 2 : 0;
+        for (let f = 0; f < flags; f++) {
+          const fy = y2 + (up ? f * 6 : -f * 6);
+          el('path', { d: up ? `M${sx} ${fy} q 2 6 8 10` : `M${sx} ${fy} q 2 -6 8 -10`, class: 'st-flag' }, g);
+        }
+      }
+      if (opts.barAfter && opts.barAfter.has(ci)) el('line', { x1: cx + gap / 2, x2: cx + gap / 2, y1: y(lines[4]), y2: y(lines[0]), class: 'st-line st-bar' }, g);
       if (hasLabels && opts.labels[ci]) text(g, cx, H - 9, opts.labels[ci], 'st-label');
     });
     container.replaceChildren(svg);

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fragment do nauczenia — ChordBuilder</title>
+  <meta name="description" content="Wpisz trudny fragment swojej partii (i innych głosów), a strona zagra go wolno, w pętli, sam albo na tle pozostałych głosów. Link do fragmentu można wysłać chórowi.">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#c2410c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Music&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div>
+        <h1>ChordBuilder</h1>
+        <p class="tagline">Fragment do nauczenia — trudne miejsce wolno, w pętli, na tle innych głosów.</p>
+        <nav class="site-nav" aria-label="Działy">
+          <a href="learn.html">Ścieżka nauki</a>
+          <a href="./">Akordy i skale</a>
+          <a href="intervals.html">Interwały</a>
+          <a href="modes.html">Modusy</a>
+          <a href="rhythm.html">Rytm</a>
+          <a href="warmup.html">Rozśpiewka</a>
+          <a href="practice.html" aria-current="page">Fragment</a>
+          <a href="quiz.html">Ćwiczenia</a>
+          <a href="glossary.html">Słowniczek</a>
+        </nav>
+      </div>
+      <div class="settings">
+        <label class="field">
+          <span>Notacja</span>
+          <div class="seg" id="notation" role="radiogroup" aria-label="Notacja nazw dźwięków">
+            <button type="button" data-value="intl">A B C</button>
+            <button type="button" data-value="H">A H C</button>
+          </div>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="card-head">
+        <h2>Fragment</h2>
+        <div class="controls tight">
+          <button type="button" class="btn ghost small" id="share">🔗 Link do fragmentu</button>
+          <button type="button" class="btn ghost small" id="example">Przykład: „Oda do radości”</button>
+          <button type="button" class="btn ghost small" id="clear-all">Wyczyść wszystko</button>
+        </div>
+      </div>
+      <p class="hint">Przepisz z nut kilka taktów, które sprawiają trudność: wybierz tonację i metrum, potem wpisuj nuty swojego głosu klawiaturą poniżej. Możesz dopisać też inne głosy, żeby ćwiczyć swoją linię na ich tle. Fragment zapisuje się w tej przeglądarce i w linku — nic nie jest wysyłane.</p>
+      <div class="controls">
+        <label class="field"><span>Tonacja</span><select id="key"></select></label>
+        <label class="field"><span>Metrum</span><select id="meter"></select></label>
+        <div class="field"><span>Głosy we fragmencie</span><div class="seg" id="voices-on" role="group" aria-label="Głosy we fragmencie"></div></div>
+        <label class="field"><span>Mój głos</span><select id="me"></select></label>
+      </div>
+      <div id="staves" class="pr-staves"></div>
+    </section>
+
+    <section class="card pr-play">
+      <h2>Odtwarzanie</h2>
+      <div class="controls">
+        <div class="field"><span>Co grać</span>
+          <div class="seg" id="mode" role="radiogroup" aria-label="Co grać">
+            <button type="button" data-value="mine">tylko mój głos</button>
+            <button type="button" data-value="all">wszystkie głosy</button>
+            <button type="button" data-value="others">bez mojego głosu</button>
+          </div>
+        </div>
+        <label class="field"><span>Tempo: <b id="bpm-val"></b> na minutę</span><input type="range" id="bpm" min="30" max="160" step="5"></label>
+        <label class="check"><input type="checkbox" id="loop"> pętla</label>
+        <label class="check"><input type="checkbox" id="countin"> odliczanie (jeden takt)</label>
+        <label class="check"><input type="checkbox" id="chord"> akord tonacji na początek</label>
+      </div>
+      <div class="controls tight">
+        <button type="button" class="btn" id="play">▶ Odtwórz</button>
+        <button type="button" class="btn ghost" id="stop" disabled>■ Stop</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Wpisywanie nut</h2>
+        <div class="field"><span>Wpisuję głos</span><div class="seg" id="edit-voice" role="radiogroup" aria-label="Wpisywany głos"></div></div>
+      </div>
+      <div class="controls tight">
+        <div class="field"><span>Wartość</span><div class="seg rh-seg" id="dur" role="radiogroup" aria-label="Wartość rytmiczna"></div></div>
+        <label class="check"><input type="checkbox" id="dot"> z kropką</label>
+        <button type="button" class="btn ghost" id="rest">Pauza</button>
+        <button type="button" class="btn ghost" id="undo">⌫ Cofnij</button>
+        <button type="button" class="btn ghost" id="clear">Wyczyść głos</button>
+      </div>
+      <p class="hint" id="bar-info"></p>
+      <div class="scroll-x"><div id="piano" class="instrument"></div></div>
+      <p class="hint">Kliknij klawisz, aby dopisać nutę o wybranej wartości (klawiatura obejmuje zakres wpisywanego głosu). Dźwięki spoza tonacji zapisują się zgodnie ze znakami przykluczowymi (krzyżyki lub bemole). Kliknięcie nuty na pięciolinii odtwarza ją.</p>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>ChordBuilder · <a href="./">strona główna</a> · <a href="https://github.com/bartoszbielawski/ChordBuilder">kod na GitHubie</a></p>
+  </footer>
+
+  <script src="js/theory.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/i18n-en.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/rhythm-core.js"></script>
+  <script src="js/practice.js"></script>
+</body>
+</html>

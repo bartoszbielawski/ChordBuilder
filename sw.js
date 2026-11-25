@@ -5,7 +5,7 @@
  * Czcionki Google: najpierw pamięć (nie zmieniają się).
  * Po zmianie listy plików podbij VERSION.
  */
-const VERSION = 'v13';
+const VERSION = 'v14';
 const CACHE = 'chordbuilder-' + VERSION;
 const ASSETS = [
   './',
@@ -19,6 +19,7 @@ const ASSETS = [
   'rhythm.html',
   'learn.html',
   'warmup.html',
+  'practice.html',
   'css/style.css',
   'css/sheet.css',
   'js/theory.js',
@@ -39,6 +40,7 @@ const ASSETS = [
   'js/learn.js',
   'js/warmup.js',
   'js/marks.js',
+  'js/practice.js',
   'manifest.webmanifest',
   'icons/icon.svg',
   'icons/icon-192.png',
