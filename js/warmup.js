@@ -377,34 +377,7 @@
 
   /* ---------- Stroik: wysokość śpiewanego dźwięku z mikrofonu (algorytm YIN) ---------- */
 
-  const tn = { ctx: null, stream: null, an: null, buf: null, timer: null, hist: [], recent: [] };
-
-  /** Częstotliwość podstawowa (Hz) fragmentu sygnału albo null (cisza / brak wyraźnej wysokości). */
-  function detectPitch(buf, sr) {
-    let rms = 0;
-    for (let i = 0; i < buf.length; i++) rms += buf[i] * buf[i];
-    // Próg ciszy niski: bez automatycznej regulacji głośności mikrofony (zwłaszcza na Linuksie) dają cichy sygnał.
-    if (Math.sqrt(rms / buf.length) < 0.002) return null;
-    const W = 1024, minTau = Math.floor(sr / 1100), maxTau = Math.min(Math.floor(sr / 70), buf.length - W - 1);
-    const d = new Float32Array(maxTau + 2);
-    for (let tau = 1; tau <= maxTau + 1; tau++) {
-      let s = 0;
-      for (let i = 0; i < W; i++) { const x = buf[i] - buf[i + tau]; s += x * x; }
-      d[tau] = s;
-    }
-    // Skumulowana, znormalizowana funkcja różnicowa: pierwsze minimum poniżej progu to okres.
-    let run = 0;
-    d[0] = 1;
-    for (let tau = 1; tau <= maxTau + 1; tau++) { run += d[tau]; d[tau] = run ? (d[tau] * tau) / run : 1; }
-    let tau = -1;
-    for (let t = minTau; t <= maxTau; t++) {
-      if (d[t] < 0.15) { while (t + 1 <= maxTau && d[t + 1] < d[t]) t++; tau = t; break; }
-    }
-    if (tau < 2) return null;
-    const a = d[tau - 1], b = d[tau], c = d[tau + 1];
-    const den = 2 * (2 * b - c - a);
-    return sr / (den ? tau + (c - a) / den : tau);
-  }
+  const tn = { mic: null, timer: null, hist: [], recent: [] };
 
   const tnTarget = () => {
     if ($('tn-target').value !== 'start') return null;
@@ -412,57 +385,13 @@
   };
 
   async function tnStart() {
-    if (tn.stream || tn.starting) { tnStop(); return; }
+    if (tn.mic || tn.starting) { tnStop(); return; }
     const show = (s) => { $('tn-display').hidden = false; $('tn-cents').textContent = s; };
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      show('Ta przeglądarka nie udostępnia mikrofonu (potrzebna strona https lub localhost).');
-      return;
-    }
     tn.starting = true;
-    const AC = window.AudioContext || window.webkitAudioContext;
-    // Kontekst audio tworzony od razu po kliknięciu — inaczej przeglądarka może go wstrzymać (autoodtwarzanie).
-    let ctx = new AC();
-    let stream;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
-    } catch (e) {
-      tn.starting = false;
-      ctx.close();
-      show(e && e.name === 'NotFoundError' ? 'Nie znaleziono mikrofonu — podłącz go albo wybierz w ustawieniach systemu.'
-        : e && (e.name === 'NotAllowedError' || e.name === 'SecurityError') ? 'Brak dostępu do mikrofonu — zezwól na niego w ustawieniach przeglądarki i spróbuj ponownie.'
-          : `Mikrofon jest niedostępny (${(e && e.name) || 'błąd'}). Być może używa go inny program.`);
-      return;
-    }
-    try {
-      let src;
-      try {
-        src = ctx.createMediaStreamSource(stream);
-      } catch (e) {
-        // Firefox: mikrofon z inną częstotliwością próbkowania niż kontekst — kontekst z częstotliwością mikrofonu.
-        const rate = stream.getAudioTracks()[0] && stream.getAudioTracks()[0].getSettings().sampleRate;
-        ctx.close();
-        ctx = rate ? new AC({ sampleRate: rate }) : new AC();
-        src = ctx.createMediaStreamSource(stream);
-      }
-      if (ctx.state === 'suspended') await ctx.resume();
-      tn.an = ctx.createAnalyser();
-      tn.an.fftSize = 4096;
-      tn.buf = new Float32Array(tn.an.fftSize);
-      src.connect(tn.an);
-      // Analizator podłączony do wyjścia przez wyciszenie — niektóre przeglądarki nie przetwarzają „wiszących” węzłów.
-      const mute = ctx.createGain();
-      mute.gain.value = 0;
-      tn.an.connect(mute).connect(ctx.destination);
-    } catch (e) {
-      tn.starting = false;
-      stream.getTracks().forEach((t) => t.stop());
-      ctx.close();
-      show(`Nie udało się uruchomić analizy dźwięku (${(e && e.message) || e}).`);
-      return;
-    }
-    Object.assign(tn, { ctx, stream, starting: false, hist: [], recent: [], quietSince: performance.now() });
-    const track = stream.getAudioTracks()[0];
-    $('tn-mic').textContent = track && track.label ? track.label : '';
+    let mic;
+    try { mic = await PitchMic.open(); } catch (e) { tn.starting = false; show(e.message); return; }
+    Object.assign(tn, { mic, starting: false, hist: [], recent: [], quietSince: performance.now() });
+    $('tn-mic').textContent = mic.label;
     $('tn-display').hidden = false;
     $('tn-start').textContent = '■ Wyłącz mikrofon';
     tn.timer = setInterval(() => {
@@ -471,9 +400,8 @@
   }
   function tnStop() {
     clearInterval(tn.timer);
-    if (tn.stream) tn.stream.getTracks().forEach((t) => t.stop());
-    if (tn.ctx) tn.ctx.close();
-    Object.assign(tn, { ctx: null, stream: null, an: null, timer: null, starting: false });
+    if (tn.mic) tn.mic.close();
+    Object.assign(tn, { mic: null, timer: null, starting: false });
     $('tn-note').textContent = '—';
     $('tn-level-bar').style.width = '0%';
     $('tn-quiet').hidden = true;
@@ -482,19 +410,12 @@
   }
 
   function tnTick() {
-    tn.an.getFloatTimeDomainData(tn.buf);
-    const f = detectPitch(tn.buf, tn.ctx.sampleRate);
+    const { midi, rms, db } = tn.mic.read();
     const now = performance.now();
     // Poziom sygnału (dBFS) — widać, czy mikrofon w ogóle coś słyszy.
-    let sum = 0;
-    for (let i = 0; i < tn.buf.length; i++) sum += tn.buf[i] * tn.buf[i];
-    const rms = Math.sqrt(sum / tn.buf.length);
-    const db = rms > 0 ? 20 * Math.log10(rms) : -100;
-    $('tn-level-bar').style.width = `${Math.max(0, Math.min(100, ((db + 60) / 60) * 100))}%`;
-    if (rms > 0.002) tn.quietSince = now;
+    $('tn-level-bar').style.width = `${PitchMic.levelPct(db)}%`;
+    if (rms > PitchMic.QUIET_RMS) tn.quietSince = now;
     $('tn-quiet').hidden = now - tn.quietSince < 3000;
-    let midi = f ? 69 + 12 * Math.log2(f / 440) : null;
-    if (midi != null && (midi < 28 || midi > 96)) midi = null;
     // Mediana z ostatnich odczytów — stabilniejszy odczyt.
     tn.recent.push(midi);
     if (tn.recent.length > 5) tn.recent.shift();

@@ -1,7 +1,7 @@
 /*
  * ChordBuilder — zapis i odczyt plików MIDI (Standard MIDI File), bez zależności.
  * write: typ 1 — ścieżka 0 z tempem, metrum i tonacją, potem po jednej ścieżce na głos.
- * read: typ 0 i 1; zwraca nuty z czasem w tickach, tempo, metrum, tonację i nazwy ścieżek.
+ * read: typ 0 i 1; zwraca nuty z czasem w tickach, tempo, metrum, tonację, nazwy ścieżek i sylaby słów.
  * Działa w przeglądarce i w Node (testy).
  */
 (function (global) {
@@ -14,7 +14,8 @@
 
   /**
    * opts: { ppq = 480, bpm = 90, time: [licznik, mianownik], key: { sf: −7..7, minor: bool },
-   *         tracks: [{ name, channel, program, notes: [{ start, dur, midi, vel }] }] } — czasy w tickach.
+   *         tracks: [{ name, channel, program, notes: [{ start, dur, midi, vel, lyric }] }] } — czasy w tickach.
+ * lyric — sylaba słów (zdarzenie meta Lyric, 0x05) w chwili początku nuty.
    */
   function write(opts) {
     const ppq = opts.ppq || 480;
@@ -31,13 +32,20 @@
       const ev = [0x00, 0xff, 0x03, ...vlq(name.length), ...name, 0x00, 0xc0 | ch, (t.program || 0) & 0x7f];
       const raw = [];
       for (const n of t.notes) {
+        if (n.lyric) raw.push({ t: n.start, lyric: text(n.lyric) });
         raw.push({ t: n.start, on: true, m: n.midi, v: n.vel || 80 });
         raw.push({ t: n.start + n.dur, on: false, m: n.midi, v: 0 });
       }
       // W tym samym czasie najpierw wyłączenia, potem włączenia (powtórzony dźwięk się nie urywa).
-      raw.sort((a, b) => a.t - b.t || (a.on === b.on ? 0 : a.on ? 1 : -1));
+      // Sylaba tuż przed włączeniem nuty.
+      const rank = (r) => (r.lyric ? 1 : r.on ? 2 : 0);
+      raw.sort((a, b) => a.t - b.t || rank(a) - rank(b));
       let last = 0;
-      for (const r of raw) { ev.push(...vlq(r.t - last), (r.on ? 0x90 : 0x80) | ch, r.m & 0x7f, r.v & 0x7f); last = r.t; }
+      for (const r of raw) {
+        if (r.lyric) ev.push(...vlq(r.t - last), 0xff, 0x05, ...vlq(r.lyric.length), ...r.lyric);
+        else ev.push(...vlq(r.t - last), (r.on ? 0x90 : 0x80) | ch, r.m & 0x7f, r.v & 0x7f);
+        last = r.t;
+      }
       ev.push(0x00, 0xff, 0x2f, 0x00);
       tracks.push(chunk('MTrk', ev));
     }
@@ -65,7 +73,7 @@
       const len = num(4);
       const end = Math.min(b.length, p + len);
       if (id !== 'MTrk') { p = end; continue; }
-      const track = { name: '', notes: [], channels: new Set() };
+      const track = { name: '', notes: [], lyrics: [], channels: new Set() };
       const open = new Map(); // (kanał, wysokość) → [nuta, …]
       let t = 0, status = 0;
       while (p < end) {
@@ -74,7 +82,9 @@
         if (s & 0x80) { p++; status = s; } else s = status; // running status
         if (s === 0xff) {
           const type = b[p++]; const l = readVlq(); const d = b.subarray(p, p + l); p += l;
-          if (type === 0x03 && !track.name) track.name = decodeURIComponent(escape(String.fromCharCode(...d)));
+          const str8 = () => { const raw = String.fromCharCode(...d); try { return decodeURIComponent(escape(raw)); } catch (e) { return raw; } };
+          if (type === 0x03 && !track.name) track.name = str8();
+          else if (type === 0x05 && l) track.lyrics.push({ t, text: str8() });
           else if (type === 0x51 && out.bpm == null && l === 3) out.bpm = 60000000 / ((d[0] << 16) | (d[1] << 8) | d[2]);
           else if (type === 0x58 && !out.time && l >= 2) out.time = [d[0], 2 ** d[1]];
           else if (type === 0x59 && !out.key && l === 2) out.key = { sf: d[0] > 127 ? d[0] - 256 : d[0], minor: d[1] === 1 };

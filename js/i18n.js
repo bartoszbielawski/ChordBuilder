@@ -177,7 +177,10 @@
     }
   }
   function translateNode(root) {
+    // translate="no" — tekst użytkownika (np. słowa pod nutami) zostaje bez zmian.
+    const keep = (n) => n && n.closest && n.closest('[translate="no"]');
     if (root.nodeType === 3) {
+      if (keep(root.parentElement)) return;
       const v = tx(root.nodeValue);
       if (v !== root.nodeValue) root.nodeValue = v;
       return;
@@ -189,7 +192,7 @@
     const nodes = [];
     while ((n = tw.nextNode())) nodes.push(n);
     for (const t of nodes) {
-      if (t.parentElement && /^(SCRIPT|STYLE)$/.test(t.parentElement.tagName)) continue;
+      if (t.parentElement && (/^(SCRIPT|STYLE)$/.test(t.parentElement.tagName) || keep(t.parentElement))) continue;
       const v = tx(t.nodeValue);
       if (v !== t.nodeValue) t.nodeValue = v;
     }

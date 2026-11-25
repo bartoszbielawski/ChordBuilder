@@ -477,6 +477,28 @@
       const m = root.MidiIO.read(new Uint8Array(bytes));
       eq(m.tracks[0].notes.map((n) => [n.start, n.dur, n.midi]), [[0, 96, 60], [96, 96, 64]]);
     }],
+    ['MIDI: sylaby słów (zdarzenia Lyric) w zapisie i odczycie', (T, eq) => {
+      const MI = root.MidiIO;
+      const bytes = MI.write({ ppq: 480, tracks: [{ name: 'Alt', notes: [
+        { start: 0, dur: 480, midi: 60, lyric: 'Ra-' }, { start: 480, dur: 480, midi: 62, lyric: 'duj' }, { start: 960, dur: 480, midi: 64 }, { start: 1440, dur: 480, midi: 64, lyric: 'się' },
+      ] }] });
+      const tr = MI.read(bytes).tracks.find((t) => t.notes.length);
+      eq(tr.lyrics.map((l) => [l.t, l.text]), [[0, 'Ra-'], [480, 'duj'], [1440, 'się']]);
+      eq(tr.notes.map((n) => [n.start, n.dur, n.midi]), [[0, 480, 60], [480, 480, 62], [960, 480, 64], [1440, 480, 64]]);
+    }],
+    ['Mikrofon: wykrywanie wysokości (YIN) dla tonów i ciszy', (T, eq, ok) => {
+      const PM = root.PitchMic;
+      for (const sr of [44100, 48000]) {
+        for (const midi of [41, 57, 69, 79]) {
+          const f = 440 * 2 ** ((midi - 69) / 12);
+          const buf = new Float32Array(4096);
+          for (let i = 0; i < buf.length; i++) buf[i] = 0.2 * Math.sin((2 * Math.PI * f * i) / sr) + 0.1 * Math.sin((4 * Math.PI * f * i) / sr);
+          const got = PM.detect(buf, sr);
+          ok(got && Math.abs(1200 * Math.log2(got / f)) < 3, `${sr} Hz, MIDI ${midi}: ${got}`);
+        }
+        eq(PM.detect(new Float32Array(4096), sr), null, 'cisza');
+      }
+    }],
     ['Analiza tonacji podaje przesłanki', (T, eq, ok) => {
       const k = T.analyzeKey(['Dm7', 'G7', 'Cmaj7'].map((s) => T.parseChordSymbol(s).chord))[0];
       eq(T.noteName(k.tonic) + ' ' + k.mode, 'C major');

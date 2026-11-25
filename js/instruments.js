@@ -340,7 +340,7 @@
   /**
    * columns: [[{ midi, note, role?, label? }], …] — każda kolumna to nuta lub współbrzmienie.
    * opts: { clef: 'treble' | 'bass' | 'auto', keySig (Theory.keySignature), gap, activeCol,
-   *         onColumn(i), labels: [tekst pod kolumną], ariaLabel, minWidth,
+   *         onColumn(i), labels: [tekst pod kolumną], lyrics: [sylaba pod kolumną], ariaLabel, minWidth,
    *         durations: [{ units (szesnastki; 16 = cała), rest, glyph (znak pauzy) }] — rytm: główki,
    *         laseczki, chorągiewki, kropki i pauzy; barAfter: Set indeksów kolumn z kreską taktową po nich }
    * Znaki chromatyczne stawiane tylko tam, gdzie dźwięk różni się od obowiązującego
@@ -360,7 +360,9 @@
     const pad = 4;
     const y = (s) => pad + (top - s) * sp;
     const hasLabels = opts.labels && opts.labels.some(Boolean);
-    const H = y(bottom) + (hasLabels ? 22 : 6);
+    const hasLyrics = opts.lyrics && opts.lyrics.some(Boolean);
+    const lyY = y(bottom) + (hasLabels ? 22 : 6) + 10;
+    const H = y(bottom) + (hasLabels ? 22 : 6) + (hasLyrics ? 20 : 0);
     const sig = opts.keySig;
     const sigNotes = sig && sig.count <= 7 ? sig.notes : [];
     const gap = opts.gap || 38;
@@ -433,7 +435,8 @@
         }
       }
       if (opts.barAfter && opts.barAfter.has(ci)) el('line', { x1: cx + gap / 2, x2: cx + gap / 2, y1: y(lines[4]), y2: y(lines[0]), class: 'st-line st-bar' }, g);
-      if (hasLabels && opts.labels[ci]) text(g, cx, H - 9, opts.labels[ci], 'st-label');
+      if (hasLabels && opts.labels[ci]) text(g, cx, y(bottom) + 13, opts.labels[ci], 'st-label');
+      if (hasLyrics && opts.lyrics[ci]) text(g, cx, lyY, opts.lyrics[ci], 'st-lyric', { translate: 'no' });
     });
     container.replaceChildren(svg);
     return svg;

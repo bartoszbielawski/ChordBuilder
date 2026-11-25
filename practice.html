@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fragment do nauczenia — ChordBuilder</title>
-  <meta name="description" content="Wpisz trudny fragment swojej partii (i innych głosów), a strona zagra go wolno, w pętli, sam albo na tle pozostałych głosów. Link do fragmentu można wysłać chórowi.">
+  <meta name="description" content="Wpisz trudny fragment swojej partii (i innych głosów) ze słowami, a strona zagra go wolno, w pętli, sam albo na tle pozostałych głosów — i sprawdzi przez mikrofon, czy śpiewasz czysto. Link do fragmentu można wysłać chórowi.">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
@@ -70,6 +70,7 @@
         <label class="field"><span>Mój głos</span><select id="me"></select></label>
       </div>
       <div id="staves" class="pr-staves"></div>
+      <p class="hint">Słowa wpisz pod pięciolinią, dzieląc wyrazy na sylaby łącznikiem, np. „Ra-duj się, nie-bo”. Każda sylaba trafia pod kolejną nutę (pauzy są pomijane), a „_” oznacza, że ta sama sylaba trwa na następnej nucie.</p>
     </section>
 
     <section class="card pr-play">
@@ -90,6 +91,23 @@
       <div class="controls tight">
         <button type="button" class="btn" id="play">▶ Odtwórz</button>
         <button type="button" class="btn ghost" id="stop" disabled>■ Stop</button>
+      </div>
+    </section>
+
+    <section class="card" id="sing-section">
+      <div class="card-head">
+        <h2>Śpiewam z nutami</h2>
+        <button type="button" class="btn" id="sing">🎤 Zaśpiewaj i sprawdź</button>
+      </div>
+      <p class="hint">Zaśpiewaj swój głos razem z odtwarzaniem — strona słucha przez mikrofon i po każdym przejściu pokazuje, które nuty były czyste, a które za nisko lub za wysoko. Twój głos nie jest wtedy grany: słychać pozostałe głosy (przy „wszystkie głosy” lub „bez mojego głosu”) albo sam metronom. Najlepiej w słuchawkach — inaczej mikrofon słyszy też głośniki. Dźwięk z mikrofonu jest analizowany tylko w tej przeglądarce: nic nie jest nagrywane ani wysyłane.</p>
+      <div id="sing-box" hidden>
+        <div class="tn-input"><span class="muted small-text">Mikrofon: <span id="sing-mic"></span></span>
+          <div class="tn-level" title="Poziom sygnału z mikrofonu"><div id="sing-level-bar"></div></div></div>
+        <p class="hint" id="sing-quiet" hidden>Mikrofon nic nie słyszy. Sprawdź, czy przeglądarka używa właściwego mikrofonu (ikona mikrofonu przy pasku adresu) i czy nie jest on wyciszony lub zbyt cichy w ustawieniach dźwięku systemu.</p>
+        <p id="sing-result" class="pr-sing-result" aria-live="polite"></p>
+        <canvas id="sing-graph" class="pr-sing-graph" width="720" height="180" aria-label="Wykres: nuty mojego głosu i wysokość śpiewu"></canvas>
+        <ul id="sing-list" class="pr-sing-list"></ul>
+        <p class="hint">Prostokąty to nuty Twojego głosu, linia — to, co śpiewasz. Po każdym przejściu nuty zmieniają kolor: zielony — czysto, żółty — trochę obok, czerwony — za nisko lub za wysoko, szary — nie słychać.</p>
       </div>
     </section>
 
@@ -123,6 +141,7 @@
   <script src="js/common.js"></script>
   <script src="js/rhythm-core.js"></script>
   <script src="js/midi-io.js"></script>
+  <script src="js/pitch-mic.js"></script>
   <script src="js/practice.js"></script>
 </body>
 </html>

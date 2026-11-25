@@ -4,6 +4,7 @@
 globalThis.window = globalThis;
 require('../js/theory.js');
 require('../js/midi-io.js');
+require('../js/pitch-mic.js');
 const { run } = require('./theory.test.js');
 
 const results = run(globalThis.Theory);

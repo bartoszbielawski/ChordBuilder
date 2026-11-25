@@ -745,3 +745,16 @@ html:not([data-profile="choir"]) #voice-field { display: none; }
 .tn-input { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
 .tn-level { flex: 1; min-width: 160px; max-width: 320px; height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
 #tn-level-bar { height: 100%; width: 0; background: var(--ok); transition: width .05s linear; }
+
+/* Fragment: słowa pod nutami i śpiewanie z mikrofonem */
+.st-lyric { font: 500 12.5px Inter, system-ui, sans-serif; fill: var(--text); }
+.pr-lyr-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; }
+.pr-lyr { flex: 1; min-width: 200px; max-width: 640px; }
+#sing-level-bar { height: 100%; width: 0; background: var(--ok); transition: width .05s linear; }
+.pr-sing-graph { width: 100%; height: auto; aspect-ratio: 4 / 1; border-radius: 10px; background: var(--surface-2); margin-top: 8px; }
+.pr-sing-result { font-weight: 600; margin: 10px 0 0; }
+.pr-sing-list { margin: 8px 0 0; padding-left: 20px; }
+.pr-sing-list li { margin: 2px 0; }
+.pr-sing-list li::marker { color: var(--muted); }
+.pr-sing-close::marker { color: var(--third) !important; }
+.pr-sing-off::marker { color: var(--no) !important; }

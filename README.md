@@ -60,7 +60,10 @@ kroku budowania), więc działa od razu na GitHub Pages.
   bez mojego”, tempo, pętla, odliczanie; fragment zapisany w przeglądarce i w linku (część po `#`).
   Eksport do MIDI (typ 1, ścieżka na głos — np. do MuseScore) i import z MIDI (typ 0/1): głosy po nazwach
   ścieżek lub wysokości, bez akompaniamentu, kwantyzacja do szesnastek, wybór taktów (`js/midi-io.js`).
-- **Stroik** (na stronie Rozśpiewka): wysokość śpiewanego dźwięku z mikrofonu (algorytm YIN),
+  Słowa pod nutami (sylaby łącznikiem, `_` — melizmat), także w MIDI (zdarzenia Lyric).
+  **Śpiewam z nutami:** mikrofon słucha śpiewu razem z odtwarzaniem (bez grania mojego głosu), wykres
+  nut i śpiewu, a po każdym przejściu ocena każdej nuty: czysto / trochę obok / za nisko lub za wysoko / nie słychać.
+- **Stroik** (na stronie Rozśpiewka): wysokość śpiewanego dźwięku z mikrofonu (algorytm YIN, `js/pitch-mic.js`),
   odchylenie w centach od najbliższego dźwięku lub od dźwięku startowego, wykres ostatnich sekund;
   analiza wyłącznie w przeglądarce, nic nie jest nagrywane ani wysyłane.
 - **Oznaczenia w nutach:** dynamika, tempo, artykulacja, łuki, oddech, repetycje, volty, D.C./D.S./coda —
