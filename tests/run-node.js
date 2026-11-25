@@ -3,6 +3,7 @@
 'use strict';
 globalThis.window = globalThis;
 require('../js/theory.js');
+require('../js/midi-io.js');
 const { run } = require('./theory.test.js');
 
 const results = run(globalThis.Theory);

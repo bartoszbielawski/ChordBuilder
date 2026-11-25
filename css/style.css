@@ -739,3 +739,9 @@ html:not([data-profile="choir"]) #voice-field { display: none; }
 .tn-needle.idle { opacity: .35; }
 .tn-cents { font-size: 17px; font-weight: 600; margin: 8px 0; }
 .tn-graph { width: 100%; height: 120px; border-radius: 10px; background: var(--surface-2); }
+.pr-io { margin-top: 4px; align-items: flex-end; }
+.field.inline { flex-direction: row; align-items: center; gap: 6px; }
+.text-input.num { width: 64px; }
+.tn-input { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.tn-level { flex: 1; min-width: 160px; max-width: 320px; height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+#tn-level-bar { height: 100%; width: 0; background: var(--ok); transition: width .05s linear; }

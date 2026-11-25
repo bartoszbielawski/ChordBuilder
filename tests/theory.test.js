@@ -455,6 +455,28 @@
         }
       }
     }],
+    ['MIDI: zapis i odczyt (ścieżki, tempo, metrum, tonacja, nuty)', (T, eq, ok) => {
+      const MI = root.MidiIO;
+      ok(MI, 'brak modułu MidiIO');
+      const bytes = MI.write({ ppq: 480, bpm: 72, time: [3, 4], key: { sf: -3, minor: false }, tracks: [
+        { name: 'Sopran', channel: 0, notes: [{ start: 0, dur: 480, midi: 67 }, { start: 480, dur: 480, midi: 67 }, { start: 960, dur: 960, midi: 70 }] },
+        { name: 'Bas ąę', channel: 1, notes: [{ start: 0, dur: 1440, midi: 39 }] },
+      ] });
+      const m = MI.read(bytes);
+      eq([m.format, m.ppq, Math.round(m.bpm)], [1, 480, 72]);
+      eq(m.time, [3, 4]); eq(m.key, { sf: -3, minor: false });
+      const tr = m.tracks.filter((t) => t.notes.length);
+      eq(tr.map((t) => t.name), ['Sopran', 'Bas ąę']);
+      eq(tr[0].notes.map((n) => [n.start, n.dur, n.midi]), [[0, 480, 67], [480, 480, 67], [960, 960, 70]], 'powtórzony dźwięk');
+      eq(tr[1].notes.map((n) => [n.start, n.dur, n.midi, n.channel]), [[0, 1440, 39, 1]]);
+    }],
+    ['MIDI: odczyt pliku typu 0 z running status i note-on o sile 0', (T, eq) => {
+      // MThd typ 0, 1 ścieżka, 96 PPQ; C4 ćwierćnuta, potem E4 (running status), wyłączenia przez note-on 0.
+      const trk = [0x00, 0x90, 60, 100, 0x60, 60, 0, 0x00, 64, 90, 0x60, 64, 0, 0x00, 0xff, 0x2f, 0x00];
+      const bytes = [0x4d, 0x54, 0x68, 0x64, 0, 0, 0, 6, 0, 0, 0, 1, 0, 96, 0x4d, 0x54, 0x72, 0x6b, 0, 0, 0, trk.length, ...trk];
+      const m = root.MidiIO.read(new Uint8Array(bytes));
+      eq(m.tracks[0].notes.map((n) => [n.start, n.dur, n.midi]), [[0, 96, 60], [96, 96, 64]]);
+    }],
     ['Analiza tonacji podaje przesłanki', (T, eq, ok) => {
       const k = T.analyzeKey(['Dm7', 'G7', 'Cmaj7'].map((s) => T.parseChordSymbol(s).chord))[0];
       eq(T.noteName(k.tonic) + ' ' + k.mode, 'C major');

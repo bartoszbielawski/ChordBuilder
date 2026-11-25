@@ -250,6 +250,146 @@
     render();
   }
 
+  /* ---------- MIDI: eksport i import ---------- */
+
+  const TRACK_NAME = { S: 'Sopran', A: 'Alt', T: 'Tenor', B: 'Bas' };
+  const ALLOWED = [16, 12, 8, 6, 4, 3, 2, 1];
+  const t = (s) => (window.I18N && window.I18N.t ? window.I18N.t(s) : s);
+  const msg = (s) => { $('io-msg').textContent = s; };
+
+  function exportMidi() {
+    const ppq = 480, u = ppq / 4;
+    const voices = VOICES.filter((v) => st.on.has(v) && st.notes[v].length);
+    if (!voices.length) { msg('Fragment jest pusty — nie ma czego eksportować.'); return; }
+    const tracks = voices.map((v, i) => {
+      let at = 0;
+      const notes = [];
+      for (const e of st.notes[v]) { if (!e.rest) notes.push({ start: at * u, dur: e.units * u, midi: e.midi }); at += e.units; }
+      return { name: TRACK_NAME[v], channel: i, notes };
+    });
+    const { mode } = keyParts();
+    const sig = keySig();
+    const [num, den] = st.meter.split('/').map(Number);
+    C.saveFile(window.MidiIO.write({ ppq, bpm: st.bpm, time: [num, den], key: { sf: sig.type === 'flat' ? -sig.count : sig.count, minor: mode === 'minor' }, tracks }),
+      'fragment.mid', 'audio/midi');
+    msg(`Zapisano plik fragment.mid (${voices.map((v) => VN[v]).join(', ')}).`);
+  }
+
+  /** Głos na podstawie nazwy ścieżki (polskiej lub angielskiej), inaczej null. */
+  function voiceFromName(name) {
+    const n = (name || '').toLowerCase().trim();
+    if (/sopr|^s\d?$/.test(n)) return 'S';
+    if (/^alt|alto|^a\d?$/.test(n)) return 'A';
+    if (/ten/.test(n) || /^t\d?$/.test(n)) return 'T';
+    if (/bas|bass|^b\d?$/.test(n)) return 'B';
+    return null;
+  }
+  /** Podział długości (w szesnastkach) na dozwolone wartości, od największej. */
+  function split(units) {
+    const out = [];
+    while (units > 0) { const a = ALLOWED.find((x) => x <= units); out.push(a); units -= a; }
+    return out;
+  }
+
+  let lastMidi = null;
+  function importMidi(mid, quiet) {
+    // Ścieżki z nutami; ścieżka z kilkoma kanałami (plik typu 0) dzielona na kanały; kanał 10 (perkusja) pomijany.
+    const parts = [];
+    for (const tr of mid.tracks) {
+      const notes = tr.notes.filter((n) => n.channel !== 9);
+      const chs = [...new Set(notes.map((n) => n.channel))];
+      if (chs.length > 1) for (const c of chs) parts.push({ name: tr.name, notes: notes.filter((n) => n.channel === c) });
+      else if (notes.length) parts.push({ name: tr.name, notes });
+    }
+    if (!parts.length) { msg('W pliku nie ma nut.'); return; }
+    const avg = (p) => p.notes.reduce((s, n) => s + n.midi, 0) / p.notes.length;
+    const assign = new Map(); // głos → część
+    for (const p of parts) { const v = voiceFromName(p.name); if (v && !assign.has(v)) assign.set(v, p); }
+    if (!assign.size) {
+      // Bez nazw głosów: pomiń akompaniament (nazwa lub dużo współbrzmień), resztę ułóż od najwyższej.
+      const poly = (p) => { const st0 = new Map(); for (const n of p.notes) st0.set(n.start, (st0.get(n.start) || 0) + 1); return [...st0.values()].filter((c) => c > 1).length / st0.size; };
+      let cand = parts.filter((p) => !/pian|organ|fortep|akomp|accomp|keyboard|klawisz/i.test(p.name || ''));
+      if (cand.length > 4) { const mono = cand.filter((p) => poly(p) < 0.3); if (mono.length) cand = mono; }
+      if (!cand.length) cand = parts;
+      if (cand.length === 1) assign.set(st.me, cand[0]);
+      else cand.sort((a, b) => avg(b) - avg(a)).slice(0, 4).forEach((p, i) => assign.set(VOICES[i], p));
+    }
+    // Metrum, tonacja, tempo z pliku (jeśli są i strona je obsługuje).
+    const notes = [];
+    if (mid.time) {
+      const ms = `${mid.time[0]}/${mid.time[1]}`;
+      if (METERS.includes(ms)) st.meter = ms; else notes.push(`metrum ${ms} nie jest obsługiwane — użyto ${st.meter}`);
+    }
+    if (mid.key) {
+      const k = KEYS.find((key) => { const [tk, mode] = key.split(':'); const s = T.keySignature(T.parseNote(tk), mode);
+        return (mode === 'minor') === mid.key.minor && (s.type === 'flat' ? -s.count : s.count) === mid.key.sf; });
+      if (k) st.key = k;
+    }
+    if (mid.bpm) st.bpm = Math.max(30, Math.min(160, Math.round(mid.bpm / 5) * 5));
+    const [num, den] = st.meter.split('/').map(Number);
+    const unit = mid.ppq / 4;
+    const barU = (16 * num) / den;
+    const from = Math.max(1, +$('imp-from').value || 1), count = Math.max(1, Math.min(32, +$('imp-count').value || 8));
+    // Liczba taktów w pliku; okno nie wychodzi poza ostatni takt z nutami.
+    let totalBars = 0;
+    for (const p of assign.values()) totalBars = Math.max(totalBars, Math.ceil(Math.max(...p.notes.map((n) => (n.start + n.dur) / unit)) / barU - 1e-9));
+    if (from > totalBars) { msg(`Plik ma tylko ${totalBars} ${C.plural(totalBars, 'takt', 'takty', 'taktów')} — wybierz wcześniejszy takt początkowy.`); return; }
+    const ws = (from - 1) * barU, we = Math.min(ws + count * barU, totalBars * barU);
+    const lastBar = we / barU;
+    let simplified = 0;
+    for (const v of VOICES) st.notes[v] = [];
+    for (const [v, p] of assign) {
+      // Kwantyzacja do szesnastek, wybór okna taktów, jeden dźwięk naraz (górny dla S/A, dolny dla T/B).
+      const byStart = new Map();
+      for (const n of p.notes) {
+        const s = Math.round(n.start / unit);
+        if (s < ws || s >= we) continue;
+        const e = Math.min(we, Math.max(s + 1, Math.round((n.start + n.dur) / unit)));
+        const prev = byStart.get(s);
+        if (prev) simplified++;
+        if (!prev || (['S', 'A'].includes(v) ? n.midi > prev.midi : n.midi < prev.midi)) byStart.set(s, { s, e, midi: n.midi });
+      }
+      const list = [...byStart.values()].sort((a, b) => a.s - b.s);
+      const seq = [];
+      let cur = ws;
+      list.forEach((n, i) => {
+        const end = Math.min(n.e, i + 1 < list.length ? list[i + 1].s : we);
+        if (n.s > cur) split(n.s - cur).forEach((u) => seq.push({ rest: true, units: u }));
+        const parts2 = split(end - n.s);
+        if (parts2.length > 1) simplified++;
+        seq.push({ midi: Math.max(24, Math.min(96, n.midi)), units: parts2[0] });
+        parts2.slice(1).forEach((u) => seq.push({ rest: true, units: u }));
+        cur = end;
+      });
+      if (seq.length && cur < we) split(we - cur).forEach((u) => seq.push({ rest: true, units: u }));
+      st.notes[v] = seq;
+    }
+    st.on = new Set([...assign.keys(), st.me]);
+    st.edit = assign.has(st.me) ? st.me : [...assign.keys()][0];
+    lastMidi = mid;
+    stop();
+    render();
+    const names = [...assign.entries()].map(([v, p]) => `${VN[v]}${p.name ? ` („${p.name}”)` : ''}`).join(', ');
+    msg(`Wczytano: ${names}; takty ${from}–${lastBar} z ${totalBars}.` +
+      (simplified ? ` Uproszczono ${simplified} ${C.plural(simplified, 'miejsce', 'miejsca', 'miejsc')} (akordy w jednym głosie lub nietypowe długości).` : '') +
+      (notes.length ? ' Uwaga: ' + notes.join('; ') + '.' : '') +
+      (totalBars > lastBar - from + 1 ? ' Inne takty wybierzesz polami „od taktu” i „liczba taktów”.' : ''));
+    if (!quiet) $('staves').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  $('midi-export').addEventListener('click', exportMidi);
+  $('midi-import').addEventListener('click', () => {
+    if (VOICES.some((v) => st.notes[v].length) && !confirm(t('Zastąpić obecny fragment nutami z pliku?'))) return;
+    $('midi-file').click();
+  });
+  $('midi-file').addEventListener('change', async (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    try { importMidi(window.MidiIO.read(new Uint8Array(await f.arrayBuffer()))); } catch (err) { msg(`Nie udało się wczytać pliku: ${err.message}`); }
+  });
+  for (const id of ['imp-from', 'imp-count']) $(id).addEventListener('change', () => { if (lastMidi) importMidi(lastMidi, true); });
+
   /* ---------- Zdarzenia ---------- */
 
   $('key').addEventListener('change', (e) => { st.key = e.target.value; render(); });

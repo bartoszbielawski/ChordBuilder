@@ -54,6 +54,14 @@
           <button type="button" class="btn ghost small" id="clear-all">Wyczyść wszystko</button>
         </div>
       </div>
+      <div class="controls tight pr-io">
+        <button type="button" class="btn ghost small" id="midi-export" title="Plik MIDI z osobną ścieżką dla każdego głosu — do otwarcia np. w MuseScore">⬇ Eksport MIDI</button>
+        <button type="button" class="btn ghost small" id="midi-import" title="Wczytaj nuty z pliku MIDI (np. z MuseScore)">⬆ Import MIDI</button>
+        <input type="file" id="midi-file" accept=".mid,.midi,audio/midi,audio/x-midi" hidden>
+        <label class="field inline"><span>od taktu</span><input type="number" id="imp-from" class="text-input num" min="1" value="1"></label>
+        <label class="field inline"><span>liczba taktów</span><input type="number" id="imp-count" class="text-input num" min="1" max="32" value="8"></label>
+      </div>
+      <p class="hint" id="io-msg" aria-live="polite"></p>
       <p class="hint">Przepisz z nut kilka taktów, które sprawiają trudność: wybierz tonację i metrum, potem wpisuj nuty swojego głosu klawiaturą poniżej. Możesz dopisać też inne głosy, żeby ćwiczyć swoją linię na ich tle. Fragment zapisuje się w tej przeglądarce i w linku — nic nie jest wysyłane.</p>
       <div class="controls">
         <label class="field"><span>Tonacja</span><select id="key"></select></label>
@@ -114,6 +122,7 @@
   <script src="js/audio.js"></script>
   <script src="js/common.js"></script>
   <script src="js/rhythm-core.js"></script>
+  <script src="js/midi-io.js"></script>
   <script src="js/practice.js"></script>
 </body>
 </html>

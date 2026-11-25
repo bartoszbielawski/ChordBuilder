@@ -58,6 +58,8 @@ kroku budowania), więc działa od razu na GitHub Pages.
 - **Fragment do nauczenia** (`practice.html`): trudne takty swojego głosu (i do trzech innych głosów)
   wpisywane z klawiatury, z rytmem i kreskami taktowymi; odtwarzanie „tylko mój głos / wszystkie /
   bez mojego”, tempo, pętla, odliczanie; fragment zapisany w przeglądarce i w linku (część po `#`).
+  Eksport do MIDI (typ 1, ścieżka na głos — np. do MuseScore) i import z MIDI (typ 0/1): głosy po nazwach
+  ścieżek lub wysokości, bez akompaniamentu, kwantyzacja do szesnastek, wybór taktów (`js/midi-io.js`).
 - **Stroik** (na stronie Rozśpiewka): wysokość śpiewanego dźwięku z mikrofonu (algorytm YIN),
   odchylenie w centach od najbliższego dźwięku lub od dźwięku startowego, wykres ostatnich sekund;
   analiza wyłącznie w przeglądarce, nic nie jest nagrywane ani wysyłane.
