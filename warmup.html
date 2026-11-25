@@ -56,6 +56,25 @@
       <div id="now-body"><p class="hint">Wybierz ćwiczenie z planu poniżej albo uruchom całą rozśpiewkę. Strona gra akord, potem wzór, a następnie powtarza go o półton wyżej — do górnej granicy głosów i z powrotem.</p></div>
     </section>
 
+    <section class="card" id="start-section">
+      <div class="card-head">
+        <h2>Dźwięk startowy</h2>
+        <button type="button" class="btn ghost" id="fork" title="Dźwięk a¹ (A4) = 440 Hz">🎵 Kamerton a¹</button>
+      </div>
+      <p class="hint">Wybierz tonację z nut i pierwszy dźwięk swojego głosu — strona zagra akord tonacji, a potem Twój dźwięk. Przy „wszystkie głosy” podaje dźwięki kolejno: bas, tenor, alt, sopran, a na koniec razem.</p>
+      <div class="controls">
+        <label class="field"><span>Tonacja</span><select id="sp-key"></select></label>
+        <label class="field"><span>Głos</span><select id="sp-voice"></select></label>
+        <span id="sp-notes" class="controls tight"></span>
+      </div>
+      <div id="sp-staff" class="melody-wrap wu-staff"></div>
+      <div class="controls tight">
+        <button type="button" class="btn" id="sp-play">▶ Akord i dźwięk</button>
+        <button type="button" class="btn ghost" id="sp-note">▶ Tylko dźwięk</button>
+        <button type="button" class="btn ghost" id="sp-chord">▶ Tylko akord</button>
+      </div>
+    </section>
+
     <section class="card">
       <h2>Ustawienia</h2>
       <div class="controls">

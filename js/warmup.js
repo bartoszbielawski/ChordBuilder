@@ -289,14 +289,98 @@
       else prompt('Link do planu:', url);
     });
     $('reset').addEventListener('click', () => { st.order = [...DEFAULT_PLAN]; st.on = new Set(DEFAULT_PLAN); save(); renderPlan(); });
-    C.seg($('notation'), st.notation, (v) => { st.notation = v; C.savePref('notation', v); renderSettings(); });
+    C.seg($('notation'), st.notation, (v) => { st.notation = v; C.savePref('notation', v); renderSettings(); renderStartPitch(); });
   }
+
+  /* ---------- Dźwięk startowy i kamerton ---------- */
+
+  const SP_KEYS = [
+    ...['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb'].map((k) => [k, 'major']),
+    ...['A', 'E', 'B', 'F#', 'C#', 'G#', 'D', 'G', 'C', 'F', 'Bb', 'Eb'].map((k) => [k, 'minor']),
+  ];
+  const SP_SAVE = 'chordbuilder.startpitch';
+  const sp = { key: 'C:major', voice: voice || 'all', first: {} };
+  try { Object.assign(sp, JSON.parse(localStorage.getItem(SP_SAVE) || '{}')); } catch (e) { /* ignoruj */ }
+  const spSave = () => { try { localStorage.setItem(SP_SAVE, JSON.stringify(sp)); } catch (e) { /* ignoruj */ } };
+  const spKey = () => { const [k, mode] = sp.key.split(':'); return { tonic: T.parseNote(k), mode }; };
+  const spKeyLabel = (tonic, mode) => (st.notation === 'H' ? T.polishKeyName(tonic, mode)
+    : mode === 'major' ? `${nn(tonic)}-dur` : `${nn(tonic).toLowerCase()}-moll`);
+
+  /** Dźwięki tonacji (w molu także podwyższony VII stopień) w zakresie głosu: [{ midi, note }]. */
+  function spChoices(v) {
+    const { tonic, mode } = spKey();
+    const sc = T.buildScale(tonic, mode === 'major' ? 'major' : 'minor');
+    const notes = sc.notes.map((n) => n.note);
+    if (mode === 'minor') notes.push(T.buildScale(tonic, 'harmonicMinor').notes[6].note);
+    const [lo, hi] = C.VOICE_RANGES[v];
+    const out = [];
+    for (let oct = 1; oct <= 6; oct++) for (const n of notes) { const m = C.midiOf(n, oct); if (m >= lo && m <= hi) out.push({ midi: m, note: n }); }
+    return out.sort((a, b) => a.midi - b.midi);
+  }
+  /** Domyślny pierwszy dźwięk: składnik akordu tonicznego najbliżej środka zakresu głosu. */
+  function spDefault(v) {
+    const { tonic, mode } = spKey();
+    const chordPcs = new Set(T.buildChord(tonic, mode === 'major' ? 'maj' : 'min').notes.map((n) => n.note.pc));
+    const [lo, hi] = C.VOICE_RANGES[v];
+    const mid = (lo + hi) / 2;
+    return spChoices(v).filter((c) => chordPcs.has(c.note.pc)).sort((a, b) => Math.abs(a.midi - mid) - Math.abs(b.midi - mid))[0];
+  }
+  const spVoices = () => (sp.voice === 'all' ? ['B', 'T', 'A', 'S'] : [sp.voice]);
+  function spFirst(v) {
+    const ch = spChoices(v);
+    return ch.find((c) => c.midi === sp.first[sp.key + v]) || spDefault(v) || ch[0];
+  }
+  function spChordMidis() {
+    const { tonic, mode } = spKey();
+    const t = 55 + T.mod(tonic.pc - 7, 12); // tonika w G3–F♯4
+    return [t - 12, t, t + (mode === 'major' ? 4 : 3), t + 7];
+  }
+
+  function renderStartPitch() {
+    $('sp-key').replaceChildren(...SP_KEYS.map(([k, mode]) => new Option(spKeyLabel(T.parseNote(k), mode), `${k}:${mode}`, false, sp.key === `${k}:${mode}`)));
+    $('sp-voice').replaceChildren(new Option('wszystkie głosy', 'all', false, sp.voice === 'all'), ...C.VOICES.map(([id, l]) => new Option(l, id, false, sp.voice === id)));
+    const VN = Object.fromEntries(C.VOICES);
+    $('sp-notes').replaceChildren(...spVoices().map((v) => {
+      const cur = spFirst(v);
+      const sel = h('select', { 'aria-label': `Pierwszy dźwięk: ${VN[v]}`, onchange: (e) => { sp.first[sp.key + v] = +e.target.value; spSave(); renderStartPitch(); } },
+        spChoices(v).map((c) => new Option(nn(c.note) + C.octaveName(c.note, c.midi), c.midi, false, c.midi === cur.midi)));
+      return h('label', { class: 'field' }, h('span', {}, sp.voice === 'all' ? `${v} — pierwszy dźwięk` : 'Pierwszy dźwięk'), sel);
+    }));
+    const { tonic, mode } = spKey();
+    const box = $('sp-staff');
+    if (sp.voice === 'all') {
+      I.renderStaff(box, spVoices().map((v) => ({ ...spFirst(v), role: { S: 'root', A: 'third', T: 'fifth', B: 'seventh' }[v], name: v })));
+    } else {
+      const c = spFirst(sp.voice);
+      I.renderMelody(box, [[{ ...c, role: 'root' }]], { clef: ['S', 'A'].includes(sp.voice) ? 'treble' : 'bass', keySig: T.keySignature(tonic, mode === 'major' ? 'major' : 'minor'),
+        labels: [nn(c.note) + C.octaveName(c.note, c.midi)], minWidth: 170, gap: 50, scale: 1.4, ariaLabel: 'Pierwszy dźwięk na pięciolinii' });
+    }
+  }
+
+  function spPlay(withChord, withNote) {
+    stopSound();
+    const B = 0.95;
+    let t = 0;
+    if (withChord) { Sound.play(spChordMidis(), 'chord', 'piano', 1.6); t = withNote ? 1.5 : 0; }
+    if (!withNote) return;
+    const notes = spVoices().map((v) => spFirst(v).midi);
+    notes.forEach((m, i) => timers.push(setTimeout(() => Sound.play([m], 'chord', 'piano', notes.length > 1 ? 1.1 : 2.2), (t + i * B) * 1000)));
+    if (notes.length > 1) timers.push(setTimeout(() => Sound.play(notes, 'chord', 'piano', 2.6), (t + notes.length * B + 0.3) * 1000));
+  }
+
+  $('sp-key').addEventListener('change', (e) => { sp.key = e.target.value; spSave(); renderStartPitch(); });
+  $('sp-voice').addEventListener('change', (e) => { sp.voice = e.target.value; spSave(); renderStartPitch(); });
+  $('sp-play').addEventListener('click', () => spPlay(true, true));
+  $('sp-note').addEventListener('click', () => spPlay(false, true));
+  $('sp-chord').addEventListener('click', () => spPlay(true, false));
+  $('fork').addEventListener('click', () => { stopSound(); Sound.play([69], 'chord', 'piano', 3); });
 
   // Kolejność: zapisany plan, potem parametry z linku (mają pierwszeństwo).
   try { const saved = localStorage.getItem(SAVE_KEY); if (saved) applyParams(new URLSearchParams(saved)); } catch (e) { /* ignoruj */ }
   if (location.hash.length > 1) applyParams(new URLSearchParams(location.hash.slice(1)));
   bind();
   renderSettings();
+  renderStartPitch();
   renderPlan();
   save();
   window.Common.registerSW();

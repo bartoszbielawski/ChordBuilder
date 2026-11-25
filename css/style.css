@@ -683,3 +683,27 @@ html:not([data-profile="choir"]) #voice-field { display: none; }
 .wu-title { font-weight: 600; }
 .wu-pattern { color: var(--muted); font-size: 13px; flex: 1; min-width: 140px; }
 .wu-btns { display: inline-flex; gap: 4px; margin-left: auto; }
+
+/* ---------- Oznaczenia w nutach ---------- */
+.mk-svg { height: 44px; width: auto; overflow: visible; }
+.mk-line { stroke: var(--text); stroke-width: .8; opacity: .55; }
+.mk-head { fill: var(--text); }
+.mk-stem, .mk-bar { stroke: var(--text); stroke-width: 1.1; }
+.mk-bar.thick { stroke-width: 3; }
+.mk-stroke { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.mk-stroke.thin { stroke-width: 1.2; stroke: var(--text); }
+.mk-fill { fill: var(--accent); }
+.mk-glyph { font-family: "Noto Music", serif; font-size: 30px; fill: var(--accent); }
+.mk-glyph.big { font-family: Georgia, "Times New Roman", serif; font-size: 22px; font-weight: 700; }
+.mk-num { font: 600 9px Inter, system-ui, sans-serif; fill: var(--text); text-anchor: start; }
+.mk-dyn { font: italic 700 24px Georgia, "Times New Roman", serif; color: var(--accent); letter-spacing: -1px; font-variant-ligatures: none; font-feature-settings: "liga" 0; }
+.mk-glyph.coda { font-size: 40px; }
+.mk-text { font: italic 600 18px Georgia, "Times New Roman", serif; color: var(--accent); }
+.mk-table { display: grid; gap: 6px; margin: 8px 0 4px; max-width: 620px; }
+.mk-row { display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: center; padding: 4px 8px; border-radius: 8px; background: var(--surface-2); }
+.mk-sym { display: flex; justify-content: center; align-items: center; min-height: 44px; }
+.mk-prompt { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.mk-big { display: inline-flex; align-items: center; justify-content: center; min-width: 120px; min-height: 70px; padding: 8px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.mk-big .mk-svg { height: 64px; }
+.mk-big .mk-dyn { font-size: 40px; }
+.mk-big .mk-text { font-size: 30px; }

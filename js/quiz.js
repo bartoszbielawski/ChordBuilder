@@ -629,6 +629,25 @@
       },
     },
     {
+      id: 'marks', group: 'Nuty', title: 'Oznaczenia w nutach',
+      desc: 'Co znaczy ten znak: dynamika, tempo, łuki, oddech, repetycje?',
+      levels: ['dynamika i tempo', '+ artykulacja, łuki, oddech, repetycja', '+ volty, D.C., D.S., coda'],
+      make(level) {
+        const M = window.Marks;
+        const pool = M.MARKS.filter((m) => m.level <= level);
+        const m = weighted(this.id, pool, (x) => x.id);
+        // Odpowiedzi: znaczenia — najpierw z tej samej grupy (trudniejsze do odróżnienia), potem inne.
+        const others = [...shuffle(pool.filter((x) => x !== m && x.group === m.group)), ...shuffle(pool.filter((x) => x.group !== m.group))].slice(0, 4);
+        return {
+          prompt: h('span', { class: 'mk-prompt' }, h('span', {}, 'Co oznacza ten znak w nutach?'), h('span', { class: 'mk-big' }, M.draw(m))),
+          answers: shuffle([m, ...others]).map((x) => ({ key: x.id, label: x.meaning })), wide: true,
+          correct: m.id, item: m.id,
+          explain: (box) => box.append(h('p', {}, h('b', {}, m.name), ' — ', h('span', {}, m.meaning), '.'),
+            h('p', { class: 'muted' }, h('span', {}, M.GROUPS[m.group]), '. ', h('a', { href: 'glossary.html' }, 'Wszystkie oznaczenia w słowniczku →'))),
+        };
+      },
+    },
+    {
       id: 'key-sig', group: 'Nuty', title: 'Znaki przykluczowe',
       desc: 'Rozpoznaj tonację po znakach przy kluczu.',
       levels: ['do 2 znaków (dur)', 'do 4 znaków, dur i moll', 'wszystkie, dur i moll'],
@@ -985,7 +1004,7 @@
   }
 
   // Zestaw „rozśpiewania” dla chórzystów: czytanie nut i słuch w zakresie własnego głosu, rytm, tonacja.
-  const CHOIR_SET = ['read-note', 'ear-interval', 'ear-degree', 'dictation', 'rhythm-ear', 'key-sig'];
+  const CHOIR_SET = ['read-note', 'marks', 'ear-interval', 'ear-degree', 'dictation', 'rhythm-ear', 'key-sig'];
 
   function renderMenu() {
     const view = C.getView();

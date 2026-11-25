@@ -48,6 +48,8 @@
       [['Ćwiczenie: czytanie nut', 'quiz.html#ex=read-note&lv=0']], ['read-note']],
     ['Rytm i metrum', 'Wartości nut i pauz, kropka przy nucie, metrum 3/4 i 4/4 (najczęstsze w pieśniach) oraz alla breve (2/2). Licz miary razem z metronomem.',
       [['Rytm', 'rhythm.html']], ['rhythm-values', 'rhythm-meter', 'rhythm-ear']],
+    ['Oznaczenia w nutach', 'Dynamika (p, mf, f, „widełki”), tempo i jego zmiany (rit., fermata), łuki, oddech, repetycje i skoki (volty, D.C., D.S., coda) — żeby nie zgubić się w nutach.',
+      [['Słowniczek: dynamika', 'glossary.html'], ['Słowniczek: repetycja i volty', 'glossary.html']], ['marks']],
     ['W jakiej tonacji śpiewamy?', 'Znaki przykluczowe wyznaczają tonację; tonika to „do” — punkt, do którego melodia wraca. Ćwicz rozpoznawanie stopni po kadencji.',
       [['Skala i tonacja', './#t=G&s=major']], ['key-sig', 'ear-degree']],
     ['Interwały ze słuchu', 'Najpierw tercja, kwarta, kwinta i oktawa, potem sekundy i seksty — w górę i w dół. Pomaga trafiać w dźwięk po skoku w swojej linii.',

@@ -53,7 +53,10 @@ kroku budowania), więc działa od razu na GitHub Pages.
   rysunki (pięciolinia, klucze, klawiatura, interwały, akordy, rytm, partytura SATB) z dźwiękiem.
 - **Rozśpiewka** (`warmup.html`): wokalizy grane z akordem i transponowane co półton w górę
   i z powrotem, w zakresie całego chóru lub jednego głosu (S/A/T/B), ćwiczenia zespołowe
-  (akord od basu, „Amen”), plan do ułożenia i link do planu dla chóru.
+  (akord od basu, „Amen”), plan do ułożenia i link do planu dla chóru. Na tej samej stronie
+  „Dźwięk startowy” (akord tonacji + pierwszy dźwięk swojego głosu lub wszystkich głosów) i kamerton a¹.
+- **Oznaczenia w nutach:** dynamika, tempo, artykulacja, łuki, oddech, repetycje, volty, D.C./D.S./coda —
+  hasła z rysunkami w słowniczku i ćwiczenie „Oznaczenia w nutach” (3 poziomy).
 - **Dla klasy:** przycisk „🔗 Link dla klasy” w ćwiczeniu tworzy link (`?seed=…`), po którym
   wszyscy uczniowie dostają te same pytania w tej samej kolejności; „📝 Sprawdzian” to 10 pytań
   bez podpowiedzi z wynikiem, listą błędów i przyciskiem „Kopiuj wynik” (do wysłania nauczycielowi); „⛶ Tryb prezentacji”

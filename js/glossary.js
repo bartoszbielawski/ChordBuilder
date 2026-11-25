@@ -74,6 +74,13 @@
     ['harmonizacja', 'Dobranie akordów do melodii: każda (akcentowana) nuta melodii powinna należeć do akordu, a akordy tworzą sensowną progresję (np. kończą się kadencją).', [['Harmonizacja melodii', './#t=C&s=major&m=334554321123322']]],
     ['CAGED', 'System nauki gry na gitarze: każdy akord da się zagrać w pięciu kształtach przeniesionych z otwartych chwytów C, A, G, E, D — razem pokrywają cały gryf.', [['Chwyty G-dur', './#t=G&s=major&r=G&c=maj&lv=2']]],
     ['partytura chóralna (SATB)', 'Zapis czterech głosów chóru: S — sopran, A — alt, T — tenor, B — bas. Na dwóch pięcioliniach sopran i alt stoją w kluczu wiolinowym (sopran laseczki w górę, alt w dół), tenor i bas w basowym. Gdy każdy głos ma własną pięciolinię, tenor śpiewa z klucza wiolinowego z ósemką pod spodem — oktawę niżej, niż wygląda. Akompaniament (organy, fortepian) ma osobne dwie pięciolinie.', [['Ćwiczenie: czytanie nut', 'quiz.html#ex=read-note&lv=0'], ['Ścieżka dla chóru', 'learn.html#path=choir']], ['chór', 'SATB', 'sopran', 'alt', 'tenor', 'bas', 'głosy']],
+    ['dynamika (p, f, crescendo)', 'Oznaczenia głośności: litery od pp (bardzo cicho) do ff (bardzo głośno) i „widełki” — stopniowe zmiany głośności.', [['Ćwiczenie: oznaczenia w nutach', 'quiz.html#ex=marks&lv=0']], ['piano', 'forte', 'głośno', 'cicho', 'widełki', 'diminuendo']],
+    ['oznaczenia tempa (Andante, rit., fermata)', 'Słowa nad pięciolinią (zwykle włoskie) mówią, jak szybko śpiewać; rit., accel. i a tempo — jak zmieniać tempo; fermata — gdzie zatrzymać się na dźwięku.', [['Ćwiczenie: oznaczenia w nutach', 'quiz.html#ex=marks&lv=0'], ['Metronom', 'rhythm.html']], ['tempo', 'allegro', 'andante', 'ritardando', 'fermata']],
+    ['artykulacja (staccato, akcent)', 'Sposób zaśpiewania pojedynczego dźwięku: krótko (kropka — staccato), mocniej (akcent >), z pełnym wytrzymaniem (kreska — tenuto).', [['Ćwiczenie: oznaczenia w nutach', 'quiz.html#ex=marks&lv=1']], ['staccato', 'akcent', 'tenuto']],
+    ['łuk legato i łuk łączący', 'Łuk nad nutami o różnej wysokości to legato — płynnie, w śpiewie zwykle kilka nut na jednej sylabie. Łuk między dwiema nutami tej samej wysokości łączy je w jeden dłuższy dźwięk (bez ponownego „uderzenia”).', [['Ćwiczenie: oznaczenia w nutach', 'quiz.html#ex=marks&lv=1']], ['łuk', 'legato', 'ligatura', 'melizmat']],
+    ['oddech i cezura', 'Znak oddechu (przecinek nad pięciolinią) pokazuje, gdzie wziąć szybki wdech; cezura (//) — krótką przerwę, chwilę ciszy.', [['Rozśpiewka: oddech', 'warmup.html']], ['oddech', 'cezura']],
+    ['repetycja i volty', 'Znaki repetycji (kreska z dwiema kropkami) obejmują fragment do powtórzenia. Volty 1. i 2. to różne zakończenia: za pierwszym razem 1., przy powtórce przeskakuje się do 2.', [['Ćwiczenie: oznaczenia w nutach', 'quiz.html#ex=marks&lv=2']], ['powtórzenie', 'repetycja', 'volta']],
+    ['D.C., D.S., Fine, coda', 'Skoki w nutach: Da capo — od początku, Dal segno — od znaku 𝄋, Fine — tu koniec po powrocie, coda (𝄌) — przeskok do zakończenia.', [['Ćwiczenie: oznaczenia w nutach', 'quiz.html#ex=marks&lv=2']], ['da capo', 'dal segno', 'segno', 'coda', 'fine']],
     ['ciąg kwintowy (progresja po kole)', 'Następstwo akordów, w którym bas schodzi o kwintę (wznosi się o kwartę), np. vi–ii–V–I. Jedna z najsilniejszych progresji w muzyce tonalnej.', [['Progresja', './#t=C&s=major&p=circle']]],
   ];
 
@@ -182,7 +189,21 @@
       h('span', { class: 'gl-meter' }, h('b', {}, '4/4'), ' ', h('span', { class: 'acc2' }, '1'), h('span', {}, '2'), h('span', { class: 'acc1' }, '3'), h('span', {}, '4')),
     ], 'Miary w takcie: duża — mocna, średnia — półmocna, mała — słaba.'),
     'partytura chóralna (SATB)': satbFig,
+    'dynamika (p, f, crescendo)': () => marksFig(['dyn']),
+    'oznaczenia tempa (Andante, rit., fermata)': () => marksFig(['tempo']),
+    'artykulacja (staccato, akcent)': () => marksFig(['art']),
+    'łuk legato i łuk łączący': () => marksFig(['slur']),
+    'oddech i cezura': () => marksFig(['breath']),
+    'repetycja i volty': () => marksFig(['repeat']),
+    'D.C., D.S., Fine, coda': () => marksFig(['jump']),
   };
+
+  /** Tabela oznaczeń z danej grupy: rysunek, nazwa, znaczenie. */
+  function marksFig(groups) {
+    const M = window.Marks;
+    return h('div', { class: 'mk-table' }, M.MARKS.filter((m) => groups.includes(m.group)).map((m) =>
+      h('div', { class: 'mk-row' }, h('div', { class: 'mk-sym' }, M.draw(m)), h('div', {}, h('b', {}, m.name), ' — ', h('span', {}, m.meaning)))));
+  }
 
   const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l');
 
